@@ -13,6 +13,7 @@ CREATE TABLE Responsavel (
     res_isVerificado BOOLEAN,
     res_senhaHash VARCHAR(16),
     res_dataCadastro DATE,
+    res_status VARCHAR(14),
     UNIQUE (res_email, res_telefone, res_cpf)
 );
 
@@ -26,6 +27,7 @@ CREATE TABLE Estudante (
     est_dataCadastro DATE,
     est_telefone VARCHAR(15),
     est_status VARCHAR(14),
+    isVerificado BOOLEAN,
     res_id VARCHAR(14),
     UNIQUE (est_cpf, est_telefone, est_email),
     FOREIGN KEY (res_id)   REFERENCES Responsavel (res_id)
@@ -38,7 +40,11 @@ CREATE TABLE Escola (
     esc_cnpj VARCHAR(20),
     esc_email VARCHAR(50),
     esc_status VARCHAR(14),
+    esc_telefone VARCHAR(15),
     esc_isVerificado BOOLEAN,
+    esc_senhaHash VARCHAR(16),
+    esc_dataCadastro DATE,
+    esc_status VARCHAR(14),
     UNIQUE (esc_cnpj, esc_email)    
 );
 
@@ -51,6 +57,7 @@ CREATE TABLE Professor (
     pro_telefone VARCHAR(14),
     pro_formacao VARCHAR(100),
     pro_status VARCHAR(14),
+    pro_dataCadastro DATE,
     pro_isVerificado BOOLEAN,
     UNIQUE (pro_cpf, pro_email, pro_telefone)
 );
