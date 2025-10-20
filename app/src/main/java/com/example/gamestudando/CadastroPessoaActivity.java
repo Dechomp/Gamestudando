@@ -29,6 +29,9 @@ public class CadastroPessoaActivity extends AppCompatActivity {
 
     Button btCadastrar, btEscolherData;
 
+    //Autenticador de FireBase
+    FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,8 +52,7 @@ public class CadastroPessoaActivity extends AppCompatActivity {
         btCadastrar = findViewById(R.id.btCadastrarPessoa);
         btEscolherData = findViewById(R.id.btEscolherData);
 
-        //Autenticador de FireBase
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
 
 
 
@@ -109,7 +111,8 @@ public class CadastroPessoaActivity extends AppCompatActivity {
         btCadastrar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mAuth.signInWithEmailAndPassword(edEmail.getText().toString(), edSenha.getText().toString())
+
+                mAuth.createUserWithEmailAndPassword(edEmail.getText().toString(), edSenha.getText().toString())
                         .addOnCompleteListener(task -> {
                             if (task.isSuccessful()){
                                 Toast.makeText(CadastroPessoaActivity.this, "Usuário cadastrado com sucesso!", Toast.LENGTH_SHORT).show();
@@ -121,6 +124,7 @@ public class CadastroPessoaActivity extends AppCompatActivity {
                             else {
                                 Toast.makeText(CadastroPessoaActivity.this, "Erro no login: " + task.getException(), Toast.LENGTH_LONG).show();
                                 Log.e("FIREBASE", "Erro no login", task.getException());
+                                edNome.setText(task.getException().toString());
                             }
                         });
 
