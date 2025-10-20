@@ -1,9 +1,6 @@
 package com.example.gamestudando;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,32 +8,13 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class LoginActivity extends AppCompatActivity {
-
-    Button btLogar, btCadastrarLogin;
-
+public class CadastrarAlunoActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_login);
-
-        btLogar = findViewById(R.id.btLogar);
-        btCadastrarLogin = findViewById(R.id.btCadastrarLogin);
-
-
-        btCadastrarLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent telaCadastro;
-
-                telaCadastro = new Intent(LoginActivity.this, EscolherCadastroActivity.class);
-                startActivity(telaCadastro);
-
-            }
-        });
-
+        setContentView(R.layout.activity_cadastrar_aluno);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);

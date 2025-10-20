@@ -35,21 +35,19 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="396dp"
         android:text="Senha:"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.079"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/textView"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/edUsuarioLogar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="288dp"
+        android:layout_marginTop="324dp"
         android:ems="10"
         android:hint="Digite Aqui..."
         android:inputType="text"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.761"
+        app:layout_constraintHorizontal_bias="0.328"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -57,20 +55,19 @@
         android:id="@+id/edSenhaLogar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="384dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="428dp"
         android:ems="10"
         android:hint="Digite Aqui..."
         android:inputType="textPassword"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.766"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/edUsuarioLogar"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btLogar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="464dp"
+        android:layout_marginTop="496dp"
         android:backgroundTint="#4CAF98"
         android:text="Logar"
         app:layout_constraintEnd_toEndOf="parent"
@@ -79,27 +76,28 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/btCadastrarLogin"
-        android:layout_width="202dp"
-        android:layout_height="52dp"
-        android:layout_marginTop="608dp"
-        android:backgroundTint="#00FFFFFF"
-        android:text="Não possui uma conta? Casdastrar"
-        android:textColor="#3F51B5"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/button3"
+        android:id="@+id/btCancelar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="20dp"
         android:backgroundTint="#BD4D2A"
-        android:text="Button"
+        android:text="Cancelar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btLogar" />
+
+    <Button
+        android:id="@+id/btCadastrarLogin"
+        android:layout_width="196dp"
+        android:layout_height="61dp"
+        android:layout_marginTop="640dp"
+        android:backgroundTint="#00FFFFFF"
+        android:text="Não possui uma conta? Casdastrar"
+        android:textColor="#3F51B5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
