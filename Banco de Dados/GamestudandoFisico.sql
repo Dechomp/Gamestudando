@@ -27,7 +27,7 @@ CREATE TABLE Estudante (
     est_dataCadastro DATE,
     est_telefone VARCHAR(15),
     est_status VARCHAR(14),
-    isVerificado BOOLEAN,
+    est_isVerificado BOOLEAN,
     res_id VARCHAR(14),
     UNIQUE (est_cpf, est_telefone, est_email),
     FOREIGN KEY (res_id)   REFERENCES Responsavel (res_id)

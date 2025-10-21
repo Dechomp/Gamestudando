@@ -126,7 +126,7 @@ public class CadastroPessoaActivity extends AppCompatActivity {
                                 Log.e("FIREBASE", "Erro no login", task.getException());
                                 edNome.setText(task.getException().toString());
                             }
-                        });
+                });
 
             }
         });
