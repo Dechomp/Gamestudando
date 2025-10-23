@@ -17,7 +17,7 @@ import java.util.List;
 
 
 
-public class EstudanteAdapter {
+public class EstudanteAdapter extends RecyclerView.Adapter<EstudanteAdapter.ViewHolder> {
     //Lista de estudante
     private List<Estudante> estudantes;
 
@@ -73,15 +73,20 @@ public class EstudanteAdapter {
 
                     //Se o tempo de clique for menor que 200ms
                     if (cliqueAtual - ultimoClique < 200) {
-
+                        //Chama o método para remover o estudante
+                        removerEstudante(estudante.getId(), posicao, v);
                     }
+                    ultimoClique = cliqueAtual;
                 }
 
+                //Retorna false para não atrapalhar o clique
                 return false;
             }
         });
 
     }
+
+
 
     //Método para apagar um estudandte
     public void removerEstudante(String idEstudante, int posicao, View view) {
@@ -102,12 +107,32 @@ public class EstudanteAdapter {
                     //Acessa a coleção de estudantes
                     .collection("Estudantes")
                     //Exclui o estudante
-                    .document(idEstudante).delete();
+                    .document(idEstudante).delete()
+                    .addOnSuccessListener(aVoid -> {
+                        //Remove o estudante da lista mostrada
+                        estudantes.remove(posicao);
+                        //Remove do recyclerView
+                        notifyItemRemoved(posicao);
+                        //Mostra a mensagem
+                        Toast.makeText(view.getContext(), "Estudante removido com sucesso", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(e ->{
+                      //Mostra a mensagem de erro
+                        Toast.makeText(view.getContext(), "Erro ao remover estudante", Toast.LENGTH_SHORT).show();
+                    });
+        }
+        else{
+            //Caso não tenha usuário logado
+            Toast.makeText(view.getContext(), "Usuário não logado", Toast.LENGTH_SHORT).show();
         }
 
     }
 
-
+    @Override
+    public int getItemCount() {
+        //Retorna a quantidade de estudantes
+        return estudantes.size();
+    }
 
     //Classe para criar um compopnente do view holder
     public class ViewHolder extends RecyclerView.ViewHolder {
