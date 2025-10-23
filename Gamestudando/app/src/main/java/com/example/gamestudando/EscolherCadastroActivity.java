@@ -30,6 +30,7 @@ public class EscolherCadastroActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent telaCadastroPessoa;
+                Global.tipoEscolhido = "Estudante";
                 telaCadastroPessoa = new Intent(EscolherCadastroActivity.this, CadastroPessoaActivity.class);
 
                 startActivity(telaCadastroPessoa);

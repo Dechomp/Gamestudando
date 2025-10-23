@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.Firebase;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 
@@ -67,4 +68,35 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
     }
+
+    private void carregarEstudantes() {
+        //Busca os dados do banco
+        db.collection("Estudante")
+                .get()
+                //Se der certo
+                .addOnSuccessListener(query ->{
+                    //Limpa a lista
+                    listaEstudantes.clear();
+                    //Percorre os dados
+                    for(QueryDocumentSnapshot docuemto : query){
+                        //Cria um objeto
+                        Estudante estudante = docuemto.toObject(Estudante.class);
+
+                        //Adiciona o id
+                        estudante.setId(docuemto.getId());
+
+                        //Adiciona a lista
+                        listaEstudantes.add(estudante);
+                    }
+                    //Atualiza a lista
+                    adapter.notifyDataSetChanged();
+                });
+
+        /*//Mostra os estudantes
+        adapter.setOnItemClickListener(estudante -> {
+            //Seta os valores
+
+        });*/
+    }
+
 }
