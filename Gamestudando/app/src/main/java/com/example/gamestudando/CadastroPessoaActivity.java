@@ -19,8 +19,13 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 public class CadastroPessoaActivity extends AppCompatActivity {
 
@@ -31,6 +36,13 @@ public class CadastroPessoaActivity extends AppCompatActivity {
 
     //Autenticador de FireBase
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
+    //Chama o banco de dados do Firebase
+    FirebaseDatabase db = FirebaseDatabase.getInstance();
+
+    //Data da criação
+    Date dataHoje = new Date();
+    Date dataNascimento;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,22 +124,6 @@ public class CadastroPessoaActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                mAuth.createUserWithEmailAndPassword(edEmail.getText().toString(), edSenha.getText().toString())
-                        .addOnCompleteListener(task -> {
-                            if (task.isSuccessful()){
-                                Toast.makeText(CadastroPessoaActivity.this, "Usuário cadastrado com sucesso!", Toast.LENGTH_SHORT).show();
-                                Log.d("FIREBASE", "Usuário cadastrado com sucesso!");
-
-                                finish();
-
-                            }
-                            else {
-                                Toast.makeText(CadastroPessoaActivity.this, "Erro no login: " + task.getException(), Toast.LENGTH_LONG).show();
-                                Log.e("FIREBASE", "Erro no login", task.getException());
-                                edNome.setText(task.getException().toString());
-                            }
-                });
-
             }
         });
 
@@ -137,5 +133,59 @@ public class CadastroPessoaActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+    private void salvarBanco(){
+        String nome = edNome.getText().toString();
+        String email = edEmail.getText().toString();
+        String telefone = edTelefone.getText().toString();
+        String dataNasc = edDataNasc.getText().toString();
+        String senha = edSenha.getText().toString();
+        String confirmarSenha = edConfirmarSenha.getText().toString();
+        String cpf = edCPF.getText().toString();
+
+        if(nome.isEmpty() || email.isEmpty() || telefone.isEmpty() || dataNasc.isEmpty()
+                || senha.isEmpty() || confirmarSenha.isEmpty() || cpf.isEmpty()){
+            Toast.makeText(this, "Preencha todos os campos", Toast.LENGTH_SHORT).show();
+        }
+        else if(!senha.equals(confirmarSenha)){
+            Toast.makeText(this, "As senhas não são iguais", Toast.LENGTH_SHORT).show();
+        }
+        else{
+            mAuth.createUserWithEmailAndPassword(edEmail.getText().toString(), edSenha.getText().toString())
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()){
+                            Toast.makeText(CadastroPessoaActivity.this, "Usuário cadastrado com sucesso!", Toast.LENGTH_SHORT).show();
+                            Log.d("FIREBASE", "Usuário cadastrado com sucesso!");
+
+                            //Formata a data de nascimento
+                            SimpleDateFormat formatador = new SimpleDateFormat("dd/MM/yyyy");;
+
+                            //Converte a data
+                            try {
+                                dataNascimento = formatador.parse(dataNasc);
+                            } catch (ParseException e) {
+                                throw new RuntimeException(e);
+                            }
+
+                            //Pega a quantidade de estudantes no banco de dados (Arrumar depois)
+                            String id = "Est" + System.currentTimeMillis();
+
+
+                            //Salva no banco de dados
+                            Estudante estudante = new Estudante(id, nome, cpf, dataNascimento, email,
+                                    dataHoje, telefone, "Ativo", false, null);
+
+                            finish();
+
+                        }
+                        else {
+                            Toast.makeText(CadastroPessoaActivity.this, "Erro no login: " + task.getException(), Toast.LENGTH_LONG).show();
+                            Log.e("FIREBASE", "Erro no login", task.getException());
+                        }
+                    });
+        }
+
+
     }
 }
