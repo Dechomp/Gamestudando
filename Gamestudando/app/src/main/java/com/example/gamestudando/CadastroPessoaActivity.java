@@ -38,7 +38,7 @@ public class CadastroPessoaActivity extends AppCompatActivity {
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
     //Chama o banco de dados do Firebase
-    FirebaseDatabase db = FirebaseDatabase.getInstance();
+    FirebaseDatabase db;
 
     //Data da criação
     Date dataHoje = new Date();
@@ -175,6 +175,13 @@ public class CadastroPessoaActivity extends AppCompatActivity {
                             //Salva no banco de dados
                             Estudante estudante = new Estudante(id, nome, cpf, dataNascimento, email,
                                     dataHoje, telefone, "Ativo", false, null);
+
+                            //Adicionar no banco de dados
+                            db.getReference("Estudantes").child(id).setValue(estudante);
+                                    //Caso de certo
+                                    //.addOnSuccessListener();
+
+
 
                             finish();
 
