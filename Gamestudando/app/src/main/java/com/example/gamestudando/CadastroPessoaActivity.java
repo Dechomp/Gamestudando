@@ -177,9 +177,13 @@ public class CadastroPessoaActivity extends AppCompatActivity {
                                     dataHoje, telefone, "Ativo", false, null);
 
                             //Adicionar no banco de dados
-                            db.getReference("Estudantes").child(id).setValue(estudante);
+                            db.getReference("Estudantes").child(id).setValue(estudante)
                                     //Caso de certo
-                                    //.addOnSuccessListener();
+                                    .addOnSuccessListener(doc -> {
+                                        Toast.makeText(CadastroPessoaActivity.this, "Usuário cadastrado com sucesso!", Toast.LENGTH_SHORT).show();
+                                        Log.d("FIREBASE", "Usuário cadastrado com sucesso!");
+
+                            });
 
 
 
