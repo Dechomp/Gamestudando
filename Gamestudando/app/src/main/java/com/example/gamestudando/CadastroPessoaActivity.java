@@ -18,7 +18,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.DateFormat;
@@ -64,14 +66,11 @@ public class CadastroPessoaActivity extends AppCompatActivity {
         btCadastrar = findViewById(R.id.btCadastrarPessoa);
         btEscolherData = findViewById(R.id.btEscolherData);
 
-
-
-
-
-
+        //Quando clicar para escolher a data de nascimento
         btEscolherData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //Recebe a data atual
                 Calendar calendario = Calendar.getInstance();
 
                 //Crio uma variável para cada informação de data
@@ -123,7 +122,8 @@ public class CadastroPessoaActivity extends AppCompatActivity {
         btCadastrar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                //Chama a função paa salvar no banco
+                salvarBanco();
             }
         });
 
@@ -135,7 +135,11 @@ public class CadastroPessoaActivity extends AppCompatActivity {
         });
     }
 
+    //Função para salvar os dados no banco de dados
     private void salvarBanco(){
+
+
+        //Recebo os dados dos campos
         String nome = edNome.getText().toString();
         String email = edEmail.getText().toString();
         String telefone = edTelefone.getText().toString();
@@ -155,8 +159,9 @@ public class CadastroPessoaActivity extends AppCompatActivity {
             mAuth.createUserWithEmailAndPassword(edEmail.getText().toString(), edSenha.getText().toString())
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()){
-                            Toast.makeText(CadastroPessoaActivity.this, "Usuário cadastrado com sucesso!", Toast.LENGTH_SHORT).show();
-                            Log.d("FIREBASE", "Usuário cadastrado com sucesso!");
+
+                            //Se der certo, recebo o usuário
+                            FirebaseUser usuario = mAuth.getCurrentUser();
 
                             //Formata a data de nascimento
                             SimpleDateFormat formatador = new SimpleDateFormat("dd/MM/yyyy");;
@@ -172,27 +177,44 @@ public class CadastroPessoaActivity extends AppCompatActivity {
                             String id = "Est" + System.currentTimeMillis();
 
 
-                            //Salva no banco de dados
+                            //Cria um obbjeto da classes estudante
                             Estudante estudante = new Estudante(id, nome, cpf, dataNascimento, email,
                                     dataHoje, telefone, "Ativo", false, null);
 
+                            //Abre a conexão com o banco
+
+                            //Ativa o fireBAse
+                            FirebaseApp.initializeApp(this);
+
+                            //Chama o banco de dados
+                            db = FirebaseDatabase.getInstance();
+
                             //Adicionar no banco de dados
-                            db.getReference("Estudantes").child(id).setValue(estudante)
+                            db.getReference("Estudante").child(id).setValue(estudante)
                                     //Caso de certo
                                     .addOnSuccessListener(doc -> {
+                                        //Crio as mensagens de Sucesso
                                         Toast.makeText(CadastroPessoaActivity.this, "Usuário cadastrado com sucesso!", Toast.LENGTH_SHORT).show();
                                         Log.d("FIREBASE", "Usuário cadastrado com sucesso!");
 
-                            });
+                                        //Fecho esta Activy
+                                        finish();
+                                    })
+                                    //Caso de erro
+                                    .addOnFailureListener( e ->{
+                                        //Mostro as mensagens
+                                        Toast.makeText(CadastroPessoaActivity.this, "Erro ao casdastrar o usuário", Toast.LENGTH_SHORT).show();
+                                        Log.e("FIREBASE", "Erro ao cadastrar", task.getException());
 
-
-
-                            finish();
-
+                                        //Deleta o usuário criado se der erro ao salvar no banco
+                                        if (usuario != null) {
+                                            usuario.delete();
+                                        }
+                                    });
                         }
                         else {
-                            Toast.makeText(CadastroPessoaActivity.this, "Erro no login: " + task.getException(), Toast.LENGTH_LONG).show();
-                            Log.e("FIREBASE", "Erro no login", task.getException());
+                            Toast.makeText(CadastroPessoaActivity.this, "Erro ao cadastrar: " + task.getException(), Toast.LENGTH_LONG).show();
+                            Log.e("FIREBASE", "Erro ao cadastrar", task.getException());
                         }
                     });
         }
