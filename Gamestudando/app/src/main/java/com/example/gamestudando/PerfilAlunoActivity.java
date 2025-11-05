@@ -56,16 +56,16 @@ public class PerfilAlunoActivity extends AppCompatActivity {
     private void carregarEstudante() {
         //Pega os dados do usuário logado
         db.collection("Estudante")
-                //Procuro pelo email do usuário logado
-                .whereEqualTo("est_email", user.getEmail())
+                //Procuro pelo id do usuário logado
+                .document(user.getUid())
                 //Pego os dados do estudante
                 .get()
                 //Caso de certo
-                .addOnSuccessListener(queryDocumentSnapshots -> {
+                .addOnSuccessListener(doc -> {
                     //Caso não venha vazio
-                    if (!queryDocumentSnapshots.isEmpty()) {
+                    if (doc.exists()) {
                         //Pego as informações do estudante
-                        Estudante estudante = queryDocumentSnapshots.getDocuments().get(0).toObject(Estudante.class);
+                        Estudante estudante = doc.toObject(Estudante.class);
 
                         //Defino os textos
                         tvNome.setText(estudante.getNome());

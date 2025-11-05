@@ -22,6 +22,7 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -37,10 +38,10 @@ public class CadastroPessoaActivity extends AppCompatActivity {
     Button btCadastrar, btEscolherData;
 
     //Autenticador de FireBase
-    FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    FirebaseAuth mAuth;
 
     //Chama o banco de dados do Firebase
-    FirebaseDatabase db;
+    FirebaseFirestore db;
 
     //Data da criação
     Date dataHoje = new Date();
@@ -65,6 +66,17 @@ public class CadastroPessoaActivity extends AppCompatActivity {
 
         btCadastrar = findViewById(R.id.btCadastrarPessoa);
         btEscolherData = findViewById(R.id.btEscolherData);
+
+        //Abre a conexão com o banco
+
+        //Ativa o fireBAse
+        FirebaseApp.initializeApp(this);
+
+        //Chama o banco de dados
+        db = FirebaseFirestore.getInstance();
+
+        //Vinculo o autentificador
+        mAuth = FirebaseAuth.getInstance();
 
         //Quando clicar para escolher a data de nascimento
         btEscolherData.setOnClickListener(new View.OnClickListener() {
@@ -173,24 +185,18 @@ public class CadastroPessoaActivity extends AppCompatActivity {
                                 throw new RuntimeException(e);
                             }
 
-                            //Pega a quantidade de estudantes no banco de dados (Arrumar depois)
-                            String id = "Est" + System.currentTimeMillis();
+                            //O id vai ser igual ao id do banco
+                            String id = usuario.getUid();
 
 
                             //Cria um obbjeto da classes estudante
                             Estudante estudante = new Estudante(id, nome, cpf, dataNascimento, email,
                                     dataHoje, telefone, "Ativo", false, null);
 
-                            //Abre a conexão com o banco
 
-                            //Ativa o fireBAse
-                            FirebaseApp.initializeApp(this);
-
-                            //Chama o banco de dados
-                            db = FirebaseDatabase.getInstance();
 
                             //Adicionar no banco de dados
-                            db.getReference("Estudante").child(id).setValue(estudante)
+                            db.collection("Estudante").document(id).set(estudante)
                                     //Caso de certo
                                     .addOnSuccessListener(doc -> {
                                         //Crio as mensagens de Sucesso
@@ -204,7 +210,7 @@ public class CadastroPessoaActivity extends AppCompatActivity {
                                     .addOnFailureListener( e ->{
                                         //Mostro as mensagens
                                         Toast.makeText(CadastroPessoaActivity.this, "Erro ao casdastrar o usuário", Toast.LENGTH_SHORT).show();
-                                        Log.e("FIREBASE", "Erro ao cadastrar", task.getException());
+                                        Log.e("FIREBASE", "Erro ao cadastrar" + e.getMessage());
 
                                         //Deleta o usuário criado se der erro ao salvar no banco
                                         if (usuario != null) {
