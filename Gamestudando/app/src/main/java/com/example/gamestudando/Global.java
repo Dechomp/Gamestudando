@@ -7,7 +7,12 @@ import android.content.Intent;
 import android.view.View;
 
 public class Global {
+
+    //Tipo de usuário escolhido na hora de cadastrar
     public static String tipoEscolhido = "";
+
+    //Tipo de teste escolhido
+    public static String testeEscolhido = "";
 
     //Função global para navegação de tela
     public static void navegarTela(View telaAtual, Class telaEscolhida) {

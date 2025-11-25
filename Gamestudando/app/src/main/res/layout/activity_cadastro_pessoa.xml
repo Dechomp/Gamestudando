@@ -39,7 +39,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="120dp"
                 android:text="Nome:"
-                app:layout_constraintStart_toStartOf="@+id/textView5"
+                app:layout_constraintStart_toStartOf="@+id/tvTituloTeste"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <EditText
@@ -75,7 +75,7 @@
                 android:layout_marginTop="76dp"
                 android:text="Email:"
                 app:layout_constraintStart_toStartOf="@+id/textView7"
-                app:layout_constraintTop_toBottomOf="@+id/textView5" />
+                app:layout_constraintTop_toBottomOf="@+id/tvTituloTeste" />
 
             <EditText
                 android:id="@+id/edCadastrarSenha"
@@ -122,7 +122,7 @@
                 tools:layout_editor_absoluteX="44dp" />
 
             <TextView
-                android:id="@+id/textView5"
+                android:id="@+id/tvTituloTeste"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="85dp"
