@@ -14,6 +14,11 @@ public class Global {
     //Tipo de teste escolhido
     public static String testeEscolhido = "";
 
+    //Quantidades de acertos e erros
+    public static int acertos = 0;
+    public static int erros = 0;
+
+
     //Função global para navegação de tela
     public static void navegarTela(View telaAtual, Class telaEscolhida) {
         //Crio um objeto da classe Intent

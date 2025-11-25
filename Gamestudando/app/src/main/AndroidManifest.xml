@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Gamestudando">
         <activity
-            android:name=".TesteActivity"
+            android:name=".TesteMatematicaActivity"
             android:exported="false" />
         <activity
             android:name=".MenuEscolhaActivity"

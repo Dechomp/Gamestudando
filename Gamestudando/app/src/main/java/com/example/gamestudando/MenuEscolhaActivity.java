@@ -44,6 +44,7 @@ public class MenuEscolhaActivity extends AppCompatActivity {
                 Global.testeEscolhido = "Matematica";
 
                 //Chama a função global de navegação de tela
+                Global.navegarTela(v, TesteMatematicaActivity.class);
             }
         });
 
