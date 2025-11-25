@@ -12,7 +12,12 @@
           "package_name": "com.example.gamestudando"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "766992730447-dir2r4pi64ecvlea5ob0uhk2bba4qq62.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAJIsi-m086Aogo3HUe9_OyFwTCVoBOVqw"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "766992730447-dir2r4pi64ecvlea5ob0uhk2bba4qq62.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

@@ -64,10 +64,8 @@ public class LoginActivity extends AppCompatActivity {
                                     Toast.makeText(LoginActivity.this, "Usuário logado com sucesso!", Toast.LENGTH_SHORT).show();
                                     Log.d("FIREBASE", "Usuário logado com sucesso!");
 
-                                    Intent telaPrincipal;
-                                    telaPrincipal = new Intent(LoginActivity.this, MainActivity.class);
-                                    startActivity(telaPrincipal);
-                                    finish();
+                                    //Mando para a tela que eu quero
+                                    Global.navegarTela(v, PerfilAlunoActivity.class);
 
                                 }
                                 else{

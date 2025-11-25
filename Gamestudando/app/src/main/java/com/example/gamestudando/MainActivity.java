@@ -20,14 +20,11 @@ public class MainActivity extends AppCompatActivity {
 
     //Chamando o banco para a aplicação
     FirebaseFirestore db;
-    //Componente de list para o teste
-    RecyclerView rcEstudantes;
+
 
     //Lista de usuários estudantes
     ArrayList<Estudante> listaEstudantes;
 
-    //Adaptador para o recyclerView
-    EstudanteAdapter adapter;
 
     //Estudante a ser editado
     Estudante estudanteSelecionado = null;
@@ -43,18 +40,6 @@ public class MainActivity extends AppCompatActivity {
         //Recebe o usuário logado
         db = FirebaseFirestore.getInstance();
 
-        //Vincula o recyclerView
-        rcEstudantes = findViewById(R.id.rcEstudantes);
-
-        //Vincula com um gerador de layout
-        rcEstudantes.setLayoutManager(new LinearLayoutManager(this));
-
-        //Relaciona o adapter
-        adapter = new EstudanteAdapter(listaEstudantes);
-
-        //Adaptador para o recyclerView
-        rcEstudantes.setAdapter(adapter);
-
       //  carregarEstudantes();
 
 
@@ -69,34 +54,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void carregarEstudantes() {
-        //Busca os dados do banco
-        db.collection("Estudante")
-                .get()
-                //Se der certo
-                .addOnSuccessListener(query ->{
-                    //Limpa a lista
-                    listaEstudantes.clear();
-                    //Percorre os dados
-                    for(QueryDocumentSnapshot docuemto : query){
-                        //Cria um objeto
-                        Estudante estudante = docuemto.toObject(Estudante.class);
+    private void carregarEstudante() {
 
-                        //Adiciona o id
-                        estudante.setId(docuemto.getId());
-
-                        //Adiciona a lista
-                        listaEstudantes.add(estudante);
-                    }
-                    //Atualiza a lista
-                    adapter.notifyDataSetChanged();
-                });
-
-        /*//Mostra os estudantes
-        adapter.setOnItemClickListener(estudante -> {
-            //Seta os valores
-
-        });*/
     }
 
 }
