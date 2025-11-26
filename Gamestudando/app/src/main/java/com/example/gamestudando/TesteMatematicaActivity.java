@@ -219,8 +219,8 @@ public class TesteMatematicaActivity extends AppCompatActivity {
                     }
                 }
 
-                //Caso j seja maior que i
-                if (j > i){
+                //Caso j seja igual que i
+                if (j == i){
                     //Adiciona o número
                     ordem[i] = num;
                 }
@@ -322,8 +322,8 @@ public class TesteMatematicaActivity extends AppCompatActivity {
                 }
             }
 
-            //Caso j seja maior que i
-            if (j > i){
+            //Caso j seja igual que i
+            if (j == i){
                 //Armazena o número
                 ordemRespostas[i] = num;
             }
@@ -414,8 +414,12 @@ public class TesteMatematicaActivity extends AppCompatActivity {
     private void selecionarBotao(){
         //Caso o botão selecionado seja diferente do anterior
         if (btSelecionado != btSelecionadoAnterior){
-            //"Desseleciona" o botão anterior
-            btSelecionadoAnterior.setBackgroundColor(parseColor("#668cff"));
+
+            if(btSelecionadoAnterior != null){
+                //"Desseleciona" o botão anterior
+                btSelecionadoAnterior.setBackgroundColor(parseColor("#668cff"));
+            }
+
 
             //Seleciona o novo botão
             btSelecionado.setBackgroundColor(parseColor("#66e0ff"));
