@@ -65,7 +65,7 @@ public class LoginActivity extends AppCompatActivity {
                                     Log.d("FIREBASE", "Usuário logado com sucesso!");
 
                                     //Mando para a tela que eu quero
-                                    Global.navegarTela(v, PerfilAlunoActivity.class);
+                                    Global.navegarTela(v, MenuEscolhaActivity.class);
 
                                 }
                                 else{
