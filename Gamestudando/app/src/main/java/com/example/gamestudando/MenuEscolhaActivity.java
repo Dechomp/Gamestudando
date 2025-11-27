@@ -48,6 +48,18 @@ public class MenuEscolhaActivity extends AppCompatActivity {
             }
         });
 
+        //Quando clicar para escolher o teste de português
+        btEscolherTestePortugues.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Salva que o teste é de Matemática
+                Global.testeEscolhido = "Matematica";
+
+                //Chama a função global de navegação de tela
+                Global.navegarTela(v, TestePortuguesActivity.class);
+            }
+        });
+
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
