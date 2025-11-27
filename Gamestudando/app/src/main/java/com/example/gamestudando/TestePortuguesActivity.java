@@ -285,13 +285,16 @@ public class TestePortuguesActivity extends AppCompatActivity {
                     //Mostra que tirou 0
                     Toast.makeText(TestePortuguesActivity.this, "Pontuação total: 0", Toast.LENGTH_SHORT).show();
                 }
+
+                //Pego o contexto
+                View v = findViewById(R.id.main);
                 //Chama a função global de navegação de tela
-                //Global.navegarTela(getApplicationContext(), ResultadoTesteActivity.class);
+                Global.navegarTela(v, ResultadoTesteActivity.class);
 
                 //Troca a cor de fundo da tela para a cor do teste
-                //ResultadoTesteActivity.corFundo = main.getBackground();
+                ResultadoTesteActivity.corFundo = main.getBackground();
 
-                //finish();
+
             }
 
         }
