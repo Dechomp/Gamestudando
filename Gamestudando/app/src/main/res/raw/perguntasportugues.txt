@@ -1,0 +1,30 @@
+Qual palavra rima com “casa”?;asa;carro;mala;cama;asa
+Qual palavra começa com a letra B?;bola;gato;asa;pato;bola
+Qual palavra rima com “pato”?;gato;mesa;carro;casa;gato
+Qual palavra começa com a letra M?;mesa;pato;casa;faca;mesa
+Qual palavra rima com “pé”?;chão;sé;sol;flor;sé
+Qual palavra começa com a letra C?;gato;copo;pato;mesa;copo
+Qual palavra rima com “sol”?;rol;mesa;flor;bola;rol
+Qual palavra começa com a letra F?;faca;mesa;sapo;cama;faca
+Qual palavra rima com “mão”?;pão;gato;faca;copo;pão
+Qual palavra começa com a letra P?;gato;casa;pato;fogo;pato
+Qual palavra rima com “trem”?;bem;sapo;sol;chão;bem
+Qual palavra começa com a letra S?;mesa;sapo;faca;rio;sapo
+Qual palavra rima com “bola”?;cola;sapo;sol;pé;cola
+Qual palavra começa com a letra R?;pato;casa;rio;mesa;rio
+Qual palavra rima com “gelo”?;pelo;casa;mesa;flor;pelo
+Qual palavra começa com a letra L?;pato;lua;casa;fogo;lua
+Qual palavra rima com “fogo”?;logo;sol;gato;pé;logo
+Qual palavra começa com a letra T?;rio;tigre;casa;bola;tigre
+Qual palavra rima com “céu”?;véu;casa;faca;sol;véu
+Qual palavra começa com a letra J?;janela;casa;sapo;rio;janela
+Qual palavra rima com “dia”?;pia;sol;lua;foca;pia
+Qual palavra começa com a letra V?;vaca;casa;mesa;faca;vaca
+Qual palavra rima com “luz”?;cruz;rio;pé;bola;cruz
+Qual palavra começa com a letra H?;pato;hora;casa;faca;hora
+Qual palavra rima com “mar”?;bar;sol;galo;rio;bar
+Qual palavra começa com a letra O?;ovo;casa;pato;fogo;ovo
+Qual palavra rima com “pão”?;mão;faca;sol;gata;mão
+Qual palavra começa com a letra E?;casa;elefante;pato;sol;elefante
+Qual palavra rima com “lago”?;trago;pé;bola;sol;trago
+Qual palavra começa com a letra U?;uva;casa;pato;rio;uva

@@ -21,7 +21,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class TesteMatematicaActivity extends AppCompatActivity {
+public class TestePortuguesActivity extends AppCompatActivity {
 
     //Definição de componentes
     Button btQuestaoA, btQuestaoB, btQuestaoC, btQuestaoD, btVerificar, btSelecionado, btSelecionadoAnterior;
@@ -45,20 +45,20 @@ public class TesteMatematicaActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_teste_matematica);
+        setContentView(R.layout.activity_teste_portugues);
 
         //Vinculando componentes
-        btQuestaoA = findViewById(R.id.btTesteMatematicaOpcaoA);
-        btQuestaoB = findViewById(R.id.btTesteMatematicaOpcaoB);
-        btQuestaoC = findViewById(R.id.btTesteMatematicaOpcaoC);
-        btQuestaoD = findViewById(R.id.btTesteMatematicaOpcaoD);
+        btQuestaoA = findViewById(R.id.btTestePortuguesOpcaoA);
+        btQuestaoB = findViewById(R.id.btTestePortuguesOpcaoB);
+        btQuestaoC = findViewById(R.id.btTestePortuguesOpcaoC);
+        btQuestaoD = findViewById(R.id.btTestePortuguesOpcaoD);
 
 
 
-        tvQuestaoNum = findViewById(R.id.tvQuestaoMatematicaTesteNum);
-        tvQuestaoTexto = findViewById(R.id.tvQuestaoMatematicaTesteTexto);
+        tvQuestaoNum = findViewById(R.id.tvQuestaoPortuguesNum);
+        tvQuestaoTexto = findViewById(R.id.tvQuestaoPortuguesTexto);
 
-        btVerificar = findViewById(R.id.btVerificarQuestao);
+        btVerificar = findViewById(R.id.btVerificarPortugues);
 
         main = findViewById(R.id.main);
 
@@ -120,52 +120,51 @@ public class TesteMatematicaActivity extends AppCompatActivity {
 
         //Quando clicar para verificar a resposta
         btVerificar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+           @Override
+           public void onClick(View v) {
 
-                //Checa se está escrito para verificar
-                if(btVerificar.getText().equals("Verificar")) {
+               //Checa se está escrito para verificar
+               if (btVerificar.getText().equals("Verificar")) {
 
-                    //Chama a função para verificar a resposta
-                    verificarResp((String) btSelecionado.getText());
+                   //Chama a função para verificar a resposta
+                   verificarResp((String) btSelecionado.getText());
 
-                    //Desabilita os botões
-                    btQuestaoA.setClickable(false);
-                    btQuestaoB.setClickable(false);
-                    btQuestaoC.setClickable(false);
-                    btQuestaoD.setClickable(false);
-                }
-                else{
-                    //Chama a função para a próxima pergunta
-                    proxPergunta();
+                   //Desabilita os botões
+                   btQuestaoA.setClickable(false);
+                   btQuestaoB.setClickable(false);
+                   btQuestaoC.setClickable(false);
+                   btQuestaoD.setClickable(false);
+               } else {
+                   //Chama a função para a próxima pergunta
+                   proxPergunta();
 
-                    //Deseleciona o botão
-                    btSelecionado = null;
-                    btSelecionadoAnterior = null;
+                   //Deseleciona o botão
+                   btSelecionado = null;
+                   btSelecionadoAnterior = null;
 
-                    //Deixa o botão de verificar desabilitado e mudo a cor dele para cinza
-                    btVerificar.setClickable(false);
+                   //Deixa o botão de verificar desabilitado e mudo a cor dele para cinza
+                   btVerificar.setClickable(false);
 
-                    //Muda o texto do botão de verificar para "Verificar" novamente
-                    btVerificar.setText("Verificar");
+                   //Muda o texto do botão de verificar para "Verificar" novamente
+                   btVerificar.setText("Verificar");
 
-                    //Muda a cor dos botões para cinza
-                    btVerificar.setBackgroundColor(parseColor("#8E8C8C"));
-                    btQuestaoA.setBackgroundColor(parseColor("#668cff"));
-                    btQuestaoB.setBackgroundColor(parseColor("#668cff"));
-                    btQuestaoC.setBackgroundColor(parseColor("#668cff"));
-                    btQuestaoD.setBackgroundColor(parseColor("#668cff"));
+                   //Muda a cor dos botões para cinza
+                   btVerificar.setBackgroundColor(parseColor("#8E8C8C"));
+                   btQuestaoA.setBackgroundColor(parseColor("#00cc66"));
+                   btQuestaoB.setBackgroundColor(parseColor("#00cc66"));
+                   btQuestaoC.setBackgroundColor(parseColor("#00cc66"));
+                   btQuestaoD.setBackgroundColor(parseColor("#00cc66"));
 
-                    //Habilitamos os botões
-                    btQuestaoA.setClickable(true);
-                    btQuestaoB.setClickable(true);
-                    btQuestaoC.setClickable(true);
-                    btQuestaoD.setClickable(true);
+                   //Habilitamos os botões
+                   btQuestaoA.setClickable(true);
+                   btQuestaoB.setClickable(true);
+                   btQuestaoC.setClickable(true);
+                   btQuestaoD.setClickable(true);
 
-                }
+               }
 
-            }
-        });
+           }
+       });
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -173,12 +172,18 @@ public class TesteMatematicaActivity extends AppCompatActivity {
         });
     }
 
+    /*
+    * btQuestao1a.setBackgroundColor(parseColor("#66cc00"));
+                    btQuestao1b.setBackgroundColor(parseColor("#00cc66"));
+                    btQuestao1c.setBackgroundColor(parseColor("#00cc66"));
+                    btQuestao1d.setBackgroundColor(parseColor("#00cc66"));
+    * */
     //Função para trazer as perguntas registradas no arquivo de texto
     private void carregarPerguntas(){
         try {
 
             //Abre o arquivo de texto
-            InputStream inputStream = getResources().openRawResource(R.raw.perguntasmatematica);
+            InputStream inputStream = getResources().openRawResource(R.raw.perguntasportugues);
 
             //Lê o arquivo de texto
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -207,7 +212,7 @@ public class TesteMatematicaActivity extends AppCompatActivity {
             Random random = new Random();
             for (int i = 0; i < 30; i++){
                 //Recebe um número aletório de 0 à 29 (30 - 1)
-                 int num = random.nextInt(30);
+                int num = random.nextInt(30);
 
                 //Percorre os números já adicionados
                 int j;
@@ -232,7 +237,7 @@ public class TesteMatematicaActivity extends AppCompatActivity {
 
             }
         } catch (Exception e) {
-            Toast.makeText(TesteMatematicaActivity.this, "Erro na aleatorização" + e.getMessage() + e.toString(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(TestePortuguesActivity.this, "Erro na aleatorização" + e.getMessage() + e.toString(), Toast.LENGTH_SHORT).show();
         }
 
         //Assim que terminar de aleatorizar as perguntas, chama a função para exibir a primeira pergunta
@@ -257,13 +262,13 @@ public class TesteMatematicaActivity extends AppCompatActivity {
                 //Exibe as mensagens de:
 
                 //Conclusão do teste
-                Toast.makeText(TesteMatematicaActivity.this, "Teste Terminado", Toast.LENGTH_SHORT).show();
+                Toast.makeText(TestePortuguesActivity.this, "Teste Terminado", Toast.LENGTH_SHORT).show();
 
                 //Quatidade de acertos
-                Toast.makeText(TesteMatematicaActivity.this, "Total de acertos: " + Global.acertos, Toast.LENGTH_SHORT).show();
+                Toast.makeText(TestePortuguesActivity.this, "Total de acertos: " + Global.acertos, Toast.LENGTH_SHORT).show();
 
                 //Quatidade de erros
-                Toast.makeText(TesteMatematicaActivity.this, "Total de erros: " + Global.erros, Toast.LENGTH_SHORT).show();
+                Toast.makeText(TestePortuguesActivity.this, "Total de erros: " + Global.erros, Toast.LENGTH_SHORT).show();
 
                 //Cacula a nota (cada ponto é subtraido por 0.2)
                 Double nota = Global.acertos - Global.erros * 0.2;
@@ -273,12 +278,12 @@ public class TesteMatematicaActivity extends AppCompatActivity {
                     DecimalFormat df = new DecimalFormat("#.##");
 
                     //Mostra a porntuação total
-                    Toast.makeText(TesteMatematicaActivity.this, "Pontuação total: " + df.format(nota), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(TestePortuguesActivity.this, "Pontuação total: " + df.format(nota), Toast.LENGTH_SHORT).show();
                 }
                 //Caso a nota seja negativa
                 else{
                     //Mostra que tirou 0
-                    Toast.makeText(TesteMatematicaActivity.this, "Pontuação total: 0", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(TestePortuguesActivity.this, "Pontuação total: 0", Toast.LENGTH_SHORT).show();
                 }
                 //Chama a função global de navegação de tela
                 //Global.navegarTela(getApplicationContext(), ResultadoTesteActivity.class);
@@ -369,7 +374,7 @@ public class TesteMatematicaActivity extends AppCompatActivity {
         //Caso a resposta selecionada seja igual a resposta certa
         if (repostaEsc.equals(respCerta)){
             //Mostra a mensagem que acertou
-            Toast.makeText(TesteMatematicaActivity.this, "Acertou!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(TestePortuguesActivity.this, "Acertou!", Toast.LENGTH_SHORT).show();
 
             //Muda a cor dos botões para verde
             btVerificar.setBackgroundColor(parseColor("#80ff00"));
@@ -381,7 +386,7 @@ public class TesteMatematicaActivity extends AppCompatActivity {
         //Caso tenha errado
         else{
             //Mostra a mensagem que errou
-            Toast.makeText(TesteMatematicaActivity.this, "Errou!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(TestePortuguesActivity.this, "Errou!", Toast.LENGTH_SHORT).show();
 
             //Deixa os botões vermelhos
             btVerificar.setBackgroundColor(parseColor("#ff0000"));
@@ -417,12 +422,12 @@ public class TesteMatematicaActivity extends AppCompatActivity {
 
             if(btSelecionadoAnterior != null){
                 //"Desseleciona" o botão anterior
-                btSelecionadoAnterior.setBackgroundColor(parseColor("#668cff"));
+                btSelecionadoAnterior.setBackgroundColor(parseColor("#00cc66"));
             }
 
 
             //Seleciona o novo botão
-            btSelecionado.setBackgroundColor(parseColor("#66e0ff"));
+            btSelecionado.setBackgroundColor(parseColor("#66cc00"));
 
             //Recebo o novo botão para o anterior
             btSelecionadoAnterior = btSelecionado;
@@ -435,7 +440,7 @@ public class TesteMatematicaActivity extends AppCompatActivity {
         //Caso o botão selecionado seja igual ao anterior
         else{
             //"Deseleciona" o botão
-            btSelecionado.setBackgroundColor(parseColor("#668cff"));
+            btSelecionado.setBackgroundColor(parseColor("#00cc66"));
 
             //Esvazio o botão anterior
             btSelecionadoAnterior = null;
@@ -447,5 +452,4 @@ public class TesteMatematicaActivity extends AppCompatActivity {
 
 
     }
-
 }
