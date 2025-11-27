@@ -7,23 +7,34 @@
     android:layout_height="match_parent"
     tools:context=".MenuEscolhaActivity">
 
+    <Button
+        android:id="@+id/button4"
+        android:layout_width="427dp"
+        android:layout_height="44dp"
+        android:backgroundTint="#2143BF"
+        tools:layout_editor_absoluteX="-8dp"
+        tools:layout_editor_absoluteY="694dp" />
+
     <TextView
         android:id="@+id/textView12"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="36dp"
+        android:layout_marginTop="80dp"
         android:text="Escolha um Teste:"
+        android:textColor="#141111"
+        android:textColorHint="#180808"
+        android:textColorLink="#100A0A"
         android:textSize="34sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btEscolherTestePortugues"
-        android:layout_width="300dp"
-        android:layout_height="150dp"
-        android:layout_marginTop="160dp"
+        android:layout_width="322dp"
+        android:layout_height="141dp"
+        android:layout_marginTop="196dp"
         android:backgroundTint="#8BC34A"
         android:text="Português"
         android:textSize="34sp"
@@ -34,8 +45,8 @@
 
     <Button
         android:id="@+id/btEscolherTesteMatematica"
-        android:layout_width="300dp"
-        android:layout_height="150dp"
+        android:layout_width="322dp"
+        android:layout_height="152dp"
         android:layout_marginTop="100dp"
         android:backgroundTint="#3F51B5"
         android:text="Matemática"
@@ -44,4 +55,13 @@
         app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btEscolherTestePortugues" />
+
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="427dp"
+        android:layout_height="44dp"
+        android:backgroundTint="#2143BF"
+        android:textColorLink="#5F2222"
+        tools:layout_editor_absoluteX="-8dp"
+        tools:layout_editor_absoluteY="-7dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

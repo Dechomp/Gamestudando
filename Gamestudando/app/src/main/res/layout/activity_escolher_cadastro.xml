@@ -7,65 +7,76 @@
     android:layout_height="match_parent"
     tools:context=".EscolherCadastroActivity">
 
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="414dp"
+        android:layout_height="684dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/game" />
+
     <Button
         android:id="@+id/btEscolherEstudante"
-        android:layout_width="200dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="196dp"
+        android:layout_width="235dp"
+        android:layout_height="64dp"
+        android:layout_marginTop="472dp"
         android:backgroundTint="#399550"
         android:text="Estudante"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btEscolherProfessor"
-        android:layout_width="200dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="30dp"
-        android:backgroundTint="#3B7E3C"
+        android:layout_width="235dp"
+        android:layout_height="64dp"
+        android:layout_marginTop="408dp"
+        android:backgroundTint="#68DB97"
         android:text="Professor"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btEscolherEstudante" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btEscolherResponsavel"
-        android:layout_width="200dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="30dp"
+        android:layout_width="235dp"
+        android:layout_height="64dp"
+        android:layout_marginTop="536dp"
         android:backgroundTint="#306D33"
         android:text="Responsavel"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btEscolherProfessor" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btEscolherEscola"
-        android:layout_width="200dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="30dp"
+        android:layout_width="235dp"
+        android:layout_height="64dp"
+        android:layout_marginTop="600dp"
         android:backgroundTint="#27492A"
         android:text="Escola"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.502"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btEscolherResponsavel" />
-
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="88dp"
-        android:text="Escolha o tipo da conta:"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="23dp"
+        app:layout_constraintBottom_toTopOf="@+id/imageView3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btEscolherProfessor"
+        app:layout_constraintVertical_bias="0.902"
+        app:srcCompat="@drawable/bruxinha" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
