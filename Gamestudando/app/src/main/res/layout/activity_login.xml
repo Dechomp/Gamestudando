@@ -9,48 +9,54 @@
     android:backgroundTint="#F6F6F6"
     tools:context=".LoginActivity">
 
+    <EditText
+        android:id="@+id/edUsuarioLogar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="320dp"
+        android:ems="10"
+        android:hint="Digite Aqui..."
+        android:inputType="textEmailAddress"
+        android:text="aluno@gmail.com"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="300dp"
         android:text="Email:"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.079"
-        app:layout_constraintStart_toStartOf="parent"
+        android:textAllCaps="true"
+        app:layout_constraintEnd_toEndOf="@+id/edUsuarioLogar"
+        app:layout_constraintStart_toStartOf="@+id/edUsuarioLogar"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="396dp"
+        android:layout_marginTop="408dp"
         android:text="Senha:"
-        app:layout_constraintStart_toStartOf="@+id/textView"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
-        android:id="@+id/edUsuarioLogar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="324dp"
-        android:ems="10"
-        android:hint="Digite Aqui..."
-        android:inputType="textEmailAddress"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.328"
-        app:layout_constraintStart_toStartOf="parent"
+        android:textAllCaps="true"
+        app:layout_constraintEnd_toEndOf="@+id/edSenhaLogar"
+        app:layout_constraintHorizontal_bias="0.523"
+        app:layout_constraintStart_toStartOf="@+id/edSenhaLogar"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/edSenhaLogar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="428dp"
         android:ems="10"
         android:hint="Digite Aqui..."
         android:inputType="textPassword"
+        android:text="teste123"
+        app:layout_constraintEnd_toEndOf="@+id/edUsuarioLogar"
+        app:layout_constraintHorizontal_bias="0.625"
         app:layout_constraintStart_toStartOf="@+id/edUsuarioLogar"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -61,6 +67,7 @@
         android:layout_marginTop="504dp"
         android:backgroundTint="#186F2C"
         android:text="Logar"
+        android:textAllCaps="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
@@ -73,6 +80,7 @@
         android:layout_marginTop="12dp"
         android:backgroundTint="#BD4D2A"
         android:text="Cancelar"
+        android:textAllCaps="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
@@ -80,11 +88,12 @@
 
     <Button
         android:id="@+id/btCadastrarLogin"
-        android:layout_width="196dp"
-        android:layout_height="61dp"
+        android:layout_width="319dp"
+        android:layout_height="51dp"
         android:layout_marginTop="624dp"
         android:backgroundTint="#00FFFFFF"
-        android:text="Não possui uma conta? Casdastrar"
+        android:text="Não possui uma conta? Cadastrar"
+        android:textAllCaps="true"
         android:textColor="#3F51B5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
@@ -123,6 +132,23 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.091"
-        app:srcCompat="@drawable/Gamestudando" />
+        app:srcCompat="@drawable/gamestudando" />
+
+    <Button
+        android:id="@+id/btSobreNos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="684dp"
+        android:backgroundTint="#00FFFFFF"
+        android:text="Sobre Nós"
+        android:textAllCaps="true"
+        android:textColor="#03A9F4"
+        app:icon="@android:drawable/ic_menu_search"
+        app:iconGravity="textEnd"
+        app:iconTint="#2196F3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

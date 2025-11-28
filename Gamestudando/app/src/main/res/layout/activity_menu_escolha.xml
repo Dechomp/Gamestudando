@@ -12,8 +12,10 @@
         android:layout_width="427dp"
         android:layout_height="44dp"
         android:backgroundTint="#2143BF"
-        tools:layout_editor_absoluteX="-8dp"
-        tools:layout_editor_absoluteY="694dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.437"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/textView12"
@@ -21,6 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="80dp"
         android:text="Escolha um Teste:"
+        android:textAllCaps="true"
         android:textColor="#141111"
         android:textColorHint="#180808"
         android:textColorLink="#100A0A"
@@ -37,6 +40,7 @@
         android:layout_marginTop="196dp"
         android:backgroundTint="#8BC34A"
         android:text="Português"
+        android:textAllCaps="true"
         android:textSize="34sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.495"
@@ -50,6 +54,7 @@
         android:layout_marginTop="100dp"
         android:backgroundTint="#3F51B5"
         android:text="Matemática"
+        android:textAllCaps="true"
         android:textSize="34sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.495"
@@ -62,6 +67,8 @@
         android:layout_height="44dp"
         android:backgroundTint="#2143BF"
         android:textColorLink="#5F2222"
-        tools:layout_editor_absoluteX="-8dp"
-        tools:layout_editor_absoluteY="-7dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,38 +1,36 @@
-package com.example.gamestudando;
+package com.example.gamestudando.classesDTO;
 
 import java.util.Date;
 
-public class Estudante {
+public class Professor {
     // Atributos
     private String id;
     private String nome;
     private String cpf;
-    private Date dataNascimento;
     private String email;
     private Date dataCadastro;
     private String telefone;
+    private String formacao;
     private String status;
     private Boolean isVerificado;
-    private String idResponsavel;
 
 
     //Primeiro construtor
-    public Estudante() {
+    public Professor() {
 
     }
 
     //Segundo construtor
-    public Estudante(String id, String nome, String cpf, Date dataNascimento, String email, Date dataCadastro, String telefone, String status, Boolean isVerificado, String idResponsavel) {
+    public Professor(String id, String nome, String cpf, String email, Date dataCadastro, String telefone, String formacao, String status, Boolean isVerificado) {
         this.id = id;
         this.nome = nome;
         this.cpf = cpf;
-        this.dataNascimento = dataNascimento;
         this.email = email;
         this.dataCadastro = dataCadastro;
         this.telefone = telefone;
+        this.formacao = formacao;
         this.status = status;
         this.isVerificado = isVerificado;
-        this.idResponsavel = idResponsavel;
     }
 
     public String getId() {
@@ -59,12 +57,12 @@ public class Estudante {
         this.cpf = cpf;
     }
 
-    public Date getDataNascimento() {
-        return dataNascimento;
+    public String getFormacao() {
+        return formacao;
     }
 
-    public void setDataNascimento(Date dataNascimento) {
-        this.dataNascimento = dataNascimento;
+    public void setFormacao(String formacao) {
+        this.formacao = formacao;
     }
 
     public String getEmail() {
@@ -107,11 +105,4 @@ public class Estudante {
         isVerificado = verificado;
     }
 
-    public String getIdResponsavel() {
-        return idResponsavel;
-    }
-
-    public void setIdResponsavel(String idResponsavel) {
-        this.idResponsavel = idResponsavel;
-    }
 }

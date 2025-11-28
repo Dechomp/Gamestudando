@@ -18,6 +18,8 @@ public class Global {
     public static int acertos = 0;
     public static int erros = 0;
 
+    public static int versao = 1;
+
 
     //Função global para navegação de tela
     public static void navegarTela(View telaAtual, Class telaEscolhida) {
