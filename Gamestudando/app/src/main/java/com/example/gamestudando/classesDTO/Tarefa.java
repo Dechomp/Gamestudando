@@ -2,9 +2,9 @@ package com.example.gamestudando.classesDTO;
 
 public class Tarefa {
     int id;
-    String pergunta, respA, respB, respC, respD, respCerta;
+    String pergunta, respA, respB, respC, respD, respCerta, materia, idProfessor;
 
-    public Tarefa(int id, String pergunta, String respA, String respB, String respC, String respD, String respCerta) {
+    public Tarefa(int id, String pergunta, String respA, String respB, String respC, String respD, String respCerta, String materia, String idProfessor) {
         this.id = id;
         this.pergunta = pergunta;
         this.respA = respA;
@@ -12,6 +12,8 @@ public class Tarefa {
         this.respC = respC;
         this.respD = respD;
         this.respCerta = respCerta;
+        this.materia = materia;
+        this.idProfessor = idProfessor;
     }
 
     public Tarefa() {
@@ -72,5 +74,21 @@ public class Tarefa {
 
     public void setRespCerta(String respCerta) {
         this.respCerta = respCerta;
+    }
+
+    public String getMateria() {
+        return materia;
+    }
+
+    public void setMateria(String materia) {
+        this.materia = materia;
+    }
+
+    public String getIdProfessor() {
+        return idProfessor;
+    }
+
+    public void setIdProfessor(String idProfessor) {
+        this.idProfessor = idProfessor;
     }
 }
