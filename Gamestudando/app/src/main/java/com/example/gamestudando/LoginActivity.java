@@ -18,7 +18,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity {
 
-    Button btLogar, btCadastrarLogin;
+    Button btLogar, btCadastrarLogin, btSobreNos;
 
     EditText edUsuarioLogar, edSenhaLogar;
 
@@ -36,9 +36,12 @@ public class LoginActivity extends AppCompatActivity {
         //Vinculando os componentes
         btLogar = findViewById(R.id.btLogar);
         btCadastrarLogin = findViewById(R.id.btCadastrarLogin);
+        btSobreNos = findViewById(R.id.btSobreNos);
 
         edUsuarioLogar = findViewById(R.id.edUsuarioLogar);
         edSenhaLogar = findViewById(R.id.edSenhaLogar);
+
+
 
         btCadastrarLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,6 +78,13 @@ public class LoginActivity extends AppCompatActivity {
                             }
                     );
                 }
+            }
+        });
+
+        btSobreNos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Global.navegarTela(v, SobreActivity.class);
             }
         });
 

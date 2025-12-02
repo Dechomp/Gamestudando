@@ -31,11 +31,17 @@ public class EscolherCadastroActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent telaCadastroPessoa;
                 Global.tipoEscolhido = "Estudante";
-                telaCadastroPessoa = new Intent(EscolherCadastroActivity.this, CadastroPessoaActivity.class);
+                Global.navegarTela(v, CadastroPessoaActivity.class);
 
-                startActivity(telaCadastroPessoa);
-                finish();
+            }
+        });
 
+        btEscolherProfessor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Global.tipoEscolhido = "Professor";
+
+                Global.navegarTela(v, CadastroPessoaActivity.class);
             }
         });
 

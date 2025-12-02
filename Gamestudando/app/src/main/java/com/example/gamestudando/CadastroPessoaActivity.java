@@ -1,14 +1,11 @@
 package com.example.gamestudando;
 
 import android.app.DatePickerDialog;
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -18,13 +15,13 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.gamestudando.classesDTO.Estudante;
+import com.example.gamestudando.classesDTO.Professor;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -181,7 +178,8 @@ public class CadastroPessoaActivity extends AppCompatActivity {
                             //Converte a data
                             try {
                                 dataNascimento = formatador.parse(dataNasc);
-                            } catch (ParseException e) {
+                            }
+                            catch (ParseException e) {
                                 throw new RuntimeException(e);
                             }
 
@@ -189,39 +187,66 @@ public class CadastroPessoaActivity extends AppCompatActivity {
                             String id = usuario.getUid();
 
 
-                            //Cria um obbjeto da classes estudante
-                            Estudante estudante = new Estudante(id, nome, cpf, dataNascimento, email,
-                                    dataHoje, telefone, "Ativo", false, null);
+                            if(Global.tipoEscolhido.equals("Estudante")) {
+                                    //Cria um obbjeto da classes estudante
+                                Estudante estudante = new Estudante(id, nome, cpf, dataNascimento, email,
+                                            dataHoje, telefone, "Ativo", false, null);
 
+                                    //Adicionar no banco de dados
+                                    db.collection("Estudante").document(id).set(estudante)
+                                            //Caso de certo
+                                            .addOnSuccessListener(doc -> {
+                                                //Crio as mensagens de Sucesso
+                                                Toast.makeText(CadastroPessoaActivity.this, "Usuário cadastrado com sucesso!", Toast.LENGTH_SHORT).show();
+                                                Log.d("FIREBASE", "Usuário cadastrado com sucesso!");
 
+                                                //Fecho esta Activy
+                                                finish();
+                                            })
+                                            //Caso de erro
+                                            .addOnFailureListener( e ->{
+                                                //Mostro as mensagens
+                                                Toast.makeText(CadastroPessoaActivity.this, "Erro ao casdastrar o usuário", Toast.LENGTH_SHORT).show();
+                                                Log.e("FIREBASE", "Erro ao cadastrar" + e.getMessage());
 
-                            //Adicionar no banco de dados
-                            db.collection("Estudante").document(id).set(estudante)
-                                    //Caso de certo
-                                    .addOnSuccessListener(doc -> {
-                                        //Crio as mensagens de Sucesso
-                                        Toast.makeText(CadastroPessoaActivity.this, "Usuário cadastrado com sucesso!", Toast.LENGTH_SHORT).show();
-                                        Log.d("FIREBASE", "Usuário cadastrado com sucesso!");
+                                                //Deleta o usuário criado se der erro ao salvar no banco
+                                                usuario.delete();
+                                            });
+                            }
+                            else if (Global.tipoEscolhido.equals("Professor")){
 
-                                        //Fecho esta Activy
-                                        finish();
-                                    })
-                                    //Caso de erro
-                                    .addOnFailureListener( e ->{
-                                        //Mostro as mensagens
-                                        Toast.makeText(CadastroPessoaActivity.this, "Erro ao casdastrar o usuário", Toast.LENGTH_SHORT).show();
-                                        Log.e("FIREBASE", "Erro ao cadastrar" + e.getMessage());
+                                Professor professor = new Professor(id, nome, cpf, email, dataHoje, telefone, null, "Ativo", false);
 
-                                        //Deleta o usuário criado se der erro ao salvar no banco
-                                        if (usuario != null) {
+                                //Adicionar no banco de dados
+                                db.collection("Professor").document(id).set(professor)
+                                        //Caso de certo
+                                        .addOnSuccessListener(doc -> {
+                                            //Crio as mensagens de Sucesso
+                                            Toast.makeText(CadastroPessoaActivity.this, "Usuário cadastrado com sucesso!", Toast.LENGTH_SHORT).show();
+                                            Log.d("FIREBASE", "Usuário cadastrado com sucesso!");
+
+                                            //Fecho esta Activy
+                                            finish();
+                                        })
+                                        //Caso de erro
+                                        .addOnFailureListener( e ->{
+                                            //Mostro as mensagens
+                                            Toast.makeText(CadastroPessoaActivity.this, "Erro ao casdastrar o usuário", Toast.LENGTH_SHORT).show();
+                                            Log.e("FIREBASE", "Erro ao cadastrar" + e.getMessage());
+
+                                            //Deleta o usuário criado se der erro ao salvar no banco
                                             usuario.delete();
-                                        }
-                                    });
+                                        });
+                            }
+                            else {
+                                Toast.makeText(CadastroPessoaActivity.this, "Erro ao cadastrar: " + task.getException(), Toast.LENGTH_LONG).show();
+                                Log.e("FIREBASE", "Erro ao cadastrar", task.getException());
+                            }
                         }
-                        else {
-                            Toast.makeText(CadastroPessoaActivity.this, "Erro ao cadastrar: " + task.getException(), Toast.LENGTH_LONG).show();
-                            Log.e("FIREBASE", "Erro ao cadastrar", task.getException());
-                        }
+
+
+
+
                     });
         }
 

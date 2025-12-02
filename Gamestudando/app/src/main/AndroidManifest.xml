@@ -14,6 +14,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Gamestudando">
         <activity
+            android:name=".SobreActivity"
+            android:exported="false" />
+        <activity
             android:name=".ResultadoTesteActivity"
             android:exported="false" />
         <activity

@@ -1,6 +1,8 @@
 package com.example.gamestudando;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -8,40 +10,26 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.example.gamestudando.classesDTO.Estudante;
-import com.google.firebase.firestore.FirebaseFirestore;
+public class SobreActivity extends AppCompatActivity {
 
-import java.util.ArrayList;
-
-public class MainActivity extends AppCompatActivity {
-
-    //Chamando o banco para a aplicação
-    FirebaseFirestore db;
-
-
-    //Lista de usuários estudantes
-    ArrayList<Estudante> listaEstudantes;
-
-
-    //Estudante a ser editado
-    Estudante estudanteSelecionado = null;
-
-
+    Button btVoltar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_sobre);
 
-        //Recebe o usuário logado
-        db = FirebaseFirestore.getInstance();
+        //Binculando componentes
+        btVoltar = findViewById(R.id.btVoltarSobreNos);
 
-      //  carregarEstudantes();
-
-
-
-
+        //QUando apertar parea voltar
+        btVoltar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Global.navegarTela(v, LoginActivity.class);
+            }
+        });
 
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -50,9 +38,4 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
     }
-
-    private void carregarEstudante() {
-
-    }
-
 }
