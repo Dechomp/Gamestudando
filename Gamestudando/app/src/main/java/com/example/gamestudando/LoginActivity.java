@@ -14,7 +14,10 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.gamestudando.classesDTO.Estudante;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -66,6 +69,42 @@ public class LoginActivity extends AppCompatActivity {
                                 if (task.isSuccessful()){
                                     Toast.makeText(LoginActivity.this, "Usuário logado com sucesso!", Toast.LENGTH_SHORT).show();
                                     Log.d("FIREBASE", "Usuário logado com sucesso!");
+                                    FirebaseFirestore db;
+
+                                    FirebaseUser user = null;
+
+                                    //Chamo o banco de dados e pega o usuário logado
+                                    db = FirebaseFirestore.getInstance();
+
+                                    //Recebe o usuário logado
+                                    user = FirebaseAuth.getInstance().getCurrentUser();
+                                    Boolean usuarioAchado = false;
+                                    db.collection("Estudante")
+                                            //Procuro pelo id do usuário logado
+                                            .document(user.getUid())
+                                            //Pego os dados do estudante
+                                            .get()
+                                            //Caso de certo
+                                            .addOnSuccessListener(doc -> {
+                                                //Caso não venha vazio
+                                                if (doc.exists()) {
+                                                    //Pego as informações do estudante
+                                                    //Estudante estudante = doc.toObject(Estudante.class);
+
+                                                    //Mando para a tela de escolha de teste
+                                                    Global.navegarTela(v, MenuEscolhaActivity.class);
+                                                }
+                                                //Se não tiver nenhum estudante
+                                                /*else {
+                                                    //Mostro a mensagem
+                                                   // Toast.makeText(this, "Usuário não encontrado", Toast.LENGTH_SHORT).show();
+                                                }*/
+                                            })
+                                            //Se der erraado
+                                            .addOnFailureListener(e ->{
+                                                //Mostro a mensagem de erro
+                                               // Toast.makeText(this, "Erro ao buscar o estudante", Toast.LENGTH_SHORT).show();
+                                            });
 
                                     //Mando para a tela que eu quero
                                     Global.navegarTela(v, MenuEscolhaActivity.class);
