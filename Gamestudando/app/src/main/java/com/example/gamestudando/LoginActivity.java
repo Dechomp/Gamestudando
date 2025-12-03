@@ -25,6 +25,8 @@ public class LoginActivity extends AppCompatActivity {
 
     EditText edUsuarioLogar, edSenhaLogar;
 
+    //Variável para ver o tipo do usuário caso ache ou não
+    boolean usuarioAchado = false;
 
     //Autenticador de FireBase
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -78,7 +80,7 @@ public class LoginActivity extends AppCompatActivity {
 
                                     //Recebe o usuário logado
                                     user = FirebaseAuth.getInstance().getCurrentUser();
-                                    Boolean usuarioAchado = false;
+
                                     db.collection("Estudante")
                                             //Procuro pelo id do usuário logado
                                             .document(user.getUid())
@@ -86,19 +88,13 @@ public class LoginActivity extends AppCompatActivity {
                                             .get()
                                             //Caso de certo
                                             .addOnSuccessListener(doc -> {
-                                                //Caso não venha vazio
+                                                //Caso exista
                                                 if (doc.exists()) {
-                                                    //Pego as informações do estudante
-                                                    //Estudante estudante = doc.toObject(Estudante.class);
-
                                                     //Mando para a tela de escolha de teste
                                                     Global.navegarTela(v, MenuEscolhaActivity.class);
+
+                                                    usuarioAchado = true;
                                                 }
-                                                //Se não tiver nenhum estudante
-                                                /*else {
-                                                    //Mostro a mensagem
-                                                   // Toast.makeText(this, "Usuário não encontrado", Toast.LENGTH_SHORT).show();
-                                                }*/
                                             })
                                             //Se der erraado
                                             .addOnFailureListener(e ->{
@@ -106,8 +102,29 @@ public class LoginActivity extends AppCompatActivity {
                                                // Toast.makeText(this, "Erro ao buscar o estudante", Toast.LENGTH_SHORT).show();
                                             });
 
-                                    //Mando para a tela que eu quero
-                                    Global.navegarTela(v, MenuEscolhaActivity.class);
+                                    if (!usuarioAchado){
+                                        //Testo para ver se é um professor
+                                        db.collection("Professor")
+                                                //Procuro pelo id do usuário logado
+                                                .document(user.getUid())
+                                                //Pego os dados do professor
+                                                .get()
+                                                //Caso de certo
+                                                .addOnSuccessListener(doc -> {
+                                                    //Caso exista
+                                                    if (doc.exists()) {
+                                                        //Mando para a tela de escolha de teste
+                                                        Global.navegarTela(v, MainProfessorActivity.class);
+
+                                                        usuarioAchado = true;
+                                                    }
+                                                })
+                                                //Se der erraado
+                                                .addOnFailureListener(e ->{
+                                                    //Mostro a mensagem de erro
+                                                    // Toast.makeText(this, "Erro ao buscar o estudante", Toast.LENGTH_SHORT).show();
+                                                });
+                                    }
 
                                 }
                                 else{
