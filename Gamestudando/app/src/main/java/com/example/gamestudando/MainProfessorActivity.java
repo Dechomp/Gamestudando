@@ -1,6 +1,7 @@
 package com.example.gamestudando;
 
 import android.os.Bundle;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -8,8 +9,18 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 public class MainProfessorActivity extends AppCompatActivity {
 
+    //Crio o banco de dados
+    FirebaseFirestore db;
+
+    FirebaseUser user = null;
+
+    //Componentes
+    TextView tvNome;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
