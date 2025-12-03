@@ -14,6 +14,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Gamestudando">
         <activity
+            android:name=".PostarTarefaActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainProfessorActivity"
             android:exported="false" />
         <activity
