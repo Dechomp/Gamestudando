@@ -58,9 +58,7 @@ public class TarefaDAO extends SQLiteOpenHelper {
                 "tar_id INTEGER NOT NULL, " +
                 "est_id INTEGER NOT NULL, " +
                 "ent_data DATE NOT NULL," +
-                "ent_quantAcertos INTEGER NOT NULL, " +
-                "ent_quantErros INTEGER NOT NULL)"
-
+                "ent_acertou INTEGER NOT NULL)" // 0 ou 1
         );
     }
 

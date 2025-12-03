@@ -14,7 +14,10 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.gamestudando.classesDTO.Estudante;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -22,6 +25,8 @@ public class LoginActivity extends AppCompatActivity {
 
     EditText edUsuarioLogar, edSenhaLogar;
 
+    //Variável para ver o tipo do usuário caso ache ou não
+    boolean usuarioAchado = false;
 
     //Autenticador de FireBase
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -66,9 +71,60 @@ public class LoginActivity extends AppCompatActivity {
                                 if (task.isSuccessful()){
                                     Toast.makeText(LoginActivity.this, "Usuário logado com sucesso!", Toast.LENGTH_SHORT).show();
                                     Log.d("FIREBASE", "Usuário logado com sucesso!");
+                                    FirebaseFirestore db;
 
-                                    //Mando para a tela que eu quero
-                                    Global.navegarTela(v, MenuEscolhaActivity.class);
+                                    FirebaseUser user = null;
+
+                                    //Chamo o banco de dados e pega o usuário logado
+                                    db = FirebaseFirestore.getInstance();
+
+                                    //Recebe o usuário logado
+                                    user = FirebaseAuth.getInstance().getCurrentUser();
+
+                                    db.collection("Estudante")
+                                            //Procuro pelo id do usuário logado
+                                            .document(user.getUid())
+                                            //Pego os dados do estudante
+                                            .get()
+                                            //Caso de certo
+                                            .addOnSuccessListener(doc -> {
+                                                //Caso exista
+                                                if (doc.exists()) {
+                                                    //Mando para a tela de escolha de teste
+                                                    Global.navegarTela(v, MenuEscolhaActivity.class);
+
+                                                    usuarioAchado = true;
+                                                }
+                                            })
+                                            //Se der erraado
+                                            .addOnFailureListener(e ->{
+                                                //Mostro a mensagem de erro
+                                               // Toast.makeText(this, "Erro ao buscar o estudante", Toast.LENGTH_SHORT).show();
+                                            });
+
+                                    if (!usuarioAchado){
+                                        //Testo para ver se é um professor
+                                        db.collection("Professor")
+                                                //Procuro pelo id do usuário logado
+                                                .document(user.getUid())
+                                                //Pego os dados do professor
+                                                .get()
+                                                //Caso de certo
+                                                .addOnSuccessListener(doc -> {
+                                                    //Caso exista
+                                                    if (doc.exists()) {
+                                                        //Mando para a tela de escolha de teste
+                                                        Global.navegarTela(v, MainProfessorActivity.class);
+
+                                                        usuarioAchado = true;
+                                                    }
+                                                })
+                                                //Se der erraado
+                                                .addOnFailureListener(e ->{
+                                                    //Mostro a mensagem de erro
+                                                    // Toast.makeText(this, "Erro ao buscar o estudante", Toast.LENGTH_SHORT).show();
+                                                });
+                                    }
 
                                 }
                                 else{
