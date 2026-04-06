@@ -1,15 +1,13 @@
-/*import { NativeTabs } from 'expo-router/unstable-native-tabs';
+import { Tabs } from 'expo-router';
 
-export default function TabLayout() {
+export default function Layout() {
   return (
-    <NativeTabs>
-      <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.TabBar label="Home" icon={{ sf: "house.fill", md: "home" }} />
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="settings">
-        <NativeTabs.Trigger.TabBar label="Settings" icon={{ sf: "gear", md: "settings" }} />
-      </NativeTabs.Trigger>
-    </NativeTabs>
+    <Tabs>
+      <Tabs.Screen name="Aba1" options={{ title: 'Aba 1' }} />
+      <Tabs.Screen name="Aba2" options={{ title: 'Aba 2' }} />
+      <Tabs.Screen name="Aba3" options={{ title: 'Aba 3' }} />
+      <Tabs.Screen name="Aba4" options={{ title: 'Aba 4' }} />
+      <Tabs.Screen name="Aba5" options={{ title: 'Aba 5' }} />
+    </Tabs>
   );
 }
-*/
