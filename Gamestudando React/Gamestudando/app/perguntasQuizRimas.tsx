@@ -1,0 +1,61 @@
+export const palavrasEsquerda = [
+{ id: "E01", texto: "GATO", grupo: "ATO", par: "01" },
+{ id: "E02", texto: "BOLA", grupo: "OLA", par: "02" },
+{ id: "E03", texto: "SAPO", grupo: "APO", par: "03" },
+{ id: "E04", texto: "MÃO", grupo: "ÃO", par: "04" },
+{ id: "E05", texto: "RATO", grupo: "ATO", par: "05" },
+
+{ id: "E06", texto: "FACA", grupo: "ACA", par: "06" },
+{ id: "E07", texto: "DADO", grupo: "ADO", par: "07" },
+{ id: "E08", texto: "GALO", grupo: "ALO", par: "08" },
+{ id: "E09", texto: "PATO", grupo: "ATO", par: "09" },
+{ id: "E10", texto: "VACA", grupo: "ACA", par: "10" },
+
+{ id: "E11", texto: "LATA", grupo: "ATA", par: "11" },
+{ id: "E12", texto: "FITA", grupo: "ITA", par: "12" },
+{ id: "E13", texto: "MALA", grupo: "ALA", par: "13" },
+{ id: "E14", texto: "BICO", grupo: "ICO", par: "14" },
+{ id: "E15", texto: "PIPO", grupo: "IPO", par: "15" },
+
+{ id: "E16", texto: "TUBO", grupo: "UBO", par: "16" },
+{ id: "E17", texto: "RUA", grupo: "UA", par: "17" },
+{ id: "E18", texto: "FOGO", grupo: "OGO", par: "18" },
+{ id: "E19", texto: "GELO", grupo: "ELO", par: "19" },
+{ id: "E20", texto: "CAMA", grupo: "AMA", par: "20" },
+
+{ id: "E21", texto: "REI", grupo: "EI", par: "21" },
+{ id: "E22", texto: "PAU", grupo: "AU", par: "22" },
+{ id: "E23", texto: "SOL", grupo: "OL", par: "23" },
+{ id: "E24", texto: "MAR", grupo: "AR", par: "24" },
+{ id: "E25", texto: "PÉ", grupo: "É", par: "25" },
+
+{ id: "E26", texto: "CÃO", grupo: "ÃO", par: "26" },
+{ id: "E27", texto: "LUA", grupo: "UA", par: "27" },
+{ id: "E28", texto: "FLOR", grupo: "OR", par: "28" },
+{ id: "E29", texto: "DENTE", grupo: "ENTE", par: "29" },
+{ id: "E30", texto: "GENTE", grupo: "ENTE", par: "30" },
+
+{ id: "E31", texto: "FARO", grupo: "ARO", par: "31" },
+{ id: "E32", texto: "PESO", grupo: "ESO", par: "32" },
+{ id: "E33", texto: "CUBO", grupo: "UBO", par: "33" },
+{ id: "E34", texto: "PATO", grupo: "ATO", par: "34" },
+{ id: "E35", texto: "SAPATO", grupo: "ATO", par: "35" },
+
+{ id: "E36", texto: "BOLA", grupo: "OLA", par: "36" },
+{ id: "E37", texto: "COLA", grupo: "OLA", par: "37" },
+{ id: "E38", texto: "MOLA", grupo: "OLA", par: "38" },
+{ id: "E39", texto: "TOLA", grupo: "OLA", par: "39" },
+{ id: "E40", texto: "RODA", grupo: "ODA", par: "40" },
+
+{ id: "E41", texto: "VIDA", grupo: "IDA", par: "41" },
+{ id: "E42", texto: "COMIDA", grupo: "IDA", par: "42" },
+{ id: "E43", texto: "FERIDA", grupo: "IDA", par: "43" },
+{ id: "E44", texto: "SAÍDA", grupo: "IDA", par: "44" },
+{ id: "E45", texto: "BATIDA", grupo: "IDA", par: "45" },
+
+{ id: "E46", texto: "PATO", grupo: "ATO", par: "46" },
+{ id: "E47", texto: "RATO", grupo: "ATO", par: "47" },
+{ id: "E48", texto: "FATO", grupo: "ATO", par: "48" },
+{ id: "E49", texto: "ATO", grupo: "ATO", par: "49" },
+{ id: "E50", texto: "CHATO", grupo: "ATO", par: "50" },
+];

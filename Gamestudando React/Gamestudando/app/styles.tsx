@@ -97,6 +97,21 @@ export const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center",
-  }
+  },
+
+  barraFundo: {
+    width: "100%",
+    height: 12,
+    backgroundColor: "#ddd",
+    borderRadius: 10,
+    marginBottom: 15,
+    overflow: "hidden", // importante pra não vazar
+  },
+
+  barraProgresso: {
+    height: "100%",
+    backgroundColor: "#4CAF50",
+    borderRadius: 10,
+  },
 
 });

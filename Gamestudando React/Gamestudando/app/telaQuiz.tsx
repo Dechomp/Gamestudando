@@ -8,7 +8,7 @@ import { useState } from "react";
 import { styles } from "./styles";
 
 // Importação do banco de perguntas do arquivo perguntas.js
-import { perguntas } from "./perguntas";
+import { perguntas } from "./perguntasQuiz4Respostas";
 
 export default function Index() {
 

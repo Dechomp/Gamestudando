@@ -8,7 +8,7 @@ import { useState } from "react";
 import { styles } from "./styles";
 
 // Importação do banco de perguntas do arquivo perguntas.js
-import { perguntas } from "./perguntas";
+import { perguntas } from "./perguntasQuiz4Respostas";
 
 export default function Index() {
 
@@ -23,6 +23,9 @@ export default function Index() {
   // Estado que guarda qual pergunta está sendo exibida no momento
   // Começa na pergunta 0 (primeira pergunta do array)
   const [perguntaAtual, setPerguntaAtual] = useState(0);
+
+  // Cálculo do progresso do quiz, para mostrar uma barra de progresso
+  const progresso = (perguntaAtual + 1) / perguntas.length;
 
   // Define qual é a resposta correta da pergunta atual
   // Pega essa informação do array de perguntas
@@ -126,11 +129,30 @@ export default function Index() {
         margin: 20,
       }}
     >
-
-      {/* Texto da pergunta atual */}
-      <Text style={styles.textoPergunta}>
-        Pergunta {perguntaAtual + 1}: {perguntas[perguntaAtual].pergunta}
+      {/* Texto de progresso (ex: "2 / 10") */}
+      <Text>
+        {perguntaAtual + 1} / {perguntas.length}
       </Text>
+
+      {/* Barra de progresso */}
+      <View style={styles.barraFundo}>
+        <View 
+          style={[
+            styles.barraProgresso,
+            { width: `${progresso * 100}%` }
+          ]}
+        />
+      </View>
+
+    
+      
+
+     {/* Texto da pergunta */}
+     <Text style={styles.textoPergunta}>
+       Pergunta {perguntaAtual + 1}: {perguntas[perguntaAtual].pergunta}
+     </Text>
+
+
 
 
       {/* Primeira linha de respostas */}
