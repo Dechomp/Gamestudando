@@ -114,4 +114,56 @@ export const styles = StyleSheet.create({
     borderRadius: 10,
   },
 
+  itemNormal: {
+    backgroundColor: "#2196F3",
+    padding: 15,
+    margin: 5,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+
+  itemSelecionado: {
+    backgroundColor: "#0D47A1",
+    padding: 15,
+    margin: 5,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+
+  itemErro: {
+    backgroundColor: "#f44336",
+    padding: 15,
+    margin: 5,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+
+  itemDesativado: {
+    backgroundColor: "#BDBDBD",
+    padding: 15,
+    margin: 5,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+
+  texto: {
+    color: "white",
+    fontWeight: "bold",
+  },
+
+  titulo: {
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+
+  barraContainer: {
+    width: "100%",
+    height: 20,
+    backgroundColor: "#ccc",
+    borderRadius: 10,
+    overflow: "hidden",
+    marginTop: 10,
+  },
+
+
 });
