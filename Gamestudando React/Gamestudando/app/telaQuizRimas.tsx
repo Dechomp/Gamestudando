@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import { Text, View, TouchableOpacity } from "react-native";
 import { useState, useEffect } from "react";
 import { styles } from "./styles";
@@ -5,9 +6,12 @@ import { palavrasEsquerda, palavrasDireita } from "./perguntasQuizRimas";
 
 export default function Index() {
 
+  const router = useRouter();
+
   // =========================
   // 🔁 GERAR RODADA (SEM REPETIÇÃO)
   // =========================
+  
   const gerarRodada = () => {
 
     const palavrasUsadas = [];
@@ -184,6 +188,19 @@ export default function Index() {
 
     }
   }, [acertos]);
+
+  // Troca de tela ao completar a fase
+
+  useEffect(() => {
+  if (acertos.length === 5) {
+    setTimeout(() => {
+      router.replace({
+        pathname: "/",
+        params: { faseConcluida: 3 }
+      });
+    }, 1500);
+  }
+}, [acertos]);
 
   // =========================
   // 🖥️ RENDER
