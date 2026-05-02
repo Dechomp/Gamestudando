@@ -1,21 +1,34 @@
 import { Text, View, TouchableOpacity, Animated } from "react-native";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 import { styles } from "./styles";
 import { perguntasMatematica } from "./perguntasMatematicaQuiz4";
+import { atualizarPerfil, carregarPerfil } from "./utils/perfilAluno";
 
-// 🔀 Embaralhar perguntas
-function sortearPerguntas(lista, quantidade = 5) {
-  const copia = [...lista];
+// =========================
+// 🔀 EMBARALHAR
+// =========================
+function embaralhar(lista) {
+  return [...lista].sort(() => Math.random() - 0.5);
+}
 
-  for (let i = copia.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [copia[i], copia[j]] = [copia[j], copia[i]];
-  }
+// =========================
+// 🧠 IA (níveis 1–10)
+// =========================
+function selecionarPerguntasIA(lista, nivelAluno = 3, quantidade = 5) {
+  const abaixo = lista.filter(p => p.nivel === nivelAluno - 1);
+  const base = lista.filter(p => p.nivel === nivelAluno);
+  const acima = lista.filter(p => p.nivel === nivelAluno + 1);
 
-  return copia.slice(0, quantidade);
+  const resultado = [];
+
+  resultado.push(...embaralhar(base).slice(0, 3));
+  resultado.push(...embaralhar(acima).slice(0, 1));
+  resultado.push(...embaralhar(abaixo).slice(0, 1));
+
+  return embaralhar(resultado).slice(0, quantidade);
 }
 
 export default function Index() {
@@ -25,68 +38,123 @@ export default function Index() {
 
   const fadeAnim = useState(new Animated.Value(1))[0];
 
-  const [perguntasSorteadas, setPerguntasSorteadas] = useState(() =>
-    sortearPerguntas(perguntasMatematica, 5)
-  );
+  const [nivelAluno, setNivelAluno] = useState(3);
+  const [perguntasSorteadas, setPerguntasSorteadas] = useState([]);
 
-  const [respostaSelecionada, setRespostaSelecionada] = useState<number | null>(null);
+  const [respostaSelecionada, setRespostaSelecionada] = useState(null);
   const [respostaConfirmada, setRespostaConfirmada] = useState(false);
   const [perguntaAtual, setPerguntaAtual] = useState(0);
 
+  const [acertos, setAcertos] = useState(0);
+  const [erros, setErros] = useState(0);
+
+  const perguntaAtualObj = perguntasSorteadas[perguntaAtual];
   const ultimaPergunta = perguntaAtual === perguntasSorteadas.length - 1;
 
-  // 🔄 RESET ao entrar
+  const progresso = (perguntaAtual + 1) / (perguntasSorteadas.length || 1);
+
+  // =========================
+  // 📥 CARREGAR PERFIL
+  // =========================
+  useEffect(() => {
+    const carregarNivel = async () => {
+      const perfil = await carregarPerfil();
+
+      const nivel = perfil?.matematica?.nivel || 3;
+      setNivelAluno(nivel);
+
+      const perguntas = selecionarPerguntasIA(
+        perguntasMatematica,
+        nivel,
+        5
+      );
+
+      setPerguntasSorteadas(perguntas);
+    };
+
+    carregarNivel();
+  }, []);
+
+  // =========================
+  // 🔄 RESET AO ENTRAR
+  // =========================
   useFocusEffect(
     useCallback(() => {
+
       setRespostaSelecionada(null);
       setRespostaConfirmada(false);
       setPerguntaAtual(0);
-      setPerguntasSorteadas(sortearPerguntas(perguntasMatematica, 5));
 
-      fadeAnim.setValue(1); // reset do fade
-    }, [])
+      const perguntas = selecionarPerguntasIA(
+        perguntasMatematica,
+        nivelAluno,
+        5
+      );
+
+      setPerguntasSorteadas(perguntas);
+
+      fadeAnim.setValue(1);
+
+    }, [nivelAluno])
   );
 
-  const perguntaAtualObj = perguntasSorteadas[perguntaAtual];
-  const respostaCorreta = perguntaAtualObj.correta;
-
-  const progresso = (perguntaAtual + 1) / perguntasSorteadas.length;
-
-  const selecionarResposta = (resposta: number) => {
+  // =========================
+  // 👆 SELEÇÃO
+  // =========================
+  const selecionarResposta = (resposta) => {
     if (respostaConfirmada) return;
-    setRespostaSelecionada(respostaSelecionada === resposta ? null : resposta);
+
+    setRespostaSelecionada(
+      respostaSelecionada === resposta ? null : resposta
+    );
   };
 
+  // =========================
+  // 🧠 CONFIRMAR RESPOSTA
+  // =========================
   const confirmarResposta = () => {
+
     if (respostaSelecionada === null && !respostaConfirmada) return;
 
     if (!respostaConfirmada) {
+
       setRespostaConfirmada(true);
 
-      // 📳 vibração leve ao responder
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      const acertou = respostaSelecionada === perguntaAtualObj.correta;
 
-    } else {
+      if (acertou) setAcertos(prev => prev + 1);
+      else setErros(prev => prev + 1);
+
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+
+    else {
+
       setRespostaSelecionada(null);
       setRespostaConfirmada(false);
 
       if (!ultimaPergunta) {
-        setPerguntaAtual(perguntaAtual + 1);
-      } else {
+        setPerguntaAtual(prev => prev + 1);
+      }
 
-        // 🎉 vibração de sucesso
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        
+      else {
+
+        Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Success
+        );
+
         const faseAtual = Array.isArray(params.faseId)
           ? params.faseId[0]
           : params.faseId || "1";
 
-        // 🌫️ animação fade antes de sair
         Animated.timing(fadeAnim, {
           toValue: 0,
           duration: 500,
           useNativeDriver: true,
-        }).start(() => {
+        }).start(async () => {
+
+          await atualizarPerfil("matematica", acertos, erros);
+
           router.replace({
             pathname: "/",
             params: { faseConcluida: String(faseAtual) }
@@ -96,30 +164,44 @@ export default function Index() {
     }
   };
 
-  const estiloBotao = (index: number) => {
+  // =========================
+  // 🎨 ESTILO (VISUAL ORIGINAL RESTAURADO)
+  // =========================
+  const estiloBotao = (index) => {
+
     if (!respostaConfirmada) {
       return respostaSelecionada === index
         ? styles.botaoRespostaSelecionada
         : styles.botaoResposta;
     }
 
-    if (index === respostaCorreta) return styles.botaoRespostaCerta;
+    if (index === perguntaAtualObj.correta)
+      return styles.botaoRespostaCerta;
 
-    if (index === respostaSelecionada && index !== respostaCorreta) {
+    if (index === respostaSelecionada)
       return styles.botaoRespostaErrada;
-    }
 
     return styles.botaoResposta;
   };
 
+  if (!perguntaAtualObj) return null;
+
   return (
     <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
 
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", margin: 20 }}>
+      <View style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        margin: 20
+      }}>
 
-        {/* 📊 Barra */}
+        {/* 📊 BARRA */}
         <View style={styles.barraContainer}>
-          <View style={[styles.barraProgresso, { width: `${progresso * 100}%` }]} />
+          <View style={[
+            styles.barraProgresso,
+            { width: `${progresso * 100}%` }
+          ]} />
         </View>
 
         <Text style={{ marginTop: 5 }}>
@@ -162,12 +244,12 @@ export default function Index() {
 
           respostaSelecionada !== null && (
             ultimaPergunta
-              ? styles.botaoFinalizar // 🎨 estilo especial
+              ? styles.botaoFinalizar
               : styles.botaoConfirmarRespostaSelecionada
           ),
 
           respostaConfirmada && (
-            respostaSelecionada === respostaCorreta
+            respostaSelecionada === perguntaAtualObj.correta
               ? styles.botaoConfirmarRespostaCerta
               : styles.botaoConfirmarRespostaErrada
           )

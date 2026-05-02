@@ -3,63 +3,68 @@ import { Text, View, TouchableOpacity, Animated } from "react-native";
 import { useState, useEffect, useRef } from "react";
 import { styles } from "./styles";
 import { palavrasEsquerda, palavrasDireita } from "./perguntasQuizRimas";
+import { atualizarPerfil, carregarPerfil } from "./utils/perfilAluno";
 
+// =========================
+// 🎲 embaralhar
+// =========================
+function embaralhar(lista) {
+  return [...lista].sort(() => Math.random() - 0.5);
+}
+
+// =========================
+// 🧠 geração IA (segura)
+// =========================
+function gerarRodadaIA(nivelAluno = 3) {
+
+  const palavrasUsadas = [];
+  const esquerdaEscolhida = [];
+  const direitaEscolhida = [];
+
+  const pool = embaralhar(palavrasEsquerda).slice(0, 5);
+
+  pool.forEach(esq => {
+
+    const opcoes = palavrasDireita.filter(d =>
+      d.par === esq.par &&
+      d.texto !== esq.texto &&
+      !palavrasUsadas.includes(d.texto)
+    );
+
+    if (!opcoes || opcoes.length === 0) return;
+
+    const dir = opcoes[Math.floor(Math.random() * opcoes.length)];
+
+    esquerdaEscolhida.push(esq);
+    direitaEscolhida.push(dir);
+
+    palavrasUsadas.push(esq.texto);
+    palavrasUsadas.push(dir.texto);
+  });
+
+  return {
+    esquerda: esquerdaEscolhida,
+    direita: embaralhar(direitaEscolhida),
+  };
+}
+
+// =========================
+// 🎮 componente
+// =========================
 export default function Index() {
 
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  // 🎬 FADE
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  // =========================
-  // 🔁 GERAR RODADA
-  // =========================
+  const [nivelAluno, setNivelAluno] = useState(3);
 
-  const gerarRodada = () => {
-
-    const palavrasUsadas = [];
-    const esquerdaEscolhida = [];
-    const direitaEscolhida = [];
-
-    while (esquerdaEscolhida.length < 5) {
-
-      const esq = palavrasEsquerda[
-        Math.floor(Math.random() * palavrasEsquerda.length)
-      ];
-
-      if (palavrasUsadas.includes(esq.texto)) continue;
-
-      let opcoes = palavrasDireita.filter(d =>
-        d.par === esq.par &&
-        d.texto !== esq.texto &&
-        !palavrasUsadas.includes(d.texto)
-      );
-
-      if (opcoes.length === 0) continue;
-
-      const dir = opcoes[Math.floor(Math.random() * opcoes.length)];
-
-      esquerdaEscolhida.push(esq);
-      direitaEscolhida.push(dir);
-
-      palavrasUsadas.push(esq.texto);
-      palavrasUsadas.push(dir.texto);
-    }
-
-    direitaEscolhida.sort(() => Math.random() - 0.5);
-
-    return {
-      esquerda: esquerdaEscolhida,
-      direita: direitaEscolhida
-    };
-  };
-
-  // =========================
-  // 🎯 ESTADOS
-  // =========================
-
-  const [rodada, setRodada] = useState(gerarRodada());
+  // ✅ FIX PRINCIPAL AQUI
+  const [rodada, setRodada] = useState({
+    esquerda: [],
+    direita: []
+  });
 
   const [selecionadoEsquerda, setSelecionadoEsquerda] = useState(null);
   const [selecionadoDireita, setSelecionadoDireita] = useState(null);
@@ -70,12 +75,38 @@ export default function Index() {
   const [erro, setErro] = useState(false);
   const [bloqueado, setBloqueado] = useState(false);
 
+  const [acertosFase, setAcertosFase] = useState(0);
+  const [errosFase, setErrosFase] = useState(0);
+
   const progresso = acertos.length / 5;
 
   // =========================
-  // 🎬 FADE IN
+  // 📥 carregar perfil
   // =========================
+  useEffect(() => {
+    const carregar = async () => {
 
+      const perfil = await carregarPerfil();
+      const nivel = perfil?.rimas?.nivel || 3;
+
+      setNivelAluno(nivel);
+
+      const r = gerarRodadaIA(nivel);
+
+      // 🔥 fallback seguro se vier incompleto
+      if (!r.esquerda?.length || !r.direita?.length) {
+        setRodada(gerarRodadaIA(nivel));
+      } else {
+        setRodada(r);
+      }
+    };
+
+    carregar();
+  }, []);
+
+  // =========================
+  // 🎬 fade
+  // =========================
   useEffect(() => {
     fadeAnim.setValue(0);
 
@@ -87,11 +118,16 @@ export default function Index() {
   }, []);
 
   // =========================
-  // 🖱️ SELEÇÃO
+  // 🧪 loading seguro (FIX REAL DA TELA BRANCA)
   // =========================
+  const carregando =
+    !rodada?.esquerda?.length ||
+    !rodada?.direita?.length;
 
+  // =========================
+  // 🖱️ seleção ESQ
+  // =========================
   const selecionarEsquerda = (item) => {
-
     if (bloqueado) return;
     if (bloqueados.includes(item.id)) return;
 
@@ -100,8 +136,10 @@ export default function Index() {
     );
   };
 
+  // =========================
+  // 🖱️ seleção DIR
+  // =========================
   const selecionarDireita = (item) => {
-
     if (bloqueado) return;
     if (bloqueados.includes(item.id)) return;
 
@@ -111,9 +149,8 @@ export default function Index() {
   };
 
   // =========================
-  // 🧠 VERIFICAÇÃO
+  // 🧠 verificação
   // =========================
-
   const verificar = () => {
 
     if (!selecionadoEsquerda || !selecionadoDireita || bloqueado) return;
@@ -129,6 +166,7 @@ export default function Index() {
       ]);
 
       setAcertos(prev => [...prev, selecionadoEsquerda.grupo]);
+      setAcertosFase(prev => prev + 1);
 
       setSelecionadoEsquerda(null);
       setSelecionadoDireita(null);
@@ -137,6 +175,7 @@ export default function Index() {
     } else {
 
       setErro(true);
+      setErrosFase(prev => prev + 1);
 
       setTimeout(() => {
         setErro(false);
@@ -155,9 +194,8 @@ export default function Index() {
   }, [selecionadoEsquerda, selecionadoDireita]);
 
   // =========================
-  // 🎯 FINAL DA FASE (CORRIGIDO)
+  // 🎯 final
   // =========================
-
   useEffect(() => {
     if (acertos.length === 5) {
 
@@ -165,34 +203,38 @@ export default function Index() {
         ? params.faseId[0]
         : params.faseId || "1";
 
-      // fade out
       Animated.timing(fadeAnim, {
         toValue: 0,
         duration: 400,
         useNativeDriver: true,
-      }).start();
+      }).start(async () => {
 
-      setTimeout(() => {
-        router.replace({
-          pathname: "/",
-          params: { faseConcluida: String(faseAtual) }
-        });
-      }, 500);
+        await atualizarPerfil("rimas", acertosFase, errosFase);
+
+        setTimeout(() => {
+          router.replace({
+            pathname: "/",
+            params: { faseConcluida: String(faseAtual) }
+          });
+        }, 200);
+      });
     }
   }, [acertos]);
 
   // =========================
-  // 🛡️ PROTEÇÃO (ANTI TELA BRANCA)
+  // 🧪 loading UI
   // =========================
-
-  if (!rodada?.esquerda || !rodada?.direita) {
-    return null;
+  if (carregando) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Carregando rimas...</Text>
+      </View>
+    );
   }
 
   // =========================
-  // 🎨 ESTILOS
+  // 🎨 estilos
   // =========================
-
   const estiloEsquerda = (item) => {
 
     if (bloqueados.includes(item.id)) return styles.itemDesativado;
@@ -214,9 +256,8 @@ export default function Index() {
   };
 
   // =========================
-  // 🖥️ RENDER
+  // 🖥️ UI
   // =========================
-
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
 
@@ -224,25 +265,16 @@ export default function Index() {
         Conecte as rimas
       </Text>
 
-      <Text style={{ marginTop: 5 }}>
-        {acertos.length} / 5
-      </Text>
+      <Text>{acertos.length} / 5</Text>
 
-      {/* 📊 Barra */}
       <View style={styles.barraContainer}>
-        <View
-          style={[
-            styles.barraProgresso,
-            { width: `${progresso * 100}%` }
-          ]}
-        />
+        <View style={[styles.barraProgresso, { width: `${progresso * 100}%` }]} />
       </View>
 
       <View style={{ flexDirection: "row", marginTop: 20 }}>
 
-        {/* ESQUERDA */}
         <View style={{ flex: 1 }}>
-          {rodada.esquerda.map((item) => (
+          {rodada.esquerda.map(item => (
             <View key={item.id} style={estiloEsquerda(item)}>
               <TouchableOpacity onPress={() => selecionarEsquerda(item)}>
                 <Text style={styles.texto}>{item.texto}</Text>
@@ -251,9 +283,8 @@ export default function Index() {
           ))}
         </View>
 
-        {/* DIREITA */}
         <View style={{ flex: 1 }}>
-          {rodada.direita.map((item) => (
+          {rodada.direita.map(item => (
             <View key={item.id} style={estiloDireita(item)}>
               <TouchableOpacity onPress={() => selecionarDireita(item)}>
                 <Text style={styles.texto}>{item.texto}</Text>
@@ -263,13 +294,6 @@ export default function Index() {
         </View>
 
       </View>
-
-      {/* FINAL */}
-      {acertos.length === 5 && (
-        <Text style={{ marginTop: 20, fontSize: 20 }}>
-          Parabéns! 🎉
-        </Text>
-      )}
 
     </Animated.View>
   );

@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { escolherProximaAtividade } from "./utils/ia";
+import { carregarPerfil } from "./utils/perfilAluno";
 
 const TOTAL_FASES = 15;
 
@@ -9,23 +12,26 @@ export default function MapaFases() {
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  // 🔓 começa da fase 1
   const [faseLiberada, setFaseLiberada] = useState(1);
+  const [recomendacao, setRecomendacao] = useState(null);
 
-  // 🧠 escolhe tipo de quiz
-  function escolherTela(faseId) {
-    if (faseId % 3 === 0) return "/telaQuizRimas";
-    if (faseId % 2 === 0) return "/telaQuiz4Matematica";
-    return "/telaQuiz4Portugues";
-  }
+  // =========================
+  // 🧠 IA
+  // =========================
+  useEffect(() => {
+    const calcularIA = async () => {
+      const perfil = await carregarPerfil();
+      const resultado = escolherProximaAtividade(perfil);
 
-  // 🧩 AGORA cria TODAS as fases
-  const fases = Array.from({ length: TOTAL_FASES }, (_, i) => ({
-    id: i + 1,
-    tela: escolherTela(i + 1)
-  }));
+      setRecomendacao(resultado);
+    };
 
-  // 🔄 carregar progresso salvo
+    calcularIA();
+  }, []);
+
+  // =========================
+  // 📦 progresso salvo
+  // =========================
   useEffect(() => {
     const carregar = async () => {
       const salvo = await AsyncStorage.getItem("faseLiberada");
@@ -35,59 +41,100 @@ export default function MapaFases() {
     carregar();
   }, []);
 
-  // 🔓 liberar próxima fase
+  // =========================
+  // 🔓 liberar fases
+  // =========================
   useEffect(() => {
-  if (params?.faseConcluida) {
+    if (params?.faseConcluida) {
 
-    const valor = Array.isArray(params.faseConcluida)
-      ? params.faseConcluida[0]
-      : params.faseConcluida;
+      const valor = Array.isArray(params.faseConcluida)
+        ? params.faseConcluida[0]
+        : params.faseConcluida;
 
-    const concluida = parseInt(valor || "1");
+      const concluida = parseInt(valor || "1");
 
-    if (!isNaN(concluida)) {
+      if (!isNaN(concluida)) {
 
-      const proxima = concluida + 1;
+        const proxima = concluida + 1;
 
-      // 🔥 só atualiza se realmente for maior
-      if (proxima > faseLiberada) {
-        const novaFase = Math.min(TOTAL_FASES, proxima);
+        if (proxima > faseLiberada) {
+          const novaFase = Math.min(TOTAL_FASES, proxima);
 
-        setFaseLiberada(novaFase);
-        AsyncStorage.setItem("faseLiberada", String(novaFase));
+          setFaseLiberada(novaFase);
+          AsyncStorage.setItem("faseLiberada", String(novaFase));
+        }
       }
     }
-  }
-}, [params?.faseConcluida, faseLiberada]);
+  }, [params?.faseConcluida, faseLiberada]);
 
+  // =========================
+  // 📚 matéria por fase (IA + fallback)
+  // =========================
+  function escolherMateriaDaFase(faseId) {
+
+    const materiaIA = recomendacao?.materia;
+
+    if (materiaIA) return materiaIA;
+
+    if (faseId % 3 === 0) return "rimas";
+    if (faseId % 2 === 0) return "matematica";
+    return "portugues";
+  }
+
+  const fases = useMemo(() => {
+    return Array.from({ length: TOTAL_FASES }, (_, i) => {
+      const id = i + 1;
+
+      return {
+        id,
+        materia: escolherMateriaDaFase(id)
+      };
+    });
+  }, [recomendacao, faseLiberada]);
+
+  // =========================
+  // 📚 telas
+  // =========================
+  function escolherTela(materia) {
+    if (materia === "matematica") return "/telaQuiz4Matematica";
+    if (materia === "portugues") return "/telaQuiz4Portugues";
+    if (materia === "rimas") return "/telaQuizRimas";
+
+    return "/telaQuiz4Portugues";
+  }
+
+  // =========================
+  // 🎮 UI
+  // =========================
   return (
     <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 }}>
-      <Text style={{ fontSize: 26, textAlign: "center", marginBottom: 30, fontWeight: "bold" }}>
+
+      <Text style={{ fontSize: 26, textAlign: "center", marginBottom: 20, fontWeight: "bold" }}>
         MAPA DE FASES
+      </Text>
+
+      {/* 🧠 ainda visível (como você pediu) */}
+      <Text style={{ textAlign: "center", marginBottom: 10 }}>
+        IA atual: {recomendacao ? JSON.stringify(recomendacao) : "calculando..."}
       </Text>
 
       <TouchableOpacity
         onPress={async () => {
           await AsyncStorage.removeItem("faseLiberada");
-
           setFaseLiberada(1);
-
-          // 🔥 limpa os params também
           router.replace("/");
-
-          console.log("Progresso resetado!");
         }}
       >
         <Text>RESETAR PROGRESSO</Text>
       </TouchableOpacity>
 
       {fases.map((fase, index) => {
+
         const liberada = fase.id <= faseLiberada;
 
         return (
           <View key={fase.id} style={{ alignItems: "center" }}>
 
-            {/* 🔘 BOTÃO */}
             <View
               style={{
                 alignSelf: index % 2 === 0 ? "flex-start" : "flex-end",
@@ -98,9 +145,10 @@ export default function MapaFases() {
                 disabled={!liberada}
                 onPress={() =>
                   router.push({
-                    pathname: fase.tela,
-                    params: { faseId: String(fase.id) }
-                    
+                    pathname: escolherTela(fase.materia),
+                    params: {
+                      faseId: String(fase.id)
+                    }
                   })
                 }
                 style={{
@@ -113,13 +161,14 @@ export default function MapaFases() {
                   elevation: 5
                 }}
               >
-                <Text style={{ color: "#fff", fontSize: 22, fontWeight: "bold" }}>
+                {/* ❌ REMOVIDO: materia visível */}
+                <Text style={{ color: "#fff", fontSize: 22 }}>
                   {fase.id}
                 </Text>
+
               </TouchableOpacity>
             </View>
 
-            {/* 🛣️ estrada */}
             {index < fases.length - 1 && (
               <View
                 style={{
@@ -130,6 +179,7 @@ export default function MapaFases() {
                 }}
               />
             )}
+
           </View>
         );
       })}
