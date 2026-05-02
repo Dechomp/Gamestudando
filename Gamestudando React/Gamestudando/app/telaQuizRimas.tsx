@@ -1,21 +1,24 @@
-import { useRouter } from "expo-router";
-import { Text, View, TouchableOpacity } from "react-native";
-import { useState, useEffect } from "react";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { Text, View, TouchableOpacity, Animated } from "react-native";
+import { useState, useEffect, useRef } from "react";
 import { styles } from "./styles";
 import { palavrasEsquerda, palavrasDireita } from "./perguntasQuizRimas";
 
 export default function Index() {
 
   const router = useRouter();
+  const params = useLocalSearchParams();
+
+  // 🎬 FADE
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   // =========================
-  // 🔁 GERAR RODADA (SEM REPETIÇÃO)
+  // 🔁 GERAR RODADA
   // =========================
-  
+
   const gerarRodada = () => {
 
     const palavrasUsadas = [];
-
     const esquerdaEscolhida = [];
     const direitaEscolhida = [];
 
@@ -25,7 +28,6 @@ export default function Index() {
         Math.floor(Math.random() * palavrasEsquerda.length)
       ];
 
-      // evita repetir palavra
       if (palavrasUsadas.includes(esq.texto)) continue;
 
       let opcoes = palavrasDireita.filter(d =>
@@ -62,13 +64,27 @@ export default function Index() {
   const [selecionadoEsquerda, setSelecionadoEsquerda] = useState(null);
   const [selecionadoDireita, setSelecionadoDireita] = useState(null);
 
-  const [acertos, setAcertos] = useState([]); // grupos (rimas)
-  const [bloqueados, setBloqueados] = useState([]); // IDs travados
+  const [acertos, setAcertos] = useState([]);
+  const [bloqueados, setBloqueados] = useState([]);
 
   const [erro, setErro] = useState(false);
   const [bloqueado, setBloqueado] = useState(false);
 
   const progresso = acertos.length / 5;
+
+  // =========================
+  // 🎬 FADE IN
+  // =========================
+
+  useEffect(() => {
+    fadeAnim.setValue(0);
+
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 600,
+      useNativeDriver: true,
+    }).start();
+  }, []);
 
   // =========================
   // 🖱️ SELEÇÃO
@@ -77,27 +93,21 @@ export default function Index() {
   const selecionarEsquerda = (item) => {
 
     if (bloqueado) return;
-
     if (bloqueados.includes(item.id)) return;
 
-    if (selecionadoEsquerda?.id === item.id) {
-      setSelecionadoEsquerda(null);
-    } else {
-      setSelecionadoEsquerda(item);
-    }
+    setSelecionadoEsquerda(prev =>
+      prev?.id === item.id ? null : item
+    );
   };
 
   const selecionarDireita = (item) => {
 
     if (bloqueado) return;
-
     if (bloqueados.includes(item.id)) return;
 
-    if (selecionadoDireita?.id === item.id) {
-      setSelecionadoDireita(null);
-    } else {
-      setSelecionadoDireita(item);
-    }
+    setSelecionadoDireita(prev =>
+      prev?.id === item.id ? null : item
+    );
   };
 
   // =========================
@@ -110,24 +120,22 @@ export default function Index() {
 
     setBloqueado(true);
 
-    // ✅ valida por rima
     if (selecionadoEsquerda.grupo === selecionadoDireita.grupo) {
 
-      setBloqueados((prev) => [
+      setBloqueados(prev => [
         ...prev,
         selecionadoEsquerda.id,
         selecionadoDireita.id
       ]);
 
-      setAcertos((prev) => [...prev, selecionadoEsquerda.grupo]);
+      setAcertos(prev => [...prev, selecionadoEsquerda.grupo]);
 
       setSelecionadoEsquerda(null);
       setSelecionadoDireita(null);
       setBloqueado(false);
-    }
 
-    // ❌ erro
-    else {
+    } else {
+
       setErro(true);
 
       setTimeout(() => {
@@ -135,17 +143,51 @@ export default function Index() {
         setSelecionadoEsquerda(null);
         setSelecionadoDireita(null);
         setBloqueado(false);
-      }, 800);
+      }, 700);
     }
   };
 
-  // executa automático
   useEffect(() => {
     if (selecionadoEsquerda && selecionadoDireita) {
       const timer = setTimeout(verificar, 200);
       return () => clearTimeout(timer);
     }
   }, [selecionadoEsquerda, selecionadoDireita]);
+
+  // =========================
+  // 🎯 FINAL DA FASE (CORRIGIDO)
+  // =========================
+
+  useEffect(() => {
+    if (acertos.length === 5) {
+
+      const faseAtual = Array.isArray(params.faseId)
+        ? params.faseId[0]
+        : params.faseId || "1";
+
+      // fade out
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 400,
+        useNativeDriver: true,
+      }).start();
+
+      setTimeout(() => {
+        router.replace({
+          pathname: "/",
+          params: { faseConcluida: String(faseAtual) }
+        });
+      }, 500);
+    }
+  }, [acertos]);
+
+  // =========================
+  // 🛡️ PROTEÇÃO (ANTI TELA BRANCA)
+  // =========================
+
+  if (!rodada?.esquerda || !rodada?.direita) {
+    return null;
+  }
 
   // =========================
   // 🎨 ESTILOS
@@ -172,42 +214,11 @@ export default function Index() {
   };
 
   // =========================
-  // 🔄 NOVA RODADA
-  // =========================
-
-  useEffect(() => {
-    if (acertos.length === 5) {
-
-      setTimeout(() => {
-        setRodada(gerarRodada());
-        setAcertos([]);
-        setBloqueados([]);
-        setSelecionadoEsquerda(null);
-        setSelecionadoDireita(null);
-      }, 1000);
-
-    }
-  }, [acertos]);
-
-  // Troca de tela ao completar a fase
-
-  useEffect(() => {
-  if (acertos.length === 5) {
-    setTimeout(() => {
-      router.replace({
-        pathname: "/",
-        params: { faseConcluida: 3 }
-      });
-    }, 1500);
-  }
-}, [acertos]);
-
-  // =========================
   // 🖥️ RENDER
   // =========================
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
 
       <Text style={styles.textoPergunta}>
         Conecte as rimas
@@ -260,6 +271,6 @@ export default function Index() {
         </Text>
       )}
 
-    </View>
+    </Animated.View>
   );
 }

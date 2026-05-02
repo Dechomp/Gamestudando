@@ -80,6 +80,10 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
 
+  botaoFinalizar: {
+    backgroundColor: "#2196F3", // azul destaque
+  },
+
   textoBotao: {
     color: "white",
     fontSize: 18,

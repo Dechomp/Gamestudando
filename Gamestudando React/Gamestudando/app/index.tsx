@@ -1,33 +1,64 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { styles } from "./styles";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const fases = [
-  { id: 1, titulo: "Português", tela: "/telaQuiz4Portugues" },
-  { id: 2, titulo: "Matemática", tela: "/telaQuiz4Matematica" },
-  { id: 3, titulo: "Rimas", tela: "/telaQuizRimas" },
-  { id: 4, titulo: "Desafio Bíblico", tela: "/telaQuiz" },
-];
+const TOTAL_FASES = 15;
 
 export default function MapaFases() {
   const router = useRouter();
   const params = useLocalSearchParams();
+
+  // 🔓 começa da fase 1
   const [faseLiberada, setFaseLiberada] = useState(1);
 
+  // 🧠 escolhe tipo de quiz
+  function escolherTela(faseId) {
+    if (faseId % 3 === 0) return "/telaQuizRimas";
+    if (faseId % 2 === 0) return "/telaQuiz4Matematica";
+    return "/telaQuiz4Portugues";
+  }
+
+  // 🧩 AGORA cria TODAS as fases
+  const fases = Array.from({ length: TOTAL_FASES }, (_, i) => ({
+    id: i + 1,
+    tela: escolherTela(i + 1)
+  }));
+
+  // 🔄 carregar progresso salvo
   useEffect(() => {
-    if (params?.faseConcluida) {
-      const valor = Array.isArray(params.faseConcluida)
-        ? params.faseConcluida[0]
-        : params.faseConcluida;
+    const carregar = async () => {
+      const salvo = await AsyncStorage.getItem("faseLiberada");
+      if (salvo) setFaseLiberada(parseInt(salvo));
+    };
 
-      const concluida = parseInt(valor || "1");
+    carregar();
+  }, []);
 
-      if (!isNaN(concluida) && concluida + 1 > faseLiberada) {
-        setFaseLiberada(concluida + 1);
+  // 🔓 liberar próxima fase
+  useEffect(() => {
+  if (params?.faseConcluida) {
+
+    const valor = Array.isArray(params.faseConcluida)
+      ? params.faseConcluida[0]
+      : params.faseConcluida;
+
+    const concluida = parseInt(valor || "1");
+
+    if (!isNaN(concluida)) {
+
+      const proxima = concluida + 1;
+
+      // 🔥 só atualiza se realmente for maior
+      if (proxima > faseLiberada) {
+        const novaFase = Math.min(TOTAL_FASES, proxima);
+
+        setFaseLiberada(novaFase);
+        AsyncStorage.setItem("faseLiberada", String(novaFase));
       }
     }
-  }, [params?.faseConcluida]);
+  }
+}, [params?.faseConcluida, faseLiberada]);
 
   return (
     <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 }}>
@@ -35,43 +66,70 @@ export default function MapaFases() {
         MAPA DE FASES
       </Text>
 
+      <TouchableOpacity
+        onPress={async () => {
+          await AsyncStorage.removeItem("faseLiberada");
+
+          setFaseLiberada(1);
+
+          // 🔥 limpa os params também
+          router.replace("/");
+
+          console.log("Progresso resetado!");
+        }}
+      >
+        <Text>RESETAR PROGRESSO</Text>
+      </TouchableOpacity>
+
       {fases.map((fase, index) => {
         const liberada = fase.id <= faseLiberada;
 
         return (
-          <View
-            key={fase.id}
-            style={{
-              marginVertical: 25,
-              alignItems: index % 2 === 0 ? "flex-start" : "flex-end"
-            }}
-          >
-            <TouchableOpacity
-              disabled={!liberada}
-              onPress={() =>
-                router.push({
-                  pathname: fase.tela,
-                  params: { faseId: String(fase.id) }
-                })
-              }
+          <View key={fase.id} style={{ alignItems: "center" }}>
+
+            {/* 🔘 BOTÃO */}
+            <View
               style={{
-                width: 90,
-                height: 90,
-                borderRadius: 45,
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: liberada ? "#4CAF50" : "#BDBDBD",
-                elevation: 5
+                alignSelf: index % 2 === 0 ? "flex-start" : "flex-end",
+                marginVertical: 20
               }}
             >
-              <Text style={{ color: "#fff", fontSize: 22, fontWeight: "bold" }}>
-                {fase.id}
-              </Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                disabled={!liberada}
+                onPress={() =>
+                  router.push({
+                    pathname: fase.tela,
+                    params: { faseId: String(fase.id) }
+                    
+                  })
+                }
+                style={{
+                  width: 90,
+                  height: 90,
+                  borderRadius: 45,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: liberada ? "#4CAF50" : "#BDBDBD",
+                  elevation: 5
+                }}
+              >
+                <Text style={{ color: "#fff", fontSize: 22, fontWeight: "bold" }}>
+                  {fase.id}
+                </Text>
+              </TouchableOpacity>
+            </View>
 
-            <Text style={{ marginTop: 8, fontWeight: "500" }}>
-              {fase.titulo}
-            </Text>
+            {/* 🛣️ estrada */}
+            {index < fases.length - 1 && (
+              <View
+                style={{
+                  width: 4,
+                  height: 50,
+                  backgroundColor: "#ccc",
+                  borderRadius: 2
+                }}
+              />
+            )}
           </View>
         );
       })}
