@@ -1,50 +1,131 @@
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { Text, View, TouchableOpacity, Animated } from "react-native";
-import { useState, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef
+} from "react";
+
+import {
+  Text,
+  View,
+  Pressable
+} from "react-native";
+
+import {
+  useRouter,
+  useLocalSearchParams,
+  useFocusEffect
+} from "expo-router";
+
 import { styles } from "./styles";
-import { palavrasEsquerda, palavrasDireita } from "./perguntasQuizRimas";
-import { atualizarPerfil, carregarPerfil } from "./utils/perfilAluno";
+
+import {
+  palavrasEsquerda,
+  palavrasDireita
+} from "./perguntasQuizRimas";
+
+import {
+  atualizarPerfil,
+  carregarPerfil
+} from "./utils/perfilAluno";
+
+import {
+  lerTextoSeAtivo,
+  pararLeitura
+} from "./utils/leituraPerguntas";
 
 // =========================
 // 🎲 embaralhar
 // =========================
 function embaralhar(lista) {
-  return [...lista].sort(() => Math.random() - 0.5);
+
+  return [...lista].sort(
+    () => Math.random() - 0.5
+  );
 }
 
 // =========================
-// 🧠 geração IA (segura)
+// 🧠 geração IA
 // =========================
 function gerarRodadaIA(nivelAluno = 3) {
 
-  const palavrasUsadas = [];
-  const esquerdaEscolhida = [];
-  const direitaEscolhida = [];
+  let tentativas = 0;
 
-  const pool = embaralhar(palavrasEsquerda).slice(0, 5);
+  while (tentativas < 10) {
 
-  pool.forEach(esq => {
+    const palavrasUsadas = [];
 
-    const opcoes = palavrasDireita.filter(d =>
-      d.par === esq.par &&
-      d.texto !== esq.texto &&
-      !palavrasUsadas.includes(d.texto)
-    );
+    const esquerdaEscolhida = [];
 
-    if (!opcoes || opcoes.length === 0) return;
+    const direitaEscolhida = [];
 
-    const dir = opcoes[Math.floor(Math.random() * opcoes.length)];
+    const pool =
+      embaralhar(palavrasEsquerda);
 
-    esquerdaEscolhida.push(esq);
-    direitaEscolhida.push(dir);
+    for (let esq of pool) {
 
-    palavrasUsadas.push(esq.texto);
-    palavrasUsadas.push(dir.texto);
-  });
+      const opcoes =
+        palavrasDireita.filter(d =>
 
+          d.par === esq.par &&
+          d.texto !== esq.texto &&
+          !palavrasUsadas.includes(d.texto)
+
+        );
+
+      if (!opcoes.length)
+        continue;
+
+      const dir =
+        opcoes[
+          Math.floor(
+            Math.random() *
+            opcoes.length
+          )
+        ];
+
+      esquerdaEscolhida.push(esq);
+
+      direitaEscolhida.push(dir);
+
+      palavrasUsadas.push(esq.texto);
+
+      palavrasUsadas.push(dir.texto);
+
+      if (
+        esquerdaEscolhida.length === 5
+      ) {
+        break;
+      }
+    }
+
+    if (
+      esquerdaEscolhida.length === 5
+    ) {
+
+      return {
+
+        esquerda:
+          esquerdaEscolhida,
+
+        direita:
+          embaralhar(
+            direitaEscolhida
+          ),
+      };
+    }
+
+    tentativas++;
+  }
+
+  // fallback
   return {
-    esquerda: esquerdaEscolhida,
-    direita: embaralhar(direitaEscolhida),
+
+    esquerda:
+      palavrasEsquerda.slice(0, 5),
+
+    direita:
+      palavrasDireita.slice(0, 5),
   };
 }
 
@@ -54,247 +135,568 @@ function gerarRodadaIA(nivelAluno = 3) {
 export default function Index() {
 
   const router = useRouter();
-  const params = useLocalSearchParams();
 
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const params =
+    useLocalSearchParams();
 
-  const [nivelAluno, setNivelAluno] = useState(3);
+  const faseAtual =
+    Array.isArray(params.faseId)
+      ? params.faseId[0]
+      : params.faseId || "1";
 
-  // ✅ FIX PRINCIPAL AQUI
-  const [rodada, setRodada] = useState({
-    esquerda: [],
-    direita: []
-  });
+  const finalizandoRef =
+    useRef(false);
 
-  const [selecionadoEsquerda, setSelecionadoEsquerda] = useState(null);
-  const [selecionadoDireita, setSelecionadoDireita] = useState(null);
+  const [rodada, setRodada] =
+    useState({
+      esquerda: [],
+      direita: []
+    });
 
-  const [acertos, setAcertos] = useState([]);
-  const [bloqueados, setBloqueados] = useState([]);
+  const [
+    selecionadoEsquerda,
+    setSelecionadoEsquerda
+  ] = useState(null);
 
-  const [erro, setErro] = useState(false);
-  const [bloqueado, setBloqueado] = useState(false);
+  const [
+    selecionadoDireita,
+    setSelecionadoDireita
+  ] = useState(null);
 
-  const [acertosFase, setAcertosFase] = useState(0);
-  const [errosFase, setErrosFase] = useState(0);
+  const [acertos,
+    setAcertos] = useState([]);
 
-  const progresso = acertos.length / 5;
+  const [bloqueados,
+    setBloqueados] = useState([]);
 
-  // =========================
-  // 📥 carregar perfil
-  // =========================
-  useEffect(() => {
-    const carregar = async () => {
+  const [erro,
+    setErro] = useState(false);
 
-      const perfil = await carregarPerfil();
-      const nivel = perfil?.rimas?.nivel || 3;
+  const [bloqueado,
+    setBloqueado] = useState(false);
 
-      setNivelAluno(nivel);
+  const [errosFase,
+    setErrosFase] = useState(0);
 
-      const r = gerarRodadaIA(nivel);
-
-      // 🔥 fallback seguro se vier incompleto
-      if (!r.esquerda?.length || !r.direita?.length) {
-        setRodada(gerarRodadaIA(nivel));
-      } else {
-        setRodada(r);
-      }
-    };
-
-    carregar();
-  }, []);
+  const progresso =
+    acertos.length / 5;
 
   // =========================
-  // 🎬 fade
+  // 🔄 recarregar tela
   // =========================
-  useEffect(() => {
-    fadeAnim.setValue(0);
+  useFocusEffect(
 
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 600,
-      useNativeDriver: true,
-    }).start();
-  }, []);
+    useCallback(() => {
+
+      let ativo = true;
+      const faseDaRodada = faseAtual;
+
+      // reset geral
+      setRodada({
+        esquerda: [],
+        direita: []
+      });
+
+      setSelecionadoEsquerda(null);
+
+      setSelecionadoDireita(null);
+
+      setAcertos([]);
+
+      setBloqueados([]);
+
+      setErro(false);
+
+      setBloqueado(false);
+
+      setErrosFase(0);
+
+      // carregar rodada
+      const carregar = async () => {
+
+        try {
+
+          const perfil =
+            await carregarPerfil();
+
+          const nivel =
+            perfil?.rimas?.nivel || 3;
+
+          const novaRodada =
+            gerarRodadaIA(nivel);
+
+          if (!ativo || faseDaRodada !== faseAtual) return;
+
+          finalizandoRef.current = false;
+
+          setRodada(novaRodada);
+
+        } catch (err) {
+
+          console.log(
+            "Erro carregando:",
+            err
+          );
+        }
+      };
+
+      carregar();
+
+      return () => {
+
+        ativo = false;
+      };
+
+    }, [faseAtual])
+
+  );
 
   // =========================
-  // 🧪 loading seguro (FIX REAL DA TELA BRANCA)
+  // ⏳ loading
   // =========================
   const carregando =
+
     !rodada?.esquerda?.length ||
+
     !rodada?.direita?.length;
 
-  // =========================
-  // 🖱️ seleção ESQ
-  // =========================
-  const selecionarEsquerda = (item) => {
-    if (bloqueado) return;
-    if (bloqueados.includes(item.id)) return;
+  useEffect(() => {
+    if (carregando) return;
 
-    setSelecionadoEsquerda(prev =>
-      prev?.id === item.id ? null : item
-    );
-  };
+    lerTextoSeAtivo("Conecte as palavras que rimam.");
+
+    return () => {
+      pararLeitura();
+    };
+  }, [carregando]);
 
   // =========================
-  // 🖱️ seleção DIR
+  // 🖱️ seleção esquerda
   // =========================
-  const selecionarDireita = (item) => {
-    if (bloqueado) return;
-    if (bloqueados.includes(item.id)) return;
+  const selecionarEsquerda =
+    (item) => {
 
-    setSelecionadoDireita(prev =>
-      prev?.id === item.id ? null : item
-    );
-  };
+      if (
+
+        bloqueado ||
+
+        bloqueados.includes(item.id)
+
+      ) return;
+
+      setSelecionadoEsquerda(
+        prev =>
+
+          prev?.id === item.id
+            ? null
+            : item
+      );
+    };
 
   // =========================
-  // 🧠 verificação
+  // 🖱️ seleção direita
   // =========================
-  const verificar = () => {
+  const selecionarDireita =
+    (item) => {
 
-    if (!selecionadoEsquerda || !selecionadoDireita || bloqueado) return;
+      if (
+
+        bloqueado ||
+
+        bloqueados.includes(item.id)
+
+      ) return;
+
+      setSelecionadoDireita(
+        prev =>
+
+          prev?.id === item.id
+            ? null
+            : item
+      );
+    };
+
+  // =========================
+  // 🧠 verificar
+  // =========================
+  const verificar = useCallback(() => {
+
+    if (
+
+      !selecionadoEsquerda ||
+
+      !selecionadoDireita ||
+
+      bloqueado
+
+    ) return;
 
     setBloqueado(true);
 
-    if (selecionadoEsquerda.grupo === selecionadoDireita.grupo) {
+    // ✅ acertou
+    if (
+
+      selecionadoEsquerda.grupo ===
+      selecionadoDireita.grupo
+
+    ) {
 
       setBloqueados(prev => [
+
         ...prev,
+
         selecionadoEsquerda.id,
+
         selecionadoDireita.id
+
       ]);
 
-      setAcertos(prev => [...prev, selecionadoEsquerda.grupo]);
-      setAcertosFase(prev => prev + 1);
+      setAcertos(prev => [
+
+        ...prev,
+
+        selecionadoEsquerda.grupo
+
+      ]);
 
       setSelecionadoEsquerda(null);
+
       setSelecionadoDireita(null);
+
       setBloqueado(false);
 
     } else {
 
+      // ❌ errou
       setErro(true);
-      setErrosFase(prev => prev + 1);
+
+      setErrosFase(
+        prev => prev + 1
+      );
 
       setTimeout(() => {
+
         setErro(false);
+
         setSelecionadoEsquerda(null);
+
         setSelecionadoDireita(null);
+
         setBloqueado(false);
-      }, 700);
-    }
-  };
 
-  useEffect(() => {
-    if (selecionadoEsquerda && selecionadoDireita) {
-      const timer = setTimeout(verificar, 200);
-      return () => clearTimeout(timer);
+      }, 600);
     }
-  }, [selecionadoEsquerda, selecionadoDireita]);
+  }, [
+    selecionadoEsquerda,
+    selecionadoDireita,
+    bloqueado
+  ]);
 
   // =========================
-  // 🎯 final
+  // 🔄 auto verificar
   // =========================
   useEffect(() => {
-    if (acertos.length === 5) {
 
-      const faseAtual = Array.isArray(params.faseId)
-        ? params.faseId[0]
-        : params.faseId || "1";
+    if (
 
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 400,
-        useNativeDriver: true,
-      }).start(async () => {
+      selecionadoEsquerda &&
 
-        await atualizarPerfil("rimas", acertosFase, errosFase);
+      selecionadoDireita
 
-        setTimeout(() => {
-          router.replace({
-            pathname: "/",
-            params: { faseConcluida: String(faseAtual) }
-          });
-        }, 200);
-      });
+    ) {
+
+      const timer =
+        setTimeout(
+          verificar,
+          200
+        );
+
+      return () =>
+        clearTimeout(timer);
     }
-  }, [acertos]);
+
+  }, [
+
+    selecionadoEsquerda,
+
+    selecionadoDireita,
+
+    verificar
+
+  ]);
 
   // =========================
-  // 🧪 loading UI
+  // 🎯 final da fase
+  // =========================
+  useEffect(() => {
+
+    if (
+      acertos.length === 5 &&
+      !finalizandoRef.current
+    ) {
+
+      finalizandoRef.current = true;
+
+      const finalizar = async () => {
+
+        try {
+
+          await atualizarPerfil(
+            "rimas",
+            acertos.length,
+            errosFase
+          );
+
+        } catch (err) {
+
+          console.log(
+            "Erro salvando:",
+            err
+          );
+        }
+
+        router.replace({
+          pathname: "/",
+          params: {
+            faseConcluida:
+              String(faseAtual)
+          }
+        });
+      };
+
+      finalizar();
+    }
+
+  }, [
+    acertos.length,
+    errosFase,
+    faseAtual,
+    router
+  ]);
+
+  // =========================
+  // ⏳ loading
   // =========================
   if (carregando) {
+
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Carregando rimas...</Text>
+
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center"
+        }}
+      >
+
+        <Text>
+          Carregando rimas...
+        </Text>
+
       </View>
     );
   }
 
   // =========================
-  // 🎨 estilos
+  // 🎨 estilos esquerda
   // =========================
-  const estiloEsquerda = (item) => {
+  const estiloEsquerda =
+    (item) => {
 
-    if (bloqueados.includes(item.id)) return styles.itemDesativado;
+      if (
+        bloqueados.includes(item.id)
+      ) {
 
-    if (selecionadoEsquerda?.id === item.id)
-      return erro ? styles.itemErro : styles.itemSelecionado;
+        return styles.itemDesativado;
+      }
 
-    return styles.itemNormal;
-  };
+      if (
+        selecionadoEsquerda?.id ===
+        item.id
+      ) {
 
-  const estiloDireita = (item) => {
+        return erro
 
-    if (bloqueados.includes(item.id)) return styles.itemDesativado;
+          ? styles.itemErro
 
-    if (selecionadoDireita?.id === item.id)
-      return erro ? styles.itemErro : styles.itemSelecionado;
+          : styles.itemSelecionado;
+      }
 
-    return styles.itemNormal;
-  };
+      return styles.itemNormal;
+    };
+
+  // =========================
+  // 🎨 estilos direita
+  // =========================
+  const estiloDireita =
+    (item) => {
+
+      if (
+        bloqueados.includes(item.id)
+      ) {
+
+        return styles.itemDesativado;
+      }
+
+      if (
+        selecionadoDireita?.id ===
+        item.id
+      ) {
+
+        return erro
+
+          ? styles.itemErro
+
+          : styles.itemSelecionado;
+      }
+
+      return styles.itemNormal;
+    };
 
   // =========================
   // 🖥️ UI
   // =========================
   return (
-    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
 
-      <Text style={styles.textoPergunta}>
-        Conecte as rimas
-      </Text>
+    <View style={styles.rimasContainer}>
 
-      <Text>{acertos.length} / 5</Text>
+      <View style={styles.rimasContent}>
 
-      <View style={styles.barraContainer}>
-        <View style={[styles.barraProgresso, { width: `${progresso * 100}%` }]} />
-      </View>
+        <Text
+          style={
+            styles.textoPergunta
+          }
+        >
+          Conecte as rimas
+        </Text>
 
-      <View style={{ flexDirection: "row", marginTop: 20 }}>
+        <Text>
+          {acertos.length} / 5
+        </Text>
 
-        <View style={{ flex: 1 }}>
-          {rodada.esquerda.map(item => (
-            <View key={item.id} style={estiloEsquerda(item)}>
-              <TouchableOpacity onPress={() => selecionarEsquerda(item)}>
-                <Text style={styles.texto}>{item.texto}</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
+        <View
+          style={
+            styles.barraContainer
+          }
+        >
+
+          <View
+            style={[
+
+              styles.barraProgresso,
+
+              {
+                width:
+                  `${progresso * 100}%`
+              }
+
+            ]}
+          />
+
         </View>
 
-        <View style={{ flex: 1 }}>
-          {rodada.direita.map(item => (
-            <View key={item.id} style={estiloDireita(item)}>
-              <TouchableOpacity onPress={() => selecionarDireita(item)}>
-                <Text style={styles.texto}>{item.texto}</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
+        <View style={styles.rimasColunas}>
+
+          {/* ESQUERDA */}
+          <View style={styles.rimasColuna}>
+
+            {rodada.esquerda.map(
+              item => (
+
+              <Pressable
+
+                key={item.id}
+                hitSlop={6}
+                accessibilityRole="button"
+
+                style={({ pressed }) => [
+
+                  estiloEsquerda(item),
+
+                  pressed && {
+                    opacity: 0.8
+                  }
+
+                ]}
+
+                onPress={() =>
+                  {
+                    lerTextoSeAtivo(item.texto);
+                    selecionarEsquerda(item);
+                  }
+                }
+              >
+
+                <Text
+                  style={
+                    styles.texto
+                  }
+                >
+                  {item.texto}
+                </Text>
+
+              </Pressable>
+
+            ))}
+
+          </View>
+
+          {/* DIREITA */}
+          <View style={styles.rimasColuna}>
+
+            {rodada.direita.map(
+              item => (
+
+              <Pressable
+
+                key={item.id}
+                hitSlop={6}
+                accessibilityRole="button"
+
+                style={({ pressed }) => [
+
+                  estiloDireita(item),
+
+                  pressed && {
+                    opacity: 0.8
+                  }
+
+                ]}
+
+                onPress={() =>
+                  {
+                    lerTextoSeAtivo(item.texto);
+                    selecionarDireita(item);
+                  }
+                }
+              >
+
+                <Text
+                  style={
+                    styles.texto
+                  }
+                >
+                  {item.texto}
+                </Text>
+
+              </Pressable>
+
+            ))}
+
+          </View>
+
         </View>
+
+        <Text
+          style={
+            styles.textoRodape
+          }
+        >
+          Jesus é o melhor professor de todos os tempos!
+        </Text>
 
       </View>
 
-    </Animated.View>
+    </View>
   );
 }

@@ -1,11 +1,12 @@
-import { Text, View, TouchableOpacity, Animated } from "react-native";
-import { useState, useCallback, useEffect } from "react";
+import { Text, View, TouchableOpacity, Animated, ScrollView } from "react-native";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 import { styles } from "./styles";
 import { perguntasMatematica } from "./perguntasMatematicaQuiz4";
 import { atualizarPerfil, carregarPerfil } from "./utils/perfilAluno";
+import { lerTextoSeAtivo, pararLeitura } from "./utils/leituraPerguntas";
 
 // =========================
 // 🔀 EMBARALHAR
@@ -15,20 +16,39 @@ function embaralhar(lista) {
 }
 
 // =========================
-// 🧠 IA (níveis 1–10)
+// 🧠 IA (AGORA SOBE DIFICULDADE)
 // =========================
 function selecionarPerguntasIA(lista, nivelAluno = 3, quantidade = 5) {
-  const abaixo = lista.filter(p => p.nivel === nivelAluno - 1);
-  const base = lista.filter(p => p.nivel === nivelAluno);
-  const acima = lista.filter(p => p.nivel === nivelAluno + 1);
+  const niveis = lista.map(p => p.nivel);
+  const menorNivel = Math.min(...niveis);
+  const maiorNivel = Math.max(...niveis);
+  const nivelSeguro = Math.max(
+    menorNivel,
+    Math.min(nivelAluno, maiorNivel)
+  );
+
+  const base = lista.filter(p => p.nivel === nivelSeguro);
+  const acima = lista.filter(p => p.nivel === nivelSeguro + 1);
+  const acima2 = lista.filter(p => p.nivel === nivelSeguro + 2);
 
   const resultado = [];
 
-  resultado.push(...embaralhar(base).slice(0, 3));
-  resultado.push(...embaralhar(acima).slice(0, 1));
-  resultado.push(...embaralhar(abaixo).slice(0, 1));
+  resultado.push(...embaralhar(base).slice(0, 2));
+  resultado.push(...embaralhar(acima).slice(0, 2));
+  resultado.push(...embaralhar(acima2).slice(0, 1));
 
-  return embaralhar(resultado).slice(0, quantidade);
+  const perguntas = embaralhar(resultado);
+  const perguntasUsadas = new Set(perguntas);
+
+  if (perguntas.length < quantidade) {
+    const extras = embaralhar(lista).filter(
+      pergunta => !perguntasUsadas.has(pergunta)
+    );
+
+    perguntas.push(...extras.slice(0, quantidade - perguntas.length));
+  }
+
+  return perguntas.slice(0, quantidade);
 }
 
 export default function Index() {
@@ -37,6 +57,17 @@ export default function Index() {
   const params = useLocalSearchParams();
 
   const fadeAnim = useState(new Animated.Value(1))[0];
+
+  // 🔥 animação individual
+  const scaleAnims = useRef([
+    new Animated.Value(1),
+    new Animated.Value(1),
+    new Animated.Value(1),
+    new Animated.Value(1),
+  ]).current;
+
+  const shakeAnim = useRef(new Animated.Value(0)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
 
   const [nivelAluno, setNivelAluno] = useState(3);
   const [perguntasSorteadas, setPerguntasSorteadas] = useState([]);
@@ -52,6 +83,16 @@ export default function Index() {
   const ultimaPergunta = perguntaAtual === perguntasSorteadas.length - 1;
 
   const progresso = (perguntaAtual + 1) / (perguntasSorteadas.length || 1);
+
+  useEffect(() => {
+    if (!perguntaAtualObj) return;
+
+    lerTextoSeAtivo(perguntaAtualObj.pergunta);
+
+    return () => {
+      pararLeitura();
+    };
+  }, [perguntaAtualObj]);
 
   // =========================
   // 📥 CARREGAR PERFIL
@@ -76,7 +117,7 @@ export default function Index() {
   }, []);
 
   // =========================
-  // 🔄 RESET AO ENTRAR
+  // 🔄 RESET
   // =========================
   useFocusEffect(
     useCallback(() => {
@@ -99,6 +140,40 @@ export default function Index() {
   );
 
   // =========================
+  // 🎯 ANIMAÇÕES
+  // =========================
+  const animarClique = (index) => {
+    Animated.sequence([
+      Animated.timing(scaleAnims[index], {
+        toValue: 0.92,
+        duration: 80,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnims[index], {
+        toValue: 1,
+        duration: 80,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const animarErro = () => {
+    Animated.sequence([
+      Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: -10, duration: 50, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: 6, duration: 50, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
+    ]).start();
+  };
+
+  const animarAcerto = () => {
+    Animated.sequence([
+      Animated.timing(pulseAnim, { toValue: 1.1, duration: 150, useNativeDriver: true }),
+      Animated.timing(pulseAnim, { toValue: 1, duration: 150, useNativeDriver: true }),
+    ]).start();
+  };
+
+  // =========================
   // 👆 SELEÇÃO
   // =========================
   const selecionarResposta = (resposta) => {
@@ -110,7 +185,7 @@ export default function Index() {
   };
 
   // =========================
-  // 🧠 CONFIRMAR RESPOSTA
+  // 🧠 CONFIRMAR
   // =========================
   const confirmarResposta = () => {
 
@@ -122,8 +197,13 @@ export default function Index() {
 
       const acertou = respostaSelecionada === perguntaAtualObj.correta;
 
-      if (acertou) setAcertos(prev => prev + 1);
-      else setErros(prev => prev + 1);
+      if (acertou) {
+        setAcertos(prev => prev + 1);
+        animarAcerto();
+      } else {
+        setErros(prev => prev + 1);
+        animarErro();
+      }
 
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
@@ -165,7 +245,7 @@ export default function Index() {
   };
 
   // =========================
-  // 🎨 ESTILO (VISUAL ORIGINAL RESTAURADO)
+  // 🎨 ESTILO
   // =========================
   const estiloBotao = (index) => {
 
@@ -187,14 +267,19 @@ export default function Index() {
   if (!perguntaAtualObj) return null;
 
   return (
-    <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
-
-      <View style={{
+    <Animated.View
+      style={{
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        margin: 20
-      }}>
+        opacity: fadeAnim,
+        transform: [{ translateX: shakeAnim }]
+      }}
+    >
+
+      <ScrollView
+        contentContainerStyle={styles.matematicaContainer}
+      >
+
+      <View style={styles.matematicaContent}>
 
         {/* 📊 BARRA */}
         <View style={styles.barraContainer}>
@@ -204,7 +289,7 @@ export default function Index() {
           ]} />
         </View>
 
-        <Text style={{ marginTop: 5 }}>
+        <Text style={styles.textoPequeno}>
           {perguntaAtual + 1} / {perguntasSorteadas.length}
         </Text>
 
@@ -212,64 +297,80 @@ export default function Index() {
           Pergunta {perguntaAtual + 1}: {perguntaAtualObj.pergunta}
         </Text>
 
-        {/* LINHA 1 */}
-        <View style={{ flexDirection: "row", marginTop: 20 }}>
-          {[0, 1].map(i => (
-            <View key={i} style={estiloBotao(i)}>
-              <TouchableOpacity onPress={() => selecionarResposta(i)}>
-                <Text style={styles.textoBotao}>
-                  {perguntaAtualObj.respostas[i]}
-                </Text>
-              </TouchableOpacity>
+        {/* LINHAS DE RESPOSTA */}
+        {[0,1,2,3].map((i) => (
+          i % 2 === 0 && (
+            <View
+              key={i}
+              style={styles.matematicaRespostasLinha}
+            >
+              {[i, i+1].map(j => (
+                <Animated.View
+                  key={j}
+                  style={[
+                    styles.matematicaRespostaWrapper,
+                    {
+                      transform: [{ scale: scaleAnims[j] }]
+                    }
+                  ]}
+                >
+                  <TouchableOpacity
+                    style={[
+                      estiloBotao(j),
+                      styles.botaoRespostaMatematica
+                    ]}
+                    onPress={() => {
+                      animarClique(j);
+                      lerTextoSeAtivo(perguntaAtualObj.respostas[j]);
+                      selecionarResposta(j);
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.textoBotao}>
+                      {perguntaAtualObj.respostas[j]}
+                    </Text>
+                  </TouchableOpacity>
+                </Animated.View>
+              ))}
             </View>
-          ))}
-        </View>
-
-        {/* LINHA 2 */}
-        <View style={{ flexDirection: "row" }}>
-          {[2, 3].map(i => (
-            <View key={i} style={estiloBotao(i)}>
-              <TouchableOpacity onPress={() => selecionarResposta(i)}>
-                <Text style={styles.textoBotao}>
-                  {perguntaAtualObj.respostas[i]}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          ))}
-        </View>
+          )
+        ))}
 
         {/* BOTÃO */}
-        <View style={[
-          styles.botaoConfirmarRespostaVazio,
+        <TouchableOpacity
+          onPress={confirmarResposta}
+          style={[
+            styles.botaoConfirmarBase,
+            styles.botaoConfirmarMatematica,
 
-          respostaSelecionada !== null && (
-            ultimaPergunta
-              ? styles.botaoFinalizar
-              : styles.botaoConfirmarRespostaSelecionada
-          ),
+            respostaSelecionada === null && !respostaConfirmada &&
+              styles.botaoConfirmarVazio,
 
-          respostaConfirmada && (
-            respostaSelecionada === perguntaAtualObj.correta
-              ? styles.botaoConfirmarRespostaCerta
-              : styles.botaoConfirmarRespostaErrada
-          )
-        ]}>
-          <TouchableOpacity onPress={confirmarResposta}>
-            <Text style={styles.textoBotao}>
-              {!respostaConfirmada
-                ? "Confirmar resposta"
-                : ultimaPergunta
-                  ? "Finalizar tarefa 🎉"
-                  : "Próxima pergunta"}
-            </Text>
-          </TouchableOpacity>
-        </View>
+            respostaSelecionada !== null && !respostaConfirmada &&
+              styles.botaoConfirmarSelecionado,
+
+            respostaConfirmada && respostaSelecionada === perguntaAtualObj.correta &&
+              styles.botaoConfirmarCerto,
+
+            respostaConfirmada && respostaSelecionada !== perguntaAtualObj.correta &&
+              styles.botaoConfirmarErrado,
+          ]}
+        >
+          <Text style={styles.textoBotao}>
+            {!respostaConfirmada
+              ? "Confirmar resposta"
+              : ultimaPergunta
+                ? "Finalizar tarefa 🎉"
+                : "Próxima pergunta"}
+          </Text>
+        </TouchableOpacity>
 
         <Text style={styles.textoRodape}>
           Jesus é o melhor professor de todos os tempos!
         </Text>
 
       </View>
+      </ScrollView>
     </Animated.View>
   );
 }

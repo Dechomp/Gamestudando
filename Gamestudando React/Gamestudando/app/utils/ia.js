@@ -1,23 +1,38 @@
-export function escolherProximaAtividade(dados) {
-  let piorArea = null;
-  let piorPrecisao = 1;
+export function escolherProximaAtividade(perfil) {
 
-  for (let area in dados) {
-    const total = dados[area].acertos + dados[area].erros;
+  if (!perfil) return { materia: "portugues" };
 
-    if (total === 0) continue;
+  const mat = perfil.matematica || { acertos: 0, erros: 0, ultimaPontuacao: 0.5 };
+  const port = perfil.portugues || { acertos: 0, erros: 0, ultimaPontuacao: 0.5 };
+  const rimas = perfil.rimas || { acertos: 0, erros: 0, ultimaPontuacao: 0.5 };
 
-    const precisao = dados[area].acertos / total;
+  const pesoMat = calcularPeso(mat);
+  const pesoPort = calcularPeso(port);
+  const pesoRimas = calcularPeso(rimas);
 
-    if (precisao < piorPrecisao) {
-      piorPrecisao = precisao;
-      piorArea = area;
-    }
-  }
+  const soma = pesoMat + pesoPort + pesoRimas;
 
-  if (piorPrecisao >= 0.7) {
-    return "proxima_fase_normal";
-  }
+  const rand = Math.random() * soma;
 
-  return piorArea;
+  if (rand < pesoMat) return { materia: "matematica" };
+  if (rand < pesoMat + pesoPort) return { materia: "portugues" };
+  return { materia: "rimas" };
+}
+
+function calcularPeso(dados) {
+  const total = dados.acertos + dados.erros;
+  const taxaGeral = total > 0 ? dados.acertos / total : 0.5;
+  const ultimaPontuacao =
+    typeof dados.ultimaPontuacao === "number"
+      ? dados.ultimaPontuacao
+      : taxaGeral;
+
+  const dificuldadeGeral = 1 - taxaGeral;
+  const dificuldadeRecente = 1 - ultimaPontuacao;
+
+  const pesoBase = 0.6;
+  const pesoDificuldadeGeral = dificuldadeGeral * 0.7;
+  const pesoDificuldadeRecente = dificuldadeRecente * 0.7;
+
+  return pesoBase + pesoDificuldadeGeral + pesoDificuldadeRecente;
 }

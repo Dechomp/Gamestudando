@@ -1,106 +1,130 @@
-import { Text, View, TouchableOpacity, Animated } from "react-native";
-import { useState, useCallback, useEffect } from "react";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { useFocusEffect } from "@react-navigation/native";
-import * as Haptics from "expo-haptics";
+import { Text, View, TouchableOpacity, Animated, ScrollView } from "react-native";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { styles } from "./styles";
 import { perguntasPortugues } from "./perguntasPortuguesQuiz4";
 import { atualizarPerfil, carregarPerfil } from "./utils/perfilAluno";
+import { lerTextoSeAtivo, pararLeitura } from "./utils/leituraPerguntas";
 
-// =========================
-// 🔀 EMBARALHAR
-// =========================
 function embaralhar(lista) {
   return [...lista].sort(() => Math.random() - 0.5);
 }
 
-// =========================
-// 🧠 IA (níveis 1–10)
-// =========================
 function selecionarPerguntasIA(lista, nivelAluno = 3, quantidade = 5) {
-  const abaixo = lista.filter(p => p.nivel === nivelAluno - 1);
-  const base = lista.filter(p => p.nivel === nivelAluno);
-  const acima = lista.filter(p => p.nivel === nivelAluno + 1);
+  const niveis = lista.map(p => p.nivel);
+  const menorNivel = Math.min(...niveis);
+  const maiorNivel = Math.max(...niveis);
+  const nivelSeguro = Math.max(
+    menorNivel,
+    Math.min(nivelAluno, maiorNivel)
+  );
 
-  const resultado = [];
+  const base = lista.filter(p => p.nivel === nivelSeguro);
+  const acima = lista.filter(p => p.nivel === nivelSeguro + 1);
+  const acima2 = lista.filter(p => p.nivel === nivelSeguro + 2);
 
-  resultado.push(...embaralhar(base).slice(0, 3));
-  resultado.push(...embaralhar(acima).slice(0, 1));
-  resultado.push(...embaralhar(abaixo).slice(0, 1));
+  const perguntas = embaralhar([
+    ...embaralhar(base).slice(0, 2),
+    ...embaralhar(acima).slice(0, 2),
+    ...embaralhar(acima2).slice(0, 1),
+  ]);
 
-  return embaralhar(resultado).slice(0, quantidade);
+  const perguntasUsadas = new Set(perguntas);
+
+  if (perguntas.length < quantidade) {
+    const extras = embaralhar(lista).filter(
+      pergunta => !perguntasUsadas.has(pergunta)
+    );
+
+    perguntas.push(...extras.slice(0, quantidade - perguntas.length));
+  }
+
+  return perguntas.slice(0, quantidade);
 }
 
 export default function Index() {
-
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  const fadeAnim = useState(new Animated.Value(1))[0];
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const scaleAnims = useRef([
+    new Animated.Value(1),
+    new Animated.Value(1),
+    new Animated.Value(1),
+    new Animated.Value(1),
+  ]).current;
 
-  const [nivelAluno, setNivelAluno] = useState(3);
+  const finalizandoRef = useRef(false);
+
   const [perguntasSorteadas, setPerguntasSorteadas] = useState([]);
-
   const [respostaSelecionada, setRespostaSelecionada] = useState(null);
   const [respostaConfirmada, setRespostaConfirmada] = useState(false);
   const [perguntaAtual, setPerguntaAtual] = useState(0);
-
   const [acertos, setAcertos] = useState(0);
   const [erros, setErros] = useState(0);
 
   const perguntaAtualObj = perguntasSorteadas[perguntaAtual];
   const ultimaPergunta = perguntaAtual === perguntasSorteadas.length - 1;
-
   const progresso = (perguntaAtual + 1) / (perguntasSorteadas.length || 1);
 
-  // =========================
-  // 📥 CARREGAR PERFIL
-  // =========================
   useEffect(() => {
-    const carregarNivel = async () => {
-      const perfil = await carregarPerfil();
+    if (!perguntaAtualObj) return;
 
-      const nivel = perfil?.portugues?.nivel || 3;
-      setNivelAluno(nivel);
+    lerTextoSeAtivo(perguntaAtualObj.pergunta);
 
-      const perguntas = selecionarPerguntasIA(
-        perguntasPortugues,
-        nivel,
-        5
-      );
-
-      setPerguntasSorteadas(perguntas);
+    return () => {
+      pararLeitura();
     };
+  }, [perguntaAtualObj]);
 
-    carregarNivel();
-  }, []);
+  const faseAtual = Array.isArray(params.faseId)
+    ? params.faseId[0]
+    : params.faseId || "1";
 
-  // =========================
-  // 🔄 RESET AO ENTRAR
-  // =========================
   useFocusEffect(
     useCallback(() => {
+      let ativo = true;
 
-      setRespostaSelecionada(null);
-      setRespostaConfirmada(false);
-      setPerguntaAtual(0);
+      const carregar = async () => {
+        const perfil = await carregarPerfil();
+        const nivel = perfil?.portugues?.nivel || 3;
+        const perguntas = selecionarPerguntasIA(perguntasPortugues, nivel, 5);
 
-      const perguntas = selecionarPerguntasIA(
-        perguntasPortugues,
-        nivelAluno,
-        5
-      );
+        if (!ativo) return;
 
-      setPerguntasSorteadas(perguntas);
+        finalizandoRef.current = false;
+        fadeAnim.setValue(1);
+        setPerguntasSorteadas(perguntas);
+        setRespostaSelecionada(null);
+        setRespostaConfirmada(false);
+        setPerguntaAtual(0);
+        setAcertos(0);
+        setErros(0);
+      };
 
-      fadeAnim.setValue(1);
+      carregar();
 
-    }, [nivelAluno])
+      return () => {
+        ativo = false;
+      };
+    }, [fadeAnim])
   );
 
-  // =========================
-  // 👆 SELEÇÃO
-  // =========================
+  const animarClique = (index) => {
+    Animated.sequence([
+      Animated.timing(scaleAnims[index], {
+        toValue: 0.94,
+        duration: 80,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnims[index], {
+        toValue: 1,
+        duration: 80,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
   const selecionarResposta = (resposta) => {
     if (respostaConfirmada) return;
 
@@ -109,167 +133,152 @@ export default function Index() {
     );
   };
 
-  // =========================
-  // 🧠 CONFIRMAR RESPOSTA
-  // =========================
-  const confirmarResposta = () => {
-
+  const confirmarResposta = async () => {
     if (respostaSelecionada === null && !respostaConfirmada) return;
 
     if (!respostaConfirmada) {
-
-      setRespostaConfirmada(true);
-
       const acertou = respostaSelecionada === perguntaAtualObj.correta;
 
-      if (acertou) setAcertos(prev => prev + 1);
-      else setErros(prev => prev + 1);
+      if (acertou) {
+        setAcertos(prev => prev + 1);
+      } else {
+        setErros(prev => prev + 1);
+      }
 
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      setRespostaConfirmada(true);
+      return;
     }
 
-    else {
-
+    if (!ultimaPergunta) {
       setRespostaSelecionada(null);
       setRespostaConfirmada(false);
-
-      if (!ultimaPergunta) {
-        setPerguntaAtual(prev => prev + 1);
-      }
-
-      else {
-
-        Haptics.notificationAsync(
-          Haptics.NotificationFeedbackType.Success
-        );
-
-        const faseAtual = Array.isArray(params.faseId)
-          ? params.faseId[0]
-          : params.faseId || "1";
-
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: true,
-        }).start(async () => {
-
-          await atualizarPerfil("portugues", acertos, erros);
-
-          router.replace({
-            pathname: "/",
-            params: { faseConcluida: String(faseAtual) }
-          });
-        });
-      }
+      setPerguntaAtual(prev => prev + 1);
+      return;
     }
+
+    if (finalizandoRef.current) return;
+
+    finalizandoRef.current = true;
+
+    const acertouUltima = respostaSelecionada === perguntaAtualObj.correta;
+    const totalAcertos = acertos + (acertouUltima ? 0 : 0);
+    const totalErros = erros + (acertouUltima ? 0 : 0);
+
+    try {
+      await atualizarPerfil("portugues", totalAcertos, totalErros);
+    } catch (error) {
+      console.log("Erro salvando portugues:", error);
+    }
+
+    router.replace({
+      pathname: "/",
+      params: { faseConcluida: String(faseAtual) },
+    });
   };
 
-  // =========================
-  // 🎨 ESTILO (VISUAL ORIGINAL RESTAURADO)
-  // =========================
   const estiloBotao = (index) => {
-
     if (!respostaConfirmada) {
       return respostaSelecionada === index
         ? styles.botaoRespostaSelecionada
         : styles.botaoResposta;
     }
 
-    if (index === perguntaAtualObj.correta)
-      return styles.botaoRespostaCerta;
-
-    if (index === respostaSelecionada)
-      return styles.botaoRespostaErrada;
-
+    if (index === perguntaAtualObj.correta) return styles.botaoRespostaCerta;
+    if (index === respostaSelecionada) return styles.botaoRespostaErrada;
     return styles.botaoResposta;
   };
 
-  if (!perguntaAtualObj) return null;
+  if (!perguntaAtualObj) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Carregando portugues...</Text>
+      </View>
+    );
+  }
 
   return (
     <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+      <ScrollView contentContainerStyle={styles.matematicaContainer}>
+        <View style={styles.matematicaContent}>
+          <View style={styles.barraContainer}>
+            <View
+              style={[
+                styles.barraProgresso,
+                { width: `${progresso * 100}%` },
+              ]}
+            />
+          </View>
 
-      <View style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        margin: 20
-      }}>
+          <Text style={styles.textoPequeno}>
+            {perguntaAtual + 1} / {perguntasSorteadas.length}
+          </Text>
 
-        {/* 📊 BARRA */}
-        <View style={styles.barraContainer}>
-          <View style={[
-            styles.barraProgresso,
-            { width: `${progresso * 100}%` }
-          ]} />
-        </View>
+          <Text style={styles.textoPergunta}>
+            Pergunta {perguntaAtual + 1}: {perguntaAtualObj.pergunta}
+          </Text>
 
-        <Text style={{ marginTop: 5 }}>
-          {perguntaAtual + 1} / {perguntasSorteadas.length}
-        </Text>
-
-        <Text style={styles.textoPergunta}>
-          Pergunta {perguntaAtual + 1}: {perguntaAtualObj.pergunta}
-        </Text>
-
-        {/* LINHA 1 */}
-        <View style={{ flexDirection: "row", marginTop: 20 }}>
-          {[0, 1].map(i => (
-            <View key={i} style={estiloBotao(i)}>
-              <TouchableOpacity onPress={() => selecionarResposta(i)}>
-                <Text style={styles.textoBotao}>
-                  {perguntaAtualObj.respostas[i]}
-                </Text>
-              </TouchableOpacity>
+          {[0, 2].map(i => (
+            <View key={i} style={styles.matematicaRespostasLinha}>
+              {[i, i + 1].map(j => (
+                <Animated.View
+                  key={j}
+                  style={[
+                    styles.matematicaRespostaWrapper,
+                    { transform: [{ scale: scaleAnims[j] }] },
+                  ]}
+                >
+                  <TouchableOpacity
+                    style={[
+                      estiloBotao(j),
+                      styles.botaoRespostaMatematica,
+                    ]}
+                    onPress={() => {
+                      animarClique(j);
+                      lerTextoSeAtivo(perguntaAtualObj.respostas[j]);
+                      selecionarResposta(j);
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.textoBotao}>
+                      {perguntaAtualObj.respostas[j]}
+                    </Text>
+                  </TouchableOpacity>
+                </Animated.View>
+              ))}
             </View>
           ))}
-        </View>
 
-        {/* LINHA 2 */}
-        <View style={{ flexDirection: "row" }}>
-          {[2, 3].map(i => (
-            <View key={i} style={estiloBotao(i)}>
-              <TouchableOpacity onPress={() => selecionarResposta(i)}>
-                <Text style={styles.textoBotao}>
-                  {perguntaAtualObj.respostas[i]}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          ))}
-        </View>
-
-        {/* BOTÃO */}
-        <View style={[
-          styles.botaoConfirmarRespostaVazio,
-
-          respostaSelecionada !== null && (
-            ultimaPergunta
-              ? styles.botaoFinalizar
-              : styles.botaoConfirmarRespostaSelecionada
-          ),
-
-          respostaConfirmada && (
-            respostaSelecionada === perguntaAtualObj.correta
-              ? styles.botaoConfirmarRespostaCerta
-              : styles.botaoConfirmarRespostaErrada
-          )
-        ]}>
-          <TouchableOpacity onPress={confirmarResposta}>
+          <TouchableOpacity
+            onPress={confirmarResposta}
+            style={[
+              styles.botaoConfirmarBase,
+              styles.botaoConfirmarMatematica,
+              respostaSelecionada === null && !respostaConfirmada &&
+                styles.botaoConfirmarVazio,
+              respostaSelecionada !== null && !respostaConfirmada &&
+                styles.botaoConfirmarSelecionado,
+              respostaConfirmada &&
+                respostaSelecionada === perguntaAtualObj.correta &&
+                styles.botaoConfirmarCerto,
+              respostaConfirmada &&
+                respostaSelecionada !== perguntaAtualObj.correta &&
+                styles.botaoConfirmarErrado,
+            ]}
+          >
             <Text style={styles.textoBotao}>
               {!respostaConfirmada
                 ? "Confirmar resposta"
                 : ultimaPergunta
-                  ? "Finalizar tarefa 🎉"
-                  : "Próxima pergunta"}
+                  ? "Finalizar tarefa"
+                  : "Proxima pergunta"}
             </Text>
           </TouchableOpacity>
+
+          <Text style={styles.textoRodape}>
+            Jesus e o melhor professor de todos os tempos!
+          </Text>
         </View>
-
-        <Text style={styles.textoRodape}>
-          Jesus é o melhor professor de todos os tempos!
-        </Text>
-
-      </View>
+      </ScrollView>
     </Animated.View>
   );
 }

@@ -8,6 +8,7 @@ import {
 } from "react-native";
 
 import { useRouter } from "expo-router";
+import { styles } from "./styles";
 
 import {
   carregarPerfil,
@@ -37,7 +38,6 @@ export default function PerfilEditar() {
 
     Alert.alert("Sucesso", "Dados atualizados!");
 
-    // 🔥 navegação garantida
     setTimeout(() => {
       router.replace("/");
     }, 200);
@@ -61,7 +61,6 @@ export default function PerfilEditar() {
 
             Alert.alert("Resetado!", "Perfil limpo com sucesso.");
 
-            // 🔥 navegação garantida
             setTimeout(() => {
               router.replace("/");
             }, 200);
@@ -72,48 +71,32 @@ export default function PerfilEditar() {
   };
 
   return (
-    <View style={{ padding: 20 }}>
+    <View style={styles.telaComTopoSeguro}>
 
-      <Text style={{ fontSize: 22, marginBottom: 10 }}>
+      <Text style={styles.editarTitulo}>
         Editar Perfil
       </Text>
 
-      <Text>Nome</Text>
+      <Text style={styles.label}>Nome</Text>
+
       <TextInput
         value={nome}
         onChangeText={setNome}
-        style={{
-          borderWidth: 1,
-          borderColor: "#ccc",
-          borderRadius: 8,
-          padding: 10,
-          marginBottom: 10
-        }}
+        style={styles.input}
       />
 
       <TouchableOpacity
         onPress={salvar}
-        style={{
-          backgroundColor: "#4CAF50",
-          padding: 10,
-          borderRadius: 8,
-          alignItems: "center",
-          marginBottom: 10
-        }}
+        style={styles.botaoSalvar}
       >
-        <Text style={{ color: "#fff" }}>Salvar</Text>
+        <Text style={styles.textoBotao}>Salvar</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         onPress={resetar}
-        style={{
-          backgroundColor: "#F44336",
-          padding: 10,
-          borderRadius: 8,
-          alignItems: "center"
-        }}
+        style={styles.botaoResetar}
       >
-        <Text style={{ color: "#fff" }}>Resetar Perfil</Text>
+        <Text style={styles.textoBotao}>Resetar Perfil</Text>
       </TouchableOpacity>
 
     </View>

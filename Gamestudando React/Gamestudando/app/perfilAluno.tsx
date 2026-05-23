@@ -1,18 +1,17 @@
 import React, { useState, useCallback } from "react";
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { Alert, View, Text, ScrollView, TouchableOpacity, Switch } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
 
-import { carregarPerfil } from "./utils/perfilAluno";
+import { carregarPerfil, atualizarConfiguracoes } from "./utils/perfilAluno";
+import { criarOuAtualizarAlunoFirebase } from "./utils/firebasePerfil";
 import { PieChart } from "react-native-gifted-charts";
+import { styles } from "./styles";
 
 export default function PerfilAluno() {
 
   const router = useRouter();
   const [perfil, setPerfil] = useState(null);
 
-  // =========================
-  // 📥 carregar sempre que voltar
-  // =========================
   const carregar = async () => {
     const dados = await carregarPerfil();
     setPerfil(dados);
@@ -26,15 +25,14 @@ export default function PerfilAluno() {
 
   if (!perfil) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Carregando perfil...</Text>
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>
+          Carregando perfil...
+        </Text>
       </View>
     );
   }
 
-  // =========================
-  // 🧮 AGRUPAMENTO
-  // =========================
   const matematica = perfil.matematica;
 
   const portugues = {
@@ -52,19 +50,50 @@ export default function PerfilAluno() {
     { value: erros, color: "#F44336" }
   ];
 
-  // =========================
-  // 🖥️ UI
-  // =========================
-  return (
-    <ScrollView contentContainerStyle={{ padding: 20 }}>
+  const leituraAtiva =
+    perfil?.configuracoes?.leituraPerguntasAtiva !== false;
 
-      <Text style={{ fontSize: 26, fontWeight: "bold", marginBottom: 20 }}>
+  const alternarLeitura = async (valor) => {
+    const perfilAtualizado = await atualizarConfiguracoes({
+      leituraPerguntasAtiva: valor
+    });
+
+    if (perfilAtualizado) {
+      setPerfil(perfilAtualizado);
+    }
+  };
+
+  const sincronizarFirebaseTeste = async () => {
+    try {
+      await criarOuAtualizarAlunoFirebase("aluno-teste-local", perfil);
+      Alert.alert("Firebase", "Perfil enviado para o Firestore.");
+    } catch (error) {
+      console.log("Erro sincronizando Firebase:", error);
+      Alert.alert("Firebase", "Nao foi possivel enviar o perfil.");
+    }
+  };
+
+  return (
+    <ScrollView contentContainerStyle={styles.perfilContainer}>
+
+      <Text style={styles.perfilTitulo}>
         📊 Relatório do Aluno
       </Text>
 
-      <Text style={{ marginBottom: 15 }}>
+      <Text style={styles.perfilNome}>
         👤 {perfil.nome || "Aluno"}
       </Text>
+
+      <View style={styles.configuracaoCard}>
+        <Text style={styles.configuracaoTexto}>
+          Leitura das perguntas
+        </Text>
+
+        <Switch
+          value={leituraAtiva}
+          onValueChange={alternarLeitura}
+        />
+      </View>
 
       {areas.map((area, index) => {
 
@@ -76,19 +105,13 @@ export default function PerfilAluno() {
           total === 0 ? 0 : Math.round((acertos / total) * 100);
 
         return (
-          <View key={index} style={{
-            marginBottom: 25,
-            padding: 15,
-            borderRadius: 12,
-            backgroundColor: "#fff",
-            elevation: 3
-          }}>
+          <View key={index} style={styles.card}>
 
-            <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+            <Text style={styles.areaTitulo}>
               {area.nome}
             </Text>
 
-            <View style={{ alignItems: "center", marginTop: 10 }}>
+            <View style={styles.graficoContainer}>
               <PieChart
                 data={gerarDadosPizza(acertos, erros)}
                 donut
@@ -97,35 +120,53 @@ export default function PerfilAluno() {
                 focusOnPress
                 sectionAutoFocus
                 centerLabelComponent={() => (
-                  <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                  <Text style={styles.porcentagem}>
                     {percentual}%
                   </Text>
                 )}
               />
             </View>
 
-            <Text style={{ marginTop: 10 }}>
-              Acertos: {acertos} | Erros: {erros}
-            </Text>
+            <View style={styles.legendaContainer}>
+
+              <View style={styles.legendaItem}>
+                <View style={[styles.legendaCor, styles.legendaAcerto]} />
+                <Text style={styles.legendaTexto}>
+                  Acertos: {acertos}
+                </Text>
+              </View>
+
+              <View style={styles.legendaItem}>
+                <View style={[styles.legendaCor, styles.legendaErro]} />
+                <Text style={styles.legendaTexto}>
+                  Erros: {erros}
+                </Text>
+              </View>
+
+            </View>
 
           </View>
         );
       })}
 
       <TouchableOpacity
+        style={styles.botaoEditar}
         onPress={() => router.push("/edicaoPerfilAluno")}
-        style={{
-          backgroundColor: "#2196F3",
-          padding: 12,
-          borderRadius: 10,
-          alignItems: "center"
-        }}
       >
-        <Text style={{ color: "#fff", fontWeight: "bold" }}>
+        <Text style={styles.botaoTexto}>
           Editar perfil
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.botaoEditar, styles.botaoFirebaseTeste]}
+        onPress={sincronizarFirebaseTeste}
+      >
+        <Text style={styles.botaoTexto}>
+          Enviar teste para Firebase
         </Text>
       </TouchableOpacity>
 
     </ScrollView>
   );
-}
+} 

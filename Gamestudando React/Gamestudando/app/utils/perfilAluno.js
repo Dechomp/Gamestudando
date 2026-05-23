@@ -2,6 +2,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const KEY = "perfilAluno";
 
+const NIVEL_MAXIMO = {
+  matematica: 4,
+  portugues: 6,
+  rimas: 4
+};
+
 // =========================
 // 🆕 PERFIL PADRÃO
 // =========================
@@ -19,19 +25,55 @@ function criarPerfilInicial() {
     matematica: {
       nivel: 3,
       acertos: 0,
-      erros: 0
+      erros: 0,
+      ultimaPontuacao: 0.5
     },
 
     portugues: {
       nivel: 3,
       acertos: 0,
-      erros: 0
+      erros: 0,
+      ultimaPontuacao: 0.5
     },
 
     rimas: {
       nivel: 3,
       acertos: 0,
-      erros: 0
+      erros: 0,
+      ultimaPontuacao: 0.5
+    },
+
+    configuracoes: {
+      leituraPerguntasAtiva: true
+    }
+  };
+}
+
+function completarPerfil(perfil) {
+  const inicial = criarPerfilInicial();
+
+  return {
+    ...inicial,
+    ...perfil,
+    progresso: {
+      ...inicial.progresso,
+      ...(perfil?.progresso || {})
+    },
+    matematica: {
+      ...inicial.matematica,
+      ...(perfil?.matematica || {})
+    },
+    portugues: {
+      ...inicial.portugues,
+      ...(perfil?.portugues || {})
+    },
+    rimas: {
+      ...inicial.rimas,
+      ...(perfil?.rimas || {})
+    },
+    configuracoes: {
+      ...inicial.configuracoes,
+      ...(perfil?.configuracoes || {})
     }
   };
 }
@@ -44,7 +86,7 @@ export async function carregarPerfil() {
     const json = await AsyncStorage.getItem(KEY);
 
     if (json) {
-      return JSON.parse(json);
+      return completarPerfil(JSON.parse(json));
     }
 
     const perfilInicial = criarPerfilInicial();
@@ -74,36 +116,13 @@ export async function salvarPerfil(perfil) {
 // =========================
 export async function resetarPerfil() {
   try {
-    const perfilInicial = {
-      uid: null,
+    await AsyncStorage.removeItem("perfilAluno");
 
-      nome: "Aluno",
-      email: null,
+    // 🔥 ADICIONE ISSO
+    await AsyncStorage.removeItem("faseLiberada");
 
-      progresso: {
-        faseLiberada: 1
-      },
+    const perfilInicial = criarPerfilInicial();
 
-      matematica: {
-        nivel: 3,
-        acertos: 0,
-        erros: 0
-      },
-
-      portugues: {
-        nivel: 3,
-        acertos: 0,
-        erros: 0
-      },
-
-      rimas: {
-        nivel: 3,
-        acertos: 0,
-        erros: 0
-      }
-    };
-
-    // 🔥 USA A MESMA KEY DO SISTEMA
     await AsyncStorage.setItem("perfilAluno", JSON.stringify(perfilInicial));
 
     return perfilInicial;
@@ -127,5 +146,61 @@ export async function atualizarDadosBasicos({ nome, email }) {
 
   } catch (e) {
     console.error("Erro ao atualizar dados:", e);
+  }
+}
+
+// =========================
+// 🧠 ATUALIZAR MATÉRIA (VOLTOU)
+// =========================
+export async function atualizarPerfil(materia, acertos, erros) {
+  try {
+    const perfil = await carregarPerfil();
+
+    const dados = perfil[materia];
+
+    if (!dados) return;
+
+    dados.acertos += acertos;
+    dados.erros += erros;
+
+    const totalFase = acertos + erros;
+
+    if (totalFase > 0) {
+      dados.ultimaPontuacao = acertos / totalFase;
+    }
+
+    const total = dados.acertos + dados.erros;
+    const taxa = total > 0 ? dados.acertos / total : 0;
+
+    if (taxa > 0.8) {
+      dados.nivel += 1;
+    } else if (taxa < 0.4 && dados.nivel > 1) {
+      dados.nivel -= 1;
+    }
+
+    const maximo = NIVEL_MAXIMO[materia] || 6;
+    dados.nivel = Math.max(1, Math.min(dados.nivel, maximo));
+
+    await salvarPerfil(perfil);
+
+  } catch (e) {
+    console.error("Erro ao atualizar perfil:", e);
+  }
+}
+
+export async function atualizarConfiguracoes(novasConfiguracoes) {
+  try {
+    const perfil = await carregarPerfil();
+
+    perfil.configuracoes = {
+      ...(perfil.configuracoes || {}),
+      ...novasConfiguracoes
+    };
+
+    await salvarPerfil(perfil);
+
+    return perfil;
+  } catch (e) {
+    console.error("Erro ao atualizar configuracoes:", e);
   }
 }
