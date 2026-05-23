@@ -17,22 +17,23 @@ import {
   useFocusEffect
 } from "expo-router";
 
-import { styles } from "./styles";
+import { styles } from "../styles";
 
 import {
   palavrasEsquerda,
   palavrasDireita
-} from "./perguntasQuizRimas";
+} from "../perguntasQuizRimas";
+import { carregarQuestoesRimas } from "../utils/repositorioQuestoes";
 
 import {
   atualizarPerfil,
   carregarPerfil
-} from "./utils/perfilAluno";
+} from "../utils/perfilAluno";
 
 import {
   lerTextoSeAtivo,
   pararLeitura
-} from "./utils/leituraPerguntas";
+} from "../utils/leituraPerguntas";
 
 // =========================
 // 🎲 embaralhar
@@ -47,7 +48,7 @@ function embaralhar(lista) {
 // =========================
 // 🧠 geração IA
 // =========================
-function gerarRodadaIA(nivelAluno = 3) {
+function gerarRodadaIA(nivelAluno = 3, esquerdaBase = palavrasEsquerda, direitaBase = palavrasDireita) {
 
   let tentativas = 0;
 
@@ -60,12 +61,12 @@ function gerarRodadaIA(nivelAluno = 3) {
     const direitaEscolhida = [];
 
     const pool =
-      embaralhar(palavrasEsquerda);
+      embaralhar(esquerdaBase);
 
     for (let esq of pool) {
 
       const opcoes =
-        palavrasDireita.filter(d =>
+        direitaBase.filter(d =>
 
           d.par === esq.par &&
           d.texto !== esq.texto &&
@@ -122,10 +123,10 @@ function gerarRodadaIA(nivelAluno = 3) {
   return {
 
     esquerda:
-      palavrasEsquerda.slice(0, 5),
+      esquerdaBase.slice(0, 5),
 
     direita:
-      palavrasDireita.slice(0, 5),
+      direitaBase.slice(0, 5),
   };
 }
 
@@ -221,9 +222,17 @@ export default function Index() {
 
           const nivel =
             perfil?.rimas?.nivel || 3;
+          const questoesRimas = await carregarQuestoesRimas(
+            palavrasEsquerda,
+            palavrasDireita
+          );
 
           const novaRodada =
-            gerarRodadaIA(nivel);
+            gerarRodadaIA(
+              nivel,
+              questoesRimas.esquerda,
+              questoesRimas.direita
+            );
 
           if (!ativo || faseDaRodada !== faseAtual) return;
 
@@ -444,7 +453,8 @@ export default function Index() {
           await atualizarPerfil(
             "rimas",
             acertos.length,
-            errosFase
+            errosFase,
+            faseAtual
           );
 
         } catch (err) {
@@ -481,13 +491,7 @@ export default function Index() {
 
     return (
 
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center"
-        }}
-      >
+      <View style={styles.loadingContainer}>
 
         <Text>
           Carregando rimas...

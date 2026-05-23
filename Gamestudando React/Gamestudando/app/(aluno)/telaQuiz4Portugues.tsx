@@ -1,10 +1,11 @@
 import { Text, View, TouchableOpacity, Animated, ScrollView } from "react-native";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
-import { styles } from "./styles";
-import { perguntasPortugues } from "./perguntasPortuguesQuiz4";
-import { atualizarPerfil, carregarPerfil } from "./utils/perfilAluno";
-import { lerTextoSeAtivo, pararLeitura } from "./utils/leituraPerguntas";
+import { styles } from "../styles";
+import { perguntasPortugues } from "../perguntasPortuguesQuiz4";
+import { atualizarPerfil, carregarPerfil } from "../utils/perfilAluno";
+import { lerTextoSeAtivo, pararLeitura } from "../utils/leituraPerguntas";
+import { carregarQuestoesMultiplaEscolha } from "../utils/repositorioQuestoes";
 
 function embaralhar(lista) {
   return [...lista].sort(() => Math.random() - 0.5);
@@ -88,7 +89,11 @@ export default function Index() {
       const carregar = async () => {
         const perfil = await carregarPerfil();
         const nivel = perfil?.portugues?.nivel || 3;
-        const perguntas = selecionarPerguntasIA(perguntasPortugues, nivel, 5);
+        const perguntasBase = await carregarQuestoesMultiplaEscolha(
+          "portugues",
+          perguntasPortugues
+        );
+        const perguntas = selecionarPerguntasIA(perguntasBase, nivel, 5);
 
         if (!ativo) return;
 
@@ -165,7 +170,7 @@ export default function Index() {
     const totalErros = erros + (acertouUltima ? 0 : 0);
 
     try {
-      await atualizarPerfil("portugues", totalAcertos, totalErros);
+      await atualizarPerfil("portugues", totalAcertos, totalErros, faseAtual);
     } catch (error) {
       console.log("Erro salvando portugues:", error);
     }
@@ -197,7 +202,7 @@ export default function Index() {
   }
 
   return (
-    <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+    <Animated.View style={[styles.telaFlex, { opacity: fadeAnim }]}>
       <ScrollView contentContainerStyle={styles.matematicaContainer}>
         <View style={styles.matematicaContent}>
           <View style={styles.barraContainer}>

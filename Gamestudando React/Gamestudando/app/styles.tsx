@@ -23,6 +23,16 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
 
+  telaFlex: {
+    flex: 1,
+  },
+
+  legadoContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
   // 🔥 NOVO (QUIZ)
   quizContainer: {
     flex: 1,
@@ -135,6 +145,29 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
 
+  quizLegacyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    margin: 20,
+  },
+
+  quizRespostasLinha: {
+    flexDirection: "row",
+  },
+
+  quizRespostasLinhaEspacada: {
+    flexDirection: "row",
+    marginTop: 20,
+  },
+
+  botaoSair: {
+    backgroundColor: colors.errada,
+    padding: 12,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+
   botaoEditar: {
     backgroundColor: colors.secundaria,
     padding: 12,
@@ -143,6 +176,12 @@ export const styles = StyleSheet.create({
   },
 
   botaoFirebaseTeste: {
+    width: "100%",
+    maxWidth: 420,
+    marginTop: 10,
+  },
+
+  botaoPerfilEspacado: {
     width: "100%",
     maxWidth: 420,
     marginTop: 10,
@@ -178,7 +217,7 @@ export const styles = StyleSheet.create({
 
     // 🌑 sombra
     elevation: 4, // Android
-    shadowColor: "#000", // iOS
+    shadowColor: colors.preto, // iOS
     shadowOpacity: 0.15,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
@@ -424,8 +463,81 @@ export const styles = StyleSheet.create({
   mapaTitulo: {
     fontSize: 26,
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 8,
     fontWeight: "bold",
+  },
+
+  mapaMundoTitulo: {
+    fontSize: 24,
+    textAlign: "center",
+    fontWeight: "bold",
+    color: colors.primaria,
+    marginBottom: 2,
+  },
+
+  mapaMundoHeader: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 14,
+    marginBottom: 12,
+  },
+
+  mapaMundoCentro: {
+    flex: 1,
+    maxWidth: 430,
+    alignItems: "center",
+  },
+
+  mapaMundoNome: {
+    fontSize: 28,
+    textAlign: "center",
+    fontWeight: "bold",
+    color: colors.preto,
+    marginBottom: 6,
+  },
+
+  mapaMundoSubtitulo: {
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: 0,
+  },
+
+  mapaMundoBotoes: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 12,
+    marginBottom: 12,
+  },
+
+  botaoMundo: {
+    backgroundColor: colors.secundaria,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    minWidth: 100,
+    alignItems: "center",
+  },
+
+  botaoMundoCircular: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: colors.secundaria,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  botaoMundoDesabilitado: {
+    backgroundColor: colors.cinza,
+  },
+
+  textoMundoSeta: {
+    color: colors.branco,
+    fontSize: 34,
+    fontWeight: "bold",
+    lineHeight: 38,
   },
 
   mapaIA: {
@@ -498,7 +610,7 @@ export const styles = StyleSheet.create({
     marginBottom: 18,
     alignItems: "center",
     elevation: 3,
-    shadowColor: "#000",
+    shadowColor: colors.preto,
     shadowOpacity: 0.12,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
@@ -551,6 +663,105 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.errada,
   },
 
+  portalContainer: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: colors.branco,
+  },
+
+  portalTitulo: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: colors.secundaria,
+    marginBottom: 30,
+    textAlign: "center",
+  },
+
+  portalTituloMenor: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+    color: colors.textoPrimario,
+  },
+
+  portalLabel: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 15,
+    color: colors.textoPrimario,
+  },
+
+  portalValor: {
+    fontSize: 18,
+    color: colors.textoSecundario,
+    marginTop: 5,
+  },
+
+  portalItemLista: {
+    fontSize: 17,
+    color: colors.textoSecundario,
+    marginTop: 5,
+    marginLeft: 10,
+  },
+
+  portalBotao: {
+    padding: 15,
+    backgroundColor: colors.cinzaMuitoClaro,
+    borderRadius: 5,
+    marginBottom: 5,
+  },
+
+  portalBotaoAtivo: {
+    backgroundColor: colors.cinza,
+    borderWidth: 1,
+  },
+
+  portalBotaoAluno: {
+    padding: 12,
+    backgroundColor: colors.fundoCampo,
+    marginLeft: 15,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.azulBorda,
+    marginBottom: 5,
+  },
+
+  portalSecao: {
+    marginTop: 20,
+  },
+
+  portalQuadroRelatorio: {
+    marginTop: 30,
+    padding: 20,
+    backgroundColor: colors.fundoInfo,
+    borderRadius: 10,
+  },
+
+  portalQuadroDetalhes: {
+    marginTop: 30,
+    padding: 20,
+    borderTopWidth: 1,
+    borderColor: colors.cinzaClaro,
+  },
+
+  portalSubtitulo: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+
+  portalBotaoCrianca: {
+    padding: 15,
+    backgroundColor: colors.cinzaMuitoClaro,
+    marginBottom: 10,
+    borderRadius: 8,
+  },
+
+  portalNomeCrianca: {
+    fontSize: 18,
+    color: colors.textoPrimario,
+  },
+
   configuracaoCard: {
     width: "100%",
     maxWidth: 420,
@@ -562,7 +773,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     elevation: 2,
-    shadowColor: "#000",
+    shadowColor: colors.preto,
     shadowOpacity: 0.1,
     shadowRadius: 3,
     shadowOffset: { width: 0, height: 1 },
@@ -594,10 +805,259 @@ export const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
+  tarefaScroll: {
+    flex: 1,
+    backgroundColor: colors.branco,
+  },
+
+  tarefaContent: {
+    padding: 20,
+  },
+
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: colors.cinzaClaro,
+    borderRadius: 8,
+    backgroundColor: colors.fundoCampo,
+  },
+
+  inputPergunta: {
+    borderWidth: 1,
+    borderColor: colors.cinzaClaro,
+    borderRadius: 8,
+    padding: 12,
+    minHeight: 100,
+    textAlignVertical: "top",
+    backgroundColor: colors.fundoCampo,
+  },
+
+  linhaAlternativa: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+
+  letra: {
+    fontSize: 18,
+    fontWeight: "bold",
+    width: 30,
+  },
+
+  inputAlternativa: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: colors.cinzaClaro,
+    borderRadius: 8,
+    padding: 10,
+    marginRight: 10,
+    backgroundColor: colors.fundoCampo,
+  },
+
+  contador: {
+    textAlign: "center",
+    fontSize: 16,
+    color: colors.textoAuxiliar,
+    marginBottom: 30,
+  },
+
+  tarefaRespostaCorretaCard: {
+    borderColor: colors.certa,
+    borderWidth: 2,
+  },
+
+  tarefaRespostaCorretaTexto: {
+    color: colors.certa,
+    fontWeight: "bold",
+    marginTop: 5,
+  },
+
+  botaoEditarTarefa: {
+    backgroundColor: colors.laranja,
+    padding: 15,
+    borderRadius: 8,
+    marginTop: 20,
+  },
+
+  botaoExcluirTarefa: {
+    backgroundColor: colors.errada,
+    padding: 15,
+    borderRadius: 8,
+    marginTop: 10,
+    marginBottom: 20,
+  },
+
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+
+  authKeyboard: {
+    flex: 1,
+  },
+
+  authContainer: {
+    flexGrow: 1,
+    padding: 20,
+    paddingTop: 72,
+    paddingBottom: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  authCard: {
+    width: "100%",
+    maxWidth: 420,
+  },
+
+  authTitulo: {
+    fontSize: 30,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+
+  authSubtitulo: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 24,
+  },
+
+  authBotaoPrincipal: {
+    backgroundColor: colors.primaria,
+    padding: 14,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 6,
+  },
+
+  authBotaoGoogle: {
+    borderWidth: 1,
+    borderColor: colors.cinzaClaro,
+    padding: 14,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 12,
+    backgroundColor: colors.branco,
+  },
+
+  authBotaoGoogleTexto: {
+    color: colors.preto,
+    fontWeight: "bold",
+  },
+
+  authLinkBotao: {
+    padding: 14,
+    alignItems: "center",
+    marginTop: 4,
+  },
+
+  authLinkTexto: {
+    color: colors.primaria,
+    fontWeight: "bold",
+  },
+
+  senhaContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.cinzaClaro,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+
+  inputSenha: {
+    flex: 1,
+    padding: 12,
+  },
+
+  botaoMostrarSenha: {
+    paddingHorizontal: 12,
+    minHeight: 44,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  textoMostrarSenha: {
+    color: colors.primaria,
+    fontWeight: "bold",
+  },
+
+  tipoContaContainer: {
+    width: "100%",
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 16,
+  },
+
+  tipoContaBotao: {
+    flex: 1,
+    minHeight: 44,
+    paddingHorizontal: 8,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.cinzaClaro,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.branco,
+  },
+
+  tipoContaBotaoSelecionado: {
+    backgroundColor: colors.primaria,
+    borderColor: colors.primaria,
+  },
+
+  tipoContaTexto: {
+    color: colors.preto,
+    fontWeight: "bold",
+    textAlign: "center",
+    fontSize: 13,
+  },
+
+  tipoContaTextoSelecionado: {
+    color: colors.branco,
+  },
+
+  avaliacaoContainer: {
+    flexGrow: 1,
+    padding: 20,
+    paddingTop: 56,
+    paddingBottom: 90,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  avaliacaoTitulo: {
+    fontSize: 28,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+
+  avaliacaoProgresso: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 24,
+  },
+
+  avaliacaoRespostas: {
+    width: "100%",
+    maxWidth: 520,
+  },
+
+  avaliacaoBotaoResposta: {
+    backgroundColor: colors.primaria,
+    padding: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 10,
+    minHeight: 56,
+    justifyContent: "center",
+  },
+
+  avaliacaoBotaoSelecionado: {
+    backgroundColor: colors.selecionada,
   },
 
 });

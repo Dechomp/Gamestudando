@@ -5,10 +5,10 @@ import { Text, View, TouchableOpacity } from "react-native";
 import { useState } from "react";
 
 // Importação dos estilos do arquivo styles.js
-import { styles } from "./styles";
+import { styles } from "../styles";
 
 // Importação do banco de perguntas do arquivo perguntas.js
-import { perguntas } from "./perguntasQuiz4Respostas";
+import { perguntas } from "../perguntasQuiz4Respostas";
 
 export default function Index() {
 
@@ -118,14 +118,7 @@ export default function Index() {
   // Estrutura visual da tela
   return (
 
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        margin: 20,
-      }}
-    >
+    <View style={styles.quizLegacyContainer}>
 
       {/* Texto da pergunta atual */}
       <Text style={styles.textoPergunta}>
@@ -134,12 +127,7 @@ export default function Index() {
 
 
       {/* Primeira linha de respostas */}
-      <View
-        style={{
-          flexDirection: "row",
-          marginTop: 20,
-        }}
-      >
+      <View style={styles.quizRespostasLinhaEspacada}>
 
         {/* Resposta 1 */}
         <View style={estiloBotao(0)}>
@@ -163,11 +151,7 @@ export default function Index() {
 
 
       {/* Segunda linha de respostas */}
-      <View
-        style={{
-          flexDirection: "row",
-        }}
-      >
+      <View style={styles.quizRespostasLinha}>
 
         {/* Resposta 3 */}
         <View style={estiloBotao(2)}>

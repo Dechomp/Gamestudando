@@ -1,16 +1,18 @@
-import React, { useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Alert, View, Text, ScrollView, TouchableOpacity, Switch } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
 
-import { carregarPerfil, atualizarConfiguracoes } from "./utils/perfilAluno";
-import { criarOuAtualizarAlunoFirebase } from "./utils/firebasePerfil";
+import { carregarPerfil, atualizarConfiguracoes } from "../utils/perfilAluno";
+import { observarUsuarioLogado, sairDaConta } from "../utils/authUsuario";
 import { PieChart } from "react-native-gifted-charts";
-import { styles } from "./styles";
+import { styles } from "../styles";
+import { colors } from "../colors";
 
 export default function PerfilAluno() {
 
   const router = useRouter();
   const [perfil, setPerfil] = useState(null);
+  const [verificandoLogin, setVerificandoLogin] = useState(true);
 
   const carregar = async () => {
     const dados = await carregarPerfil();
@@ -23,7 +25,38 @@ export default function PerfilAluno() {
     }, [])
   );
 
-  if (!perfil) {
+  useEffect(() => {
+    const parar = observarUsuarioLogado((usuario) => {
+      setVerificandoLogin(false);
+
+      if (!usuario) {
+        setPerfil(null);
+        router.replace("/");
+      }
+    });
+
+    return parar;
+  }, [router]);
+
+  const deslogar = () => {
+    Alert.alert(
+      "Sair da conta",
+      "Deseja sair desta conta?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Sair",
+          style: "destructive",
+          onPress: async () => {
+            await sairDaConta();
+            router.replace("/");
+          }
+        }
+      ]
+    );
+  };
+
+  if (verificandoLogin || !perfil) {
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>
@@ -46,8 +79,8 @@ export default function PerfilAluno() {
   ];
 
   const gerarDadosPizza = (acertos, erros) => [
-    { value: acertos, color: "#4CAF50" },
-    { value: erros, color: "#F44336" }
+    { value: acertos, color: colors.certa },
+    { value: erros, color: colors.errada }
   ];
 
   const leituraAtiva =
@@ -60,16 +93,6 @@ export default function PerfilAluno() {
 
     if (perfilAtualizado) {
       setPerfil(perfilAtualizado);
-    }
-  };
-
-  const sincronizarFirebaseTeste = async () => {
-    try {
-      await criarOuAtualizarAlunoFirebase("aluno-teste-local", perfil);
-      Alert.alert("Firebase", "Perfil enviado para o Firestore.");
-    } catch (error) {
-      console.log("Erro sincronizando Firebase:", error);
-      Alert.alert("Firebase", "Nao foi possivel enviar o perfil.");
     }
   };
 
@@ -159,11 +182,11 @@ export default function PerfilAluno() {
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[styles.botaoEditar, styles.botaoFirebaseTeste]}
-        onPress={sincronizarFirebaseTeste}
+        style={[styles.botaoSair, styles.botaoPerfilEspacado]}
+        onPress={deslogar}
       >
-        <Text style={styles.botaoTexto}>
-          Enviar teste para Firebase
+        <Text style={styles.textoBotao}>
+          Sair da conta
         </Text>
       </TouchableOpacity>
 

@@ -3,13 +3,14 @@ import {
   View,
   Text,
   TextInput,
-  StyleSheet,
   ScrollView,
   Switch,
   TouchableOpacity,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { styles } from '../styles';
 
 const CriarTarefa = () => {
   // Lista de tarefas salvas localmente
@@ -203,79 +204,5 @@ const CriarTarefa = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-  },
-  titulo: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#4A90E2',
-    marginBottom: 25,
-  },
-  label: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    marginTop: 15,
-    color: '#333',
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#CCC',
-    borderRadius: 8,
-    backgroundColor: '#F9F9F9',
-  },
-  inputPergunta: {
-    borderWidth: 1,
-    borderColor: '#CCC',
-    borderRadius: 8,
-    padding: 12,
-    minHeight: 100,
-    textAlignVertical: 'top',
-    backgroundColor: '#F9F9F9',
-  },
-  linhaAlternativa: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  letra: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    width: 30,
-  },
-  inputAlternativa: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#CCC',
-    borderRadius: 8,
-    padding: 10,
-    marginRight: 10,
-    backgroundColor: '#F9F9F9',
-  },
-  botaoSalvar: {
-    backgroundColor: '#4A90E2',
-    padding: 15,
-    borderRadius: 8,
-    marginTop: 30,
-    marginBottom: 20,
-  },
-  textoBotao: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  contador: {
-    textAlign: 'center',
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 30,
-  },
-});
 
 export default CriarTarefa;

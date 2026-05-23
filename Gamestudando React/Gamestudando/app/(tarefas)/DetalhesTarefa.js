@@ -4,10 +4,9 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
-import { styles } from './styles';
+import { styles } from '../styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DetalheTarefa = () => {
@@ -74,8 +73,8 @@ const DetalheTarefa = () => {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: '#FFFFFF' }}
-      contentContainerStyle={{ padding: 20 }}
+      style={styles.tarefaScroll}
+      contentContainerStyle={styles.tarefaContent}
     >
       <Text style={styles.titulo}>Detalhes da Tarefa</Text>
 
@@ -92,10 +91,8 @@ const DetalheTarefa = () => {
           key={index}
           style={[
             styles.card,
-            alternativaCorreta === index && {
-              borderColor: '#4CAF50',
-              borderWidth: 2,
-            },
+            alternativaCorreta === index &&
+              styles.tarefaRespostaCorretaCard,
           ]}
         >
           <Text style={styles.pergunta}>
@@ -104,11 +101,7 @@ const DetalheTarefa = () => {
 
           {alternativaCorreta === index && (
             <Text
-              style={{
-                color: '#4CAF50',
-                fontWeight: 'bold',
-                marginTop: 5,
-              }}
+              style={styles.tarefaRespostaCorretaTexto}
             >
               ✓ Resposta Correta
             </Text>
@@ -120,42 +113,19 @@ const DetalheTarefa = () => {
       <Text style={styles.pergunta}>{params.nivel}</Text>
 
       <TouchableOpacity
-        style={{
-          backgroundColor: '#F9A825',
-          padding: 15,
-          borderRadius: 8,
-          marginTop: 20,
-        }}
+        style={styles.botaoEditarTarefa}
         onPress={editarTarefa}
       >
-        <Text
-          style={{
-            color: '#FFF',
-            textAlign: 'center',
-            fontWeight: 'bold',
-          }}
-        >
+        <Text style={styles.textoBotao}>
           Editar Tarefa
         </Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={{
-          backgroundColor: '#E53935',
-          padding: 15,
-          borderRadius: 8,
-          marginTop: 10,
-          marginBottom: 20,
-        }}
+        style={styles.botaoExcluirTarefa}
         onPress={excluirTarefa}
       >
-        <Text
-          style={{
-            color: '#FFF',
-            textAlign: 'center',
-            fontWeight: 'bold',
-          }}
-        >
+        <Text style={styles.textoBotao}>
           Excluir Tarefa
         </Text>
       </TouchableOpacity>

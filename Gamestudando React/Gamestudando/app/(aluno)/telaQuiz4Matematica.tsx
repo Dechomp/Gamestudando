@@ -3,10 +3,11 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
-import { styles } from "./styles";
-import { perguntasMatematica } from "./perguntasMatematicaQuiz4";
-import { atualizarPerfil, carregarPerfil } from "./utils/perfilAluno";
-import { lerTextoSeAtivo, pararLeitura } from "./utils/leituraPerguntas";
+import { styles } from "../styles";
+import { perguntasMatematica } from "../perguntasMatematicaQuiz4";
+import { atualizarPerfil, carregarPerfil } from "../utils/perfilAluno";
+import { lerTextoSeAtivo, pararLeitura } from "../utils/leituraPerguntas";
+import { carregarQuestoesMultiplaEscolha } from "../utils/repositorioQuestoes";
 
 // =========================
 // 🔀 EMBARALHAR
@@ -97,24 +98,7 @@ export default function Index() {
   // =========================
   // 📥 CARREGAR PERFIL
   // =========================
-  useEffect(() => {
-    const carregarNivel = async () => {
-      const perfil = await carregarPerfil();
-
-      const nivel = perfil?.matematica?.nivel || 3;
-      setNivelAluno(nivel);
-
-      const perguntas = selecionarPerguntasIA(
-        perguntasMatematica,
-        nivel,
-        5
-      );
-
-      setPerguntasSorteadas(perguntas);
-    };
-
-    carregarNivel();
-  }, []);
+  // As perguntas sao carregadas pelo focus abaixo para manter cache/web atualizados.
 
   // =========================
   // 🔄 RESET
@@ -122,21 +106,41 @@ export default function Index() {
   useFocusEffect(
     useCallback(() => {
 
+      let ativo = true;
+
       setRespostaSelecionada(null);
       setRespostaConfirmada(false);
       setPerguntaAtual(0);
-
-      const perguntas = selecionarPerguntasIA(
-        perguntasMatematica,
-        nivelAluno,
-        5
-      );
-
-      setPerguntasSorteadas(perguntas);
-
+      setAcertos(0);
+      setErros(0);
       fadeAnim.setValue(1);
 
-    }, [nivelAluno])
+      const carregar = async () => {
+        const perfil = await carregarPerfil();
+        const nivelAtual = perfil?.matematica?.nivel || nivelAluno;
+        setNivelAluno(nivelAtual);
+
+        const perguntasBase = await carregarQuestoesMultiplaEscolha(
+          "matematica",
+          perguntasMatematica
+        );
+        const perguntas = selecionarPerguntasIA(
+          perguntasBase,
+          nivelAtual,
+          5
+        );
+
+        if (!ativo) return;
+
+        setPerguntasSorteadas(perguntas);
+      };
+
+      carregar();
+
+      return () => {
+        ativo = false;
+      };
+    }, [fadeAnim, nivelAluno])
   );
 
   // =========================
@@ -233,7 +237,7 @@ export default function Index() {
           useNativeDriver: true,
         }).start(async () => {
 
-          await atualizarPerfil("matematica", acertos, erros);
+          await atualizarPerfil("matematica", acertos, erros, faseAtual);
 
           router.replace({
             pathname: "/",
@@ -268,11 +272,13 @@ export default function Index() {
 
   return (
     <Animated.View
-      style={{
-        flex: 1,
+      style={[
+        styles.telaFlex,
+        {
         opacity: fadeAnim,
         transform: [{ translateX: shakeAnim }]
-      }}
+        }
+      ]}
     >
 
       <ScrollView

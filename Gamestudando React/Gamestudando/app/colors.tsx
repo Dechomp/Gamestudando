@@ -5,6 +5,9 @@ export const colors = {
   // =========================
   branco: "#FFFFFF",
   preto: "#000000",
+  textoPrimario: "#333333",
+  textoSecundario: "#555555",
+  textoAuxiliar: "#666666",
 
   // =========================
   // 🌈 CORES PRINCIPAIS
@@ -24,7 +27,12 @@ export const colors = {
   // =========================
   cinza: "#BDBDBD",          // desabilitado
   cinzaClaro: "#CCCCCC",     // linhas / detalhes
+  cinzaMuitoClaro: "#F0F0F0",
+  fundoCampo: "#F9F9F9",
+  fundoInfo: "#E8F4FD",
   fundoBarra: "#DDDDDD",     // fundo da barra de progresso
+  laranja: "#F9A825",
+  azulBorda: "#3498DB",
 
   // =========================
   // 🔘 BOTÃO CONFIRMAR
