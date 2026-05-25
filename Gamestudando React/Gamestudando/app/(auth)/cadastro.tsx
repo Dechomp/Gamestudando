@@ -11,7 +11,10 @@ import {
 } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 
-import { cadastrarAlunoEmail } from "../utils/authUsuario";
+import {
+  cadastrarAlunoEmail,
+  obterRotaInicialPorPerfil
+} from "../utils/authUsuario";
 import { styles } from "../styles";
 
 export default function Cadastro() {
@@ -77,21 +80,7 @@ export default function Cadastro() {
         "Enviamos um email de verificacao. Voce ja pode comecar a usar o app."
       );
 
-      if (perfil?.tipo === "professor") {
-        router.replace("/PerfilProfessor");
-        return;
-      }
-
-      if (perfil?.tipo === "responsavel") {
-        router.replace("/PerfilResponsavel");
-        return;
-      }
-
-      router.replace(
-        perfil?.progresso?.avaliacaoInicialConcluida
-          ? "/"
-          : "/avaliacaoInicial"
-      );
+      router.replace(obterRotaInicialPorPerfil(perfil));
     } catch (error) {
       console.log("Erro no cadastro:", error);
       Alert.alert("Cadastro", mensagemErroAuth(error));

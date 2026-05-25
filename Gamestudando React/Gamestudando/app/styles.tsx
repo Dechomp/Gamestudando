@@ -666,7 +666,12 @@ export const styles = StyleSheet.create({
   portalContainer: {
     flex: 1,
     padding: 20,
+    paddingTop: 56,
     backgroundColor: colors.branco,
+  },
+
+  portalContent: {
+    paddingBottom: 100,
   },
 
   portalTitulo: {
@@ -715,6 +720,7 @@ export const styles = StyleSheet.create({
   portalBotaoAtivo: {
     backgroundColor: colors.cinza,
     borderWidth: 1,
+    borderColor: colors.secundaria,
   },
 
   portalBotaoAluno: {
@@ -812,6 +818,101 @@ export const styles = StyleSheet.create({
 
   tarefaContent: {
     padding: 20,
+    paddingTop: 56,
+    paddingBottom: 100,
+  },
+
+  linhaAcoes: {
+    flexDirection: "row",
+    gap: 10,
+    marginVertical: 16,
+  },
+
+  botaoAcaoFlex: {
+    flex: 1,
+  },
+
+  seletorCriacaoContainer: {
+    flexDirection: "row",
+    backgroundColor: colors.cinzaMuitoClaro,
+    borderRadius: 8,
+    padding: 4,
+    marginBottom: 22,
+  },
+
+  seletorCriacaoBotao: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 6,
+    alignItems: "center",
+  },
+
+  seletorCriacaoAtivo: {
+    backgroundColor: colors.card,
+    elevation: 2,
+    shadowColor: colors.preto,
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
+  },
+
+  seletorCriacaoTexto: {
+    color: colors.textoSecundario,
+    fontWeight: "bold",
+  },
+
+  seletorCriacaoTextoAtivo: {
+    color: colors.secundaria,
+  },
+
+  turmaQrCard: {
+    alignItems: "center",
+    backgroundColor: colors.fundoInfo,
+    borderRadius: 8,
+    padding: 18,
+    marginTop: 18,
+  },
+
+  turmaCodigo: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: colors.textoPrimario,
+    marginBottom: 14,
+  },
+
+  turmaQrBox: {
+    alignSelf: "center",
+    backgroundColor: colors.branco,
+    padding: 12,
+    borderRadius: 8,
+    marginVertical: 14,
+  },
+
+  turmaAlunoItem: {
+    width: "100%",
+    backgroundColor: colors.fundoCampo,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 10,
+  },
+
+  relatorioMateriaLinha: {
+    backgroundColor: colors.branco,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 10,
+  },
+
+  qrScannerContainer: {
+    marginTop: 20,
+    marginBottom: 20,
+  },
+
+  qrScanner: {
+    width: "100%",
+    height: 260,
+    borderRadius: 8,
+    overflow: "hidden",
   },
 
   pickerContainer: {
@@ -819,6 +920,15 @@ export const styles = StyleSheet.create({
     borderColor: colors.cinzaClaro,
     borderRadius: 8,
     backgroundColor: colors.fundoCampo,
+  },
+
+  pickerContainerEspacado: {
+    borderWidth: 1,
+    borderColor: colors.cinzaClaro,
+    borderRadius: 8,
+    backgroundColor: colors.fundoCampo,
+    marginTop: 10,
+    marginBottom: 18,
   },
 
   inputPergunta: {
@@ -869,6 +979,18 @@ export const styles = StyleSheet.create({
     color: colors.certa,
     fontWeight: "bold",
     marginTop: 5,
+  },
+
+  botaoVoltarTarefa: {
+    alignSelf: "flex-start",
+    paddingVertical: 8,
+    marginBottom: 12,
+  },
+
+  textoVoltarTarefa: {
+    color: colors.secundaria,
+    fontSize: 16,
+    fontWeight: "bold",
   },
 
   botaoEditarTarefa: {
@@ -937,6 +1059,8 @@ export const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 8,
     alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
     marginTop: 12,
     backgroundColor: colors.branco,
   },
@@ -946,10 +1070,34 @@ export const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
+  googleIcone: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: colors.branco,
+    borderWidth: 1,
+    borderColor: colors.cinzaClaro,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+
+  googleIconeTexto: {
+    color: colors.primaria,
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
   authLinkBotao: {
     padding: 14,
     alignItems: "center",
     marginTop: 4,
+  },
+
+  authLinkBotaoSecundario: {
+    alignItems: "flex-end",
+    marginTop: -8,
+    marginBottom: 12,
   },
 
   authLinkTexto: {

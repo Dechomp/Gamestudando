@@ -4,7 +4,11 @@ import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { escolherProximaAtividade } from "../utils/ia";
-import { observarUsuarioLogado } from "../utils/authUsuario";
+import {
+  carregarPerfilUsuarioAtual,
+  observarUsuarioLogado,
+  obterRotaInicialPorPerfil
+} from "../utils/authUsuario";
 import {
   carregarPerfil,
   obterOuCriarMateriaDaFase
@@ -78,16 +82,26 @@ export default function MapaFases() {
   );
 
   useEffect(() => {
-    const parar = observarUsuarioLogado((usuario) => {
-      const logado = !!usuario;
-      setUsuarioLogado(logado);
-      setVerificandoLogin(false);
-
-      if (!logado) {
+    const parar = observarUsuarioLogado(async (usuario) => {
+      if (!usuario) {
+        setUsuarioLogado(false);
         setRecomendacao(null);
         setMateriasPorFase({});
+        setVerificandoLogin(false);
         router.replace("/login");
+        return;
       }
+
+      const perfil = await carregarPerfilUsuarioAtual();
+      const rotaInicial = obterRotaInicialPorPerfil(perfil);
+
+      if (rotaInicial !== "/") {
+        router.replace(rotaInicial);
+        return;
+      }
+
+      setUsuarioLogado(true);
+      setVerificandoLogin(false);
     });
 
     return parar;

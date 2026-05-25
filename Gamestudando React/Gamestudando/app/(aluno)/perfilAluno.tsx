@@ -4,6 +4,7 @@ import { useRouter, useFocusEffect } from "expo-router";
 
 import { carregarPerfil, atualizarConfiguracoes } from "../utils/perfilAluno";
 import { observarUsuarioLogado, sairDaConta } from "../utils/authUsuario";
+import { listarTurmasDoAluno } from "../utils/firebaseTurmas";
 import { PieChart } from "react-native-gifted-charts";
 import { styles } from "../styles";
 import { colors } from "../colors";
@@ -13,10 +14,17 @@ export default function PerfilAluno() {
   const router = useRouter();
   const [perfil, setPerfil] = useState(null);
   const [verificandoLogin, setVerificandoLogin] = useState(true);
+  const [turmas, setTurmas] = useState([]);
 
   const carregar = async () => {
     const dados = await carregarPerfil();
+    const turmasAluno = await listarTurmasDoAluno().catch((error) => {
+      console.log(error);
+      return [];
+    });
+
     setPerfil(dados);
+    setTurmas(turmasAluno);
   };
 
   useFocusEffect(
@@ -116,6 +124,37 @@ export default function PerfilAluno() {
           value={leituraAtiva}
           onValueChange={alternarLeitura}
         />
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.areaTitulo}>Minhas turmas</Text>
+
+        {turmas.length === 0 ? (
+          <Text style={styles.legendaTexto}>
+            Voce ainda nao entrou em nenhuma turma.
+          </Text>
+        ) : (
+          turmas.map((turma) => (
+            <View key={turma.id} style={styles.turmaAlunoItem}>
+              <Text style={styles.configuracaoTexto}>{turma.nome}</Text>
+              <Text style={styles.legendaTexto}>
+                Professor: {turma.professorNome || "Professor"}
+              </Text>
+              <Text style={styles.legendaTexto}>
+                Codigo: {turma.codigo}
+              </Text>
+            </View>
+          ))
+        )}
+
+        <TouchableOpacity
+          style={[styles.botaoEditar, styles.botaoPerfilEspacado]}
+          onPress={() => router.push("/entrarTurma")}
+        >
+          <Text style={styles.textoBotao}>
+            Entrar em turma
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {areas.map((area, index) => {

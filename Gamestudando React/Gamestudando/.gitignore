@@ -31,7 +31,15 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
+.env.*
+!.env.example
+functions/.env
+functions/.env.*
+!functions/.env.example
 .env*.local
+app/google-services.json
+google-services.json
 
 # typescript
 *.tsbuildinfo

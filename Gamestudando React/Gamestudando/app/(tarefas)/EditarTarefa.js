@@ -1,42 +1,39 @@
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   Switch,
+  Text,
+  TextInput,
   TouchableOpacity,
+  View,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLocalSearchParams, router } from 'expo-router';
 
 import { styles } from '../styles';
-import { useLocalSearchParams, router } from 'expo-router';
+import { atualizarQuestaoProfessor } from '../utils/firebaseTarefas';
 
 const EditarTarefa = () => {
   const params = useLocalSearchParams();
-
-  const [disciplina, setDisciplina] = useState(
-    params.disciplina || 'Matemática'
+  const [materia, setMateria] = useState(
+    valorParam(params.materia) || normalizarMateria(valorParam(params.disciplina))
   );
-
-  const [pergunta, setPergunta] = useState(
-    params.pergunta || ''
-  );
-
+  const [pergunta, setPergunta] = useState(valorParam(params.pergunta));
   const [alternativas, setAlternativas] = useState(
-    params.alternativas
-      ? JSON.parse(params.alternativas)
-      : ['', '', '', '']
+    lerLista(valorParam(params.respostas) || valorParam(params.alternativas), ['', '', '', ''])
   );
-
   const [alternativaCorreta, setAlternativaCorreta] = useState(
-    Number(params.alternativaCorreta)
+    Number(valorParam(params.correta) || valorParam(params.alternativaCorreta) || 0)
   );
+  const [palavraA, setPalavraA] = useState(valorParam(params.esquerda));
+  const [palavraB, setPalavraB] = useState(valorParam(params.direita));
+  const [nivel, setNivel] = useState(valorParam(params.nivel) || '1');
+  const [salvando, setSalvando] = useState(false);
 
-  const [nivel, setNivel] = useState(
-    params.nivel || '1'
-  );
+  const isRima = materia === 'rimas';
 
   const atualizarAlternativa = (texto, indice) => {
     const novasAlternativas = [...alternativas];
@@ -45,152 +42,194 @@ const EditarTarefa = () => {
   };
 
   const salvarAlteracoes = async () => {
+    if (salvando) return;
+
     try {
-      const tarefasSalvas =
-        await AsyncStorage.getItem('tarefas');
+      setSalvando(true);
 
-      const tarefas = tarefasSalvas
-        ? JSON.parse(tarefasSalvas)
-        : [];
-
-      const tarefasAtualizadas = tarefas.map(
-        (tarefa) => {
-          if (tarefa.id === params.id) {
-            return {
-              ...tarefa,
-              disciplina,
-              pergunta,
-              alternativas,
-              alternativaCorreta,
-              nivel,
-            };
-          }
-
-          return tarefa;
+      if (isRima) {
+        if (!palavraA.trim() || !palavraB.trim()) {
+          Alert.alert('Atenção', 'Preencha as duas palavras da rima.');
+          return;
         }
-      );
 
-      await AsyncStorage.setItem(
-        'tarefas',
-        JSON.stringify(tarefasAtualizadas)
-      );
+        await atualizarQuestaoProfessor(valorParam(params.id), {
+          materia: 'rimas',
+          palavraA,
+          palavraB,
+          nivel,
+        });
+      } else {
+        if (!pergunta.trim() || alternativas.some(alternativa => !alternativa.trim())) {
+          Alert.alert('Atenção', 'Preencha a pergunta e todas as respostas.');
+          return;
+        }
 
-      window.alert('Tarefa atualizada com sucesso!');
+        await atualizarQuestaoProfessor(valorParam(params.id), {
+          materia,
+          pergunta,
+          respostas: alternativas,
+          correta: alternativaCorreta,
+          nivel,
+        });
+      }
 
-      router.push('/ListarTarefas');
+      Alert.alert('Pronto', 'Tarefa atualizada com sucesso.');
+      router.replace('/ListarTarefas');
     } catch (error) {
       console.log(error);
-      window.alert(
-        'Erro ao atualizar a tarefa.'
-      );
+
+      if (error?.message === 'RIMA_DUPLICADA') {
+        Alert.alert('Rima repetida', 'Ja existe uma tarefa com esse par de palavras.');
+        return;
+      }
+
+      if (error?.message === 'MODERACAO_LOCAL') {
+        Alert.alert(
+          'Tarefa bloqueada',
+          error.motivo || 'A tarefa foi bloqueada pela verificacao local.'
+        );
+        return;
+      }
+
+      Alert.alert('Erro', 'Nao foi possivel atualizar a tarefa.');
+    } finally {
+      setSalvando(false);
     }
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.titulo}>
-        Editar Tarefa
-      </Text>
-
-      <Text style={styles.label}>
-        Disciplina
-      </Text>
-
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={disciplina}
-          onValueChange={(itemValue) =>
-            setDisciplina(itemValue)
-          }
-        >
-          <Picker.Item
-            label="Matemática"
-            value="Matemática"
-          />
-          <Picker.Item
-            label="Português"
-            value="Português"
-          />
-        </Picker>
-      </View>
-
-      <Text style={styles.label}>
-        Pergunta
-      </Text>
-
-      <TextInput
-        style={styles.inputPergunta}
-        value={pergunta}
-        onChangeText={setPergunta}
-        multiline
-      />
-
-      <Text style={styles.label}>
-        Respostas
-      </Text>
-
-      {alternativas.map((alternativa, index) => (
-        <View
-          key={index}
-          style={styles.linhaAlternativa}
-        >
-          <Text style={styles.letra}>
-            {String.fromCharCode(65 + index)}:
-          </Text>
-
-          <TextInput
-            style={styles.inputAlternativa}
-            value={alternativa}
-            onChangeText={(texto) =>
-              atualizarAlternativa(
-                texto,
-                index
-              )
-            }
-          />
-
-          <Switch
-            value={
-              alternativaCorreta === index
-            }
-            onValueChange={() =>
-              setAlternativaCorreta(index)
-            }
-          />
-        </View>
-      ))}
-
-      <Text style={styles.label}>
-        Nível de Dificuldade
-      </Text>
-
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={nivel}
-          onValueChange={(itemValue) =>
-            setNivel(itemValue)
-          }
-        >
-          <Picker.Item label="1" value="1" />
-          <Picker.Item label="2" value="2" />
-          <Picker.Item label="3" value="3" />
-          <Picker.Item label="4" value="4" />
-          <Picker.Item label="5" value="5" />
-          <Picker.Item label="6" value="6" />
-        </Picker>
-      </View>
-
-      <TouchableOpacity
-        style={styles.botaoSalvar}
-        onPress={salvarAlteracoes}
+    <KeyboardAvoidingView
+      style={styles.telaFlex}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView
+        style={styles.tarefaScroll}
+        contentContainerStyle={styles.tarefaContent}
+        keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.textoBotao}>
-          Salvar Alterações
-        </Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <TouchableOpacity
+          style={styles.botaoVoltarTarefa}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.textoVoltarTarefa}>← Voltar</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.titulo}>Editar Tarefa</Text>
+
+        <Text style={styles.label}>Materia</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={materia}
+            onValueChange={(itemValue) => setMateria(itemValue)}
+          >
+            <Picker.Item label="Matematica" value="matematica" />
+            <Picker.Item label="Portugues" value="portugues" />
+            <Picker.Item label="Rimas" value="rimas" />
+          </Picker>
+        </View>
+
+        {isRima ? (
+          <>
+            <Text style={styles.label}>Primeira palavra</Text>
+            <TextInput
+              style={styles.input}
+              value={palavraA}
+              onChangeText={setPalavraA}
+              placeholder="Ex: PATO"
+            />
+
+            <Text style={styles.label}>Segunda palavra</Text>
+            <TextInput
+              style={styles.input}
+              value={palavraB}
+              onChangeText={setPalavraB}
+              placeholder="Ex: GATO"
+            />
+          </>
+        ) : (
+          <>
+            <Text style={styles.label}>Pergunta</Text>
+            <TextInput
+              style={styles.inputPergunta}
+              value={pergunta}
+              onChangeText={setPergunta}
+              multiline
+            />
+
+            <Text style={styles.label}>Respostas</Text>
+            {alternativas.map((alternativa, index) => (
+              <View key={index} style={styles.linhaAlternativa}>
+                <Text style={styles.letra}>
+                  {String.fromCharCode(65 + index)}:
+                </Text>
+
+                <TextInput
+                  style={styles.inputAlternativa}
+                  value={alternativa}
+                  onChangeText={(texto) => atualizarAlternativa(texto, index)}
+                />
+
+                <Switch
+                  value={alternativaCorreta === index}
+                  onValueChange={() => setAlternativaCorreta(index)}
+                />
+              </View>
+            ))}
+          </>
+        )}
+
+        <Text style={styles.label}>Nivel de Dificuldade</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={nivel}
+            onValueChange={(itemValue) => setNivel(itemValue)}
+          >
+            <Picker.Item label="1" value="1" />
+            <Picker.Item label="2" value="2" />
+            <Picker.Item label="3" value="3" />
+            <Picker.Item label="4" value="4" />
+            <Picker.Item label="5" value="5" />
+            <Picker.Item label="6" value="6" />
+          </Picker>
+        </View>
+
+        <TouchableOpacity
+          style={styles.botaoSalvar}
+          onPress={salvarAlteracoes}
+        >
+          <Text style={styles.textoBotao}>
+            {salvando ? 'Salvando...' : 'Salvar Alteracoes'}
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
+function valorParam(valor) {
+  if (Array.isArray(valor)) return valor[0] || '';
+  return valor || '';
+}
+
+function lerLista(valor, fallback) {
+  if (!valor) return fallback;
+
+  try {
+    const lista = JSON.parse(valor);
+    return Array.isArray(lista) ? lista : fallback;
+  } catch (error) {
+    console.log(error);
+    return fallback;
+  }
+}
+
+function normalizarMateria(materia) {
+  const texto = String(materia).toLowerCase();
+
+  if (texto.includes('rima')) return 'rimas';
+  if (texto.includes('port')) return 'portugues';
+  return 'matematica';
+}
 
 export default EditarTarefa;

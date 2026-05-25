@@ -1,7 +1,10 @@
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   sendEmailVerification,
+  signInWithCredential,
   signInWithEmailAndPassword,
   signOut,
   updateEmail,
@@ -27,6 +30,17 @@ export function observarUsuarioLogado(callback) {
 
 export function obterUsuarioLogado() {
   return auth.currentUser;
+}
+
+export function obterRotaInicialPorPerfil(perfil) {
+  if (!perfil) return "/tipoContaGoogle";
+  if (perfil?.tipo === "professor") return "/PerfilProfessor";
+  if (perfil?.tipo === "responsavel") return "/PerfilResponsavel";
+  if (!perfil?.progresso?.avaliacaoInicialConcluida) {
+    return "/avaliacaoInicial";
+  }
+
+  return "/";
 }
 
 export async function cadastrarAlunoEmail({ nome, email, senha, tipo = "aluno" }) {
@@ -70,6 +84,25 @@ export async function cadastrarAlunoEmail({ nome, email, senha, tipo = "aluno" }
   };
 }
 
+export async function carregarPerfilUsuarioAtual({ criarSeNaoExistir = true } = {}) {
+  const usuario = auth.currentUser;
+
+  if (!usuario) return null;
+
+  const perfilFirebase = await carregarPerfilFirebase(usuario.uid);
+  const perfilLocal = perfilFirebase
+    ? converterPerfilFirebaseParaLocal(perfilFirebase)
+    : criarSeNaoExistir
+      ? await criarPerfilParaUsuario(usuario)
+      : null;
+
+  if (!perfilLocal) return null;
+
+  await salvarPerfil(perfilLocal);
+
+  return perfilLocal;
+}
+
 export async function entrarEmailSenha(email, senha) {
   const credencial = await signInWithEmailAndPassword(
     auth,
@@ -78,18 +111,52 @@ export async function entrarEmailSenha(email, senha) {
   );
 
   const usuario = credencial.user;
-  const perfilFirebase = await carregarPerfilFirebase(usuario.uid);
-  const perfilLocal = perfilFirebase
-    ? converterPerfilFirebaseParaLocal(perfilFirebase)
-    : await criarPerfilParaUsuario(usuario);
-
-  await salvarPerfil(perfilLocal);
+  const perfilLocal = await carregarPerfilUsuarioAtual();
   sincronizarPerguntasIniciais().catch(() => {});
 
   return {
     usuario,
     perfil: perfilLocal
   };
+}
+
+export async function entrarComCredencialGoogle(idToken) {
+  const credencialGoogle = GoogleAuthProvider.credential(idToken);
+  const credencial = await signInWithCredential(auth, credencialGoogle);
+  const perfilLocal = await carregarPerfilUsuarioAtual({
+    criarSeNaoExistir: false
+  });
+  sincronizarPerguntasIniciais().catch(() => {});
+
+  return {
+    usuario: credencial.user,
+    perfil: perfilLocal,
+    precisaEscolherTipo: !perfilLocal
+  };
+}
+
+export async function finalizarCadastroGoogle({ tipo }) {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error("Usuario nao logado.");
+  }
+
+  const perfil = await criarPerfilParaUsuario(usuario, tipo);
+  await salvarPerfil(perfil);
+  sincronizarPerguntasIniciais().catch(() => {});
+
+  return perfil;
+}
+
+export async function enviarEmailRecuperacaoSenha(email) {
+  const emailTratado = email.trim();
+
+  if (!emailTratado) {
+    throw new Error("EMAIL_RECUPERACAO_VAZIO");
+  }
+
+  await sendPasswordResetEmail(auth, emailTratado);
 }
 
 export async function sairDaConta() {
@@ -120,14 +187,19 @@ export async function atualizarSenhaConta(novaSenha) {
   await updatePassword(auth.currentUser, novaSenha);
 }
 
-async function criarPerfilParaUsuario(usuario) {
+async function criarPerfilParaUsuario(usuario, tipo = "aluno") {
   const perfilAtual = await carregarPerfil();
   const perfilAluno = {
     ...perfilAtual,
     uid: usuario.uid,
-    tipo: "aluno",
+    tipo,
     nome: usuario.displayName || "Aluno",
-    email: usuario.email || null
+    email: usuario.email || null,
+    progresso: {
+      ...(perfilAtual.progresso || {}),
+      avaliacaoInicialConcluida: tipo === "aluno" ? false : true,
+      avaliacaoInicialConcluidaEm: null
+    }
   };
 
   await criarOuAtualizarAlunoFirebase(usuario.uid, perfilAluno, {

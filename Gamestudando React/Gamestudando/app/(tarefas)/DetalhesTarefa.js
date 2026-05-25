@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Alert,
   View,
   Text,
   ScrollView,
@@ -7,130 +8,166 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { styles } from '../styles';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { excluirQuestaoProfessor } from '../utils/firebaseTarefas';
 
 const DetalheTarefa = () => {
   const params = useLocalSearchParams();
+  const materia = valorParam(params.disciplina) || tituloMateria(valorParam(params.materia));
+  const formato = valorParam(params.formato);
+  const pergunta = valorParam(params.pergunta);
+  const alternativas = lerLista(valorParam(params.respostas) || valorParam(params.alternativas));
+  const alternativaCorreta = Number(valorParam(params.correta) || valorParam(params.alternativaCorreta));
+  const esquerda = valorParam(params.esquerda);
+  const direita = valorParam(params.direita);
 
-  const alternativas = JSON.parse(params.alternativas || '[]');
-  const alternativaCorreta = Number(params.alternativaCorreta);
-
-  const editarTarefa = () => { 
-    
+  const editarTarefa = () => {
     router.push({
-    pathname: '/EditarTarefa',
-    params: {
-      id: params.id,
-      disciplina: params.disciplina,
-      pergunta: params.pergunta,
-      alternativas: params.alternativas,
-      alternativaCorreta: params.alternativaCorreta,
-      nivel: params.nivel,
-    },
-  });
-};
+      pathname: '/EditarTarefa',
+      params: params,
+    });
+  };
+
+  const confirmarExclusao = () => {
+    Alert.alert(
+      'Excluir tarefa',
+      'Deseja realmente excluir esta tarefa?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: excluirTarefa,
+        },
+      ]
+    );
+  };
 
   const excluirTarefa = async () => {
-  const confirmar = window.confirm(
-    'Deseja realmente excluir esta tarefa?'
-  );
-
-  if (!confirmar) {
-    return;
-  }
-
-  try {
-    const tarefasSalvas =
-      await AsyncStorage.getItem('tarefas');
-
-    const tarefas = tarefasSalvas
-      ? JSON.parse(tarefasSalvas)
-      : [];
-
-    const tarefasAtualizadas =
-      tarefas.filter(
-        (tarefa) => tarefa.id !== params.id
-      );
-
-    await AsyncStorage.setItem(
-      'tarefas',
-      JSON.stringify(tarefasAtualizadas)
-    );
-
-    window.alert(
-      'Tarefa excluída com sucesso!'
-    );
-
-    router.push('/ListarTarefas');
-  } catch (error) {
-    console.log(error);
-
-    window.alert(
-      'Erro ao excluir a tarefa.'
-    );
-  }
-};
+    try {
+      await excluirQuestaoProfessor(valorParam(params.id));
+      Alert.alert('Pronto', 'Tarefa excluida com sucesso.');
+      router.replace('/ListarTarefas');
+    } catch (error) {
+      console.log(error);
+      Alert.alert('Erro', 'Nao foi possivel excluir a tarefa.');
+    }
+  };
 
   return (
     <ScrollView
       style={styles.tarefaScroll}
       contentContainerStyle={styles.tarefaContent}
     >
+      <TouchableOpacity
+        style={styles.botaoVoltarTarefa}
+        onPress={() => router.back()}
+      >
+        <Text style={styles.textoVoltarTarefa}>← Voltar</Text>
+      </TouchableOpacity>
+
       <Text style={styles.titulo}>Detalhes da Tarefa</Text>
 
-      <Text style={styles.label}>Disciplina</Text>
-      <Text style={styles.pergunta}>{params.disciplina}</Text>
+      <Text style={styles.label}>Materia</Text>
+      <Text style={styles.pergunta}>{materia || 'Atividade'}</Text>
 
-      <Text style={styles.label}>Pergunta</Text>
-      <Text style={styles.pergunta}>{params.pergunta}</Text>
+      <Text style={styles.label}>Formato</Text>
+      <Text style={styles.pergunta}>
+        {formato === 'conectar_pares' ? 'Rimas' : 'Multipla escolha'}
+      </Text>
 
-      <Text style={styles.label}>Alternativas</Text>
+      {formato === 'conectar_pares' ? (
+        <>
+          <Text style={styles.label}>Par de rimas</Text>
 
-      {alternativas.map((alternativa, index) => (
-        <View
-          key={index}
-          style={[
-            styles.card,
-            alternativaCorreta === index &&
-              styles.tarefaRespostaCorretaCard,
-          ]}
-        >
-          <Text style={styles.pergunta}>
-            {String.fromCharCode(65 + index)}) {alternativa}
-          </Text>
+          <View style={styles.card}>
+            <Text style={styles.pergunta}>{esquerda || '-'}</Text>
+            <Text style={styles.pergunta}>{direita || '-'}</Text>
+          </View>
+        </>
+      ) : (
+        <>
+          <Text style={styles.label}>Pergunta</Text>
+          <Text style={styles.pergunta}>{pergunta || '-'}</Text>
 
-          {alternativaCorreta === index && (
-            <Text
-              style={styles.tarefaRespostaCorretaTexto}
+          <Text style={styles.label}>Alternativas</Text>
+
+          {alternativas.map((alternativa, index) => (
+            <View
+              key={`${alternativa}-${index}`}
+              style={[
+                styles.card,
+                alternativaCorreta === index &&
+                  styles.tarefaRespostaCorretaCard,
+              ]}
             >
-              ✓ Resposta Correta
-            </Text>
-          )}
-        </View>
-      ))}
+              <Text style={styles.pergunta}>
+                {String.fromCharCode(65 + index)}) {alternativa}
+              </Text>
 
-      <Text style={styles.label}>Nível de Dificuldade</Text>
-      <Text style={styles.pergunta}>{params.nivel}</Text>
+              {alternativaCorreta === index && (
+                <Text style={styles.tarefaRespostaCorretaTexto}>
+                  Resposta correta
+                </Text>
+              )}
+            </View>
+          ))}
+        </>
+      )}
+
+      <Text style={styles.label}>Nivel de Dificuldade</Text>
+      <Text style={styles.pergunta}>{valorParam(params.nivel) || '1'}</Text>
+
+      <Text style={styles.label}>Status</Text>
+      <Text style={styles.pergunta}>
+        {textoStatus(valorParam(params.statusRevisao))}
+      </Text>
 
       <TouchableOpacity
         style={styles.botaoEditarTarefa}
         onPress={editarTarefa}
       >
-        <Text style={styles.textoBotao}>
-          Editar Tarefa
-        </Text>
+        <Text style={styles.textoBotao}>Editar Tarefa</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.botaoExcluirTarefa}
-        onPress={excluirTarefa}
+        onPress={confirmarExclusao}
       >
-        <Text style={styles.textoBotao}>
-          Excluir Tarefa
-        </Text>
+        <Text style={styles.textoBotao}>Excluir Tarefa</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 };
+
+function valorParam(valor) {
+  if (Array.isArray(valor)) return valor[0] || '';
+  return valor || '';
+}
+
+function lerLista(valor) {
+  if (!valor) return [];
+
+  try {
+    const lista = JSON.parse(valor);
+    return Array.isArray(lista) ? lista : [];
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+}
+
+function tituloMateria(materia) {
+  if (materia === 'rimas') return 'Rimas';
+  if (materia === 'portugues') return 'Portugues';
+  if (materia === 'matematica') return 'Matematica';
+  return materia;
+}
+
+function textoStatus(status) {
+  if (status === 'aprovada') return 'aprovada';
+  if (status === 'rejeitada') return 'rejeitada';
+  if (status === 'pendente_ia') return 'em revisao automatica';
+  return status || 'pendente';
+}
 
 export default DetalheTarefa;

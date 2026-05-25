@@ -5,42 +5,51 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect , router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { styles } from '../styles';
+import { listarQuestoesDoProfessor } from '../utils/firebaseTarefas';
 
 const ListaTarefas = () => {
   const [tarefas, setTarefas] = useState([]);
+  const [carregando, setCarregando] = useState(true);
 
   const carregarTarefas = async () => {
     try {
-      const tarefasSalvas = await AsyncStorage.getItem('tarefas');
-      const lista = tarefasSalvas
-        ? JSON.parse(tarefasSalvas)
-        : [];
+      setCarregando(true);
+      const lista = await listarQuestoesDoProfessor();
       setTarefas(lista);
     } catch (error) {
       console.log(error);
+    } finally {
+      setCarregando(false);
     }
   };
 
-  // Recarrega toda vez que a tela recebe foco
   useFocusEffect(
     useCallback(() => {
       carregarTarefas();
     }, [])
   );
 
-  const visualizarTarefa = (tarefa) => {
+  const abrirDetalhes = (item) => {
+    const respostas = item.respostas || item.alternativas || [];
+
     router.push({
       pathname: '/DetalhesTarefa',
       params: {
-        id: tarefa.id,
-        disciplina: tarefa.disciplina,
-        pergunta: tarefa.pergunta,
-        alternativas: JSON.stringify(tarefa.alternativas),
-        alternativaCorreta: tarefa.alternativaCorreta.toString(),
-        nivel: tarefa.nivel,
+        id: item.id,
+        materia: item.materia || '',
+        disciplina: tituloMateria(item),
+        formato: item.formato || '',
+        pergunta: item.pergunta || '',
+        respostas: JSON.stringify(respostas),
+        alternativas: JSON.stringify(respostas),
+        correta: String(item.correta ?? item.alternativaCorreta ?? ''),
+        alternativaCorreta: String(item.correta ?? item.alternativaCorreta ?? ''),
+        nivel: String(item.nivel || 1),
+        statusRevisao: item.statusRevisao || 'pendente',
+        esquerda: item.esquerda?.texto || '',
+        direita: item.direita?.texto || '',
       },
     });
   };
@@ -48,25 +57,42 @@ const ListaTarefas = () => {
   const renderItem = ({ item }) => (
     <TouchableOpacity
       style={styles.card}
-      onPress={() => visualizarTarefa(item)}
+      onPress={() => abrirDetalhes(item)}
     >
       <Text style={styles.disciplina}>
-        {item.disciplina}
+        {tituloMateria(item)}
       </Text>
+
       <Text style={styles.pergunta} numberOfLines={2}>
-        {item.pergunta}
+        {tituloTarefa(item)}
       </Text>
+
       <Text style={styles.nivel}>
-        Nível de dificuldade: {item.nivel}
+        Nivel de dificuldade: {item.nivel}
+      </Text>
+
+      <Text style={styles.legendaTexto}>
+        Status: {textoStatus(item.statusRevisao)}
       </Text>
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={styles.portalContainer}>
+      <TouchableOpacity
+        style={styles.botaoVoltarTarefa}
+        onPress={() => router.push('/PerfilProfessor')}
+      >
+        <Text style={styles.textoVoltarTarefa}>← Voltar</Text>
+      </TouchableOpacity>
+
       <Text style={styles.titulo}>Lista de Tarefas</Text>
 
-      {tarefas.length === 0 ? (
+      {carregando ? (
+        <Text style={styles.contador}>
+          Carregando tarefas...
+        </Text>
+      ) : tarefas.length === 0 ? (
         <Text style={styles.contador}>
           Nenhuma tarefa cadastrada.
         </Text>
@@ -81,5 +107,27 @@ const ListaTarefas = () => {
     </View>
   );
 };
+
+function tituloMateria(item) {
+  if (item.materia === 'rimas') return 'Rimas';
+  if (item.materia === 'portugues') return 'Portugues';
+  if (item.materia === 'matematica') return 'Matematica';
+  return item.materia || 'Atividade';
+}
+
+function tituloTarefa(item) {
+  if (item.formato === 'conectar_pares') {
+    return `${item.esquerda?.texto || ''} / ${item.direita?.texto || ''}`;
+  }
+
+  return item.pergunta || 'Atividade';
+}
+
+function textoStatus(status) {
+  if (status === 'aprovada') return 'aprovada';
+  if (status === 'rejeitada') return 'rejeitada';
+  if (status === 'pendente_ia') return 'em revisao automatica';
+  return status || 'pendente';
+}
 
 export default ListaTarefas;

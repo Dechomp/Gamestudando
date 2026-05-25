@@ -32,6 +32,7 @@ export default function AlunoLayout() {
 
       <Tabs.Screen name="avaliacaoInicial" options={{ href: null }} />
       <Tabs.Screen name="edicaoPerfilAluno" options={{ href: null }} />
+      <Tabs.Screen name="entrarTurma" options={{ href: null }} />
       <Tabs.Screen name="telaMapa" options={{ href: null }} />
       <Tabs.Screen name="telaQuiz" options={{ href: null }} />
       <Tabs.Screen name="telaQuiz4Matematica" options={{ href: null }} />
