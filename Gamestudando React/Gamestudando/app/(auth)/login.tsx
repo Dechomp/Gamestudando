@@ -10,6 +10,12 @@ import {
   View
 } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
+import {
+  GoogleSignin,
+  isCancelledResponse,
+  isErrorWithCode,
+  statusCodes
+} from "@react-native-google-signin/google-signin";
 
 import {
   carregarPerfilUsuarioAtual,
@@ -19,12 +25,10 @@ import {
   observarUsuarioLogado,
   obterRotaInicialPorPerfil
 } from "../utils/authUsuario";
-import * as Google from "expo-auth-session/providers/google";
-import * as WebBrowser from "expo-web-browser";
-import { obterGoogleWebClientId } from "../utils/googleAuthConfig";
+import {
+  obterGoogleWebClientId
+} from "../utils/googleAuthConfig";
 import { styles } from "../styles";
-
-WebBrowser.maybeCompleteAuthSession();
 
 export default function Login() {
   const router = useRouter();
@@ -34,16 +38,17 @@ export default function Login() {
   const [carregando, setCarregando] = useState(false);
   const [carregandoGoogle, setCarregandoGoogle] = useState(false);
   const googleWebClientId = obterGoogleWebClientId();
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    webClientId: googleWebClientId || undefined,
-    androidClientId: googleWebClientId || undefined,
-  });
 
   useEffect(() => {
     const parar = observarUsuarioLogado(async (usuario) => {
       if (!usuario) return;
 
-      const perfil = await carregarPerfilUsuarioAtual();
+      const perfil = await carregarPerfilUsuarioAtual({
+        criarSeNaoExistir: false
+      });
+
+      if (!perfil) return;
+
       router.replace(obterRotaInicialPorPerfil(perfil));
     });
 
@@ -51,36 +56,11 @@ export default function Login() {
   }, [router]);
 
   useEffect(() => {
-    const concluirGoogle = async () => {
-      if (response?.type !== "success") return;
-
-      const idToken = response.params?.id_token;
-
-      if (!idToken) {
-        Alert.alert("Login com Google", "Nao recebemos o token do Google.");
-        return;
-      }
-
-      try {
-        setCarregandoGoogle(true);
-        const { perfil, precisaEscolherTipo } = await entrarComCredencialGoogle(idToken);
-
-        if (precisaEscolherTipo) {
-          router.replace("/tipoContaGoogle");
-          return;
-        }
-
-        router.replace(obterRotaInicialPorPerfil(perfil));
-      } catch (error) {
-        console.log("Erro no Google Login:", error);
-        Alert.alert("Login com Google", mensagemErroGoogle(error));
-      } finally {
-        setCarregandoGoogle(false);
-      }
-    };
-
-    concluirGoogle();
-  }, [response, router]);
+    GoogleSignin.configure({
+      webClientId: googleWebClientId || undefined,
+      offlineAccess: false,
+    });
+  }, [googleWebClientId]);
 
   useFocusEffect(
     useCallback(() => {
@@ -135,16 +115,47 @@ export default function Login() {
     if (!googleWebClientId) {
       Alert.alert(
         "Login com Google",
-        "Nao encontrei o Client ID do Google. Confira se o arquivo google-services.json esta em app/google-services.json."
+        "Nao encontrei o Web Client ID do Google. Confira se o arquivo google-services.json esta atualizado em app/google-services.json."
       );
       return;
     }
 
     try {
-      await promptAsync();
+      setCarregandoGoogle(true);
+
+      await GoogleSignin.hasPlayServices({
+        showPlayServicesUpdateDialog: true,
+      });
+
+      await GoogleSignin.revokeAccess().catch(() => {});
+      await GoogleSignin.signOut().catch(() => {});
+
+      const respostaGoogle = await GoogleSignin.signIn();
+
+      if (isCancelledResponse(respostaGoogle)) {
+        return;
+      }
+
+      const idToken = respostaGoogle.data?.idToken;
+
+      if (!idToken) {
+        Alert.alert("Login com Google", "Nao recebemos o token do Google.");
+        return;
+      }
+
+      const { perfil, precisaEscolherTipo } = await entrarComCredencialGoogle(idToken);
+
+      if (precisaEscolherTipo) {
+        router.replace("/tipoContaGoogle");
+        return;
+      }
+
+      router.replace(obterRotaInicialPorPerfil(perfil));
     } catch (error) {
-      console.log("Erro abrindo Google Login:", error);
-      Alert.alert("Login com Google", "Nao foi possivel abrir o login do Google.");
+      console.log("Erro no Google Login:", error);
+      Alert.alert("Login com Google", mensagemErroGoogle(error));
+    } finally {
+      setCarregandoGoogle(false);
     }
   }
 
@@ -219,9 +230,9 @@ export default function Login() {
           <TouchableOpacity
             style={[
               styles.authBotaoGoogle,
-              (!request || carregandoGoogle) && styles.botaoDesabilitado
+              carregandoGoogle && styles.botaoDesabilitado
             ]}
-            disabled={!request || carregandoGoogle}
+            disabled={carregandoGoogle}
             onPress={entrarGoogle}
           >
             <View style={styles.googleIcone}>
@@ -262,6 +273,20 @@ function mensagemErroRecuperacao(error) {
 
 function mensagemErroGoogle(error) {
   const codigo = error?.code || "";
+
+  if (isErrorWithCode(error)) {
+    if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+      return "Login cancelado.";
+    }
+
+    if (error.code === statusCodes.IN_PROGRESS) {
+      return "O login com Google ja esta em andamento.";
+    }
+
+    if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+      return "Atualize o Google Play Services no celular para entrar com Google.";
+    }
+  }
 
   if (codigo.includes("account-exists-with-different-credential")) {
     return "Ja existe uma conta com esse email usando outro metodo de login.";

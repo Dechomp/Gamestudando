@@ -1,12 +1,14 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   Alert,
+  Platform,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Picker } from '@react-native-picker/picker';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { PieChart } from 'react-native-gifted-charts';
@@ -14,6 +16,7 @@ import { PieChart } from 'react-native-gifted-charts';
 import { styles } from '../styles';
 import { colors } from '../colors';
 import {
+  adicionarAlunoNaTurmaPorCodigo,
   atualizarTurmaProfessor,
   excluirTurmaProfessor,
   obterTurmaProfessor,
@@ -27,8 +30,12 @@ const DetalhesTurma = () => {
   const [nomeEditado, setNomeEditado] = useState('');
   const [editando, setEditando] = useState(false);
   const [alunoSelecionado, setAlunoSelecionado] = useState(null);
+  const [codigoAluno, setCodigoAluno] = useState('');
+  const [lendoQrAluno, setLendoQrAluno] = useState(false);
+  const [vinculandoAluno, setVinculandoAluno] = useState(false);
   const [ordenarPor, setOrdenarPor] = useState('nome');
   const [ordem, setOrdem] = useState('asc');
+  const [permission, requestPermission] = useCameraPermissions();
 
   const resumoTurma = useMemo(
     () => turma ? calcularResumoTurma(turma) : null,
@@ -127,6 +134,47 @@ const DetalhesTurma = () => {
         },
       ]
     );
+  };
+
+  const adicionarAlunoPorCodigo = async (valorCodigo = codigoAluno) => {
+    if (vinculandoAluno) return;
+
+    try {
+      setVinculandoAluno(true);
+      setLendoQrAluno(false);
+      await adicionarAlunoNaTurmaPorCodigo(turmaId, valorCodigo);
+      setCodigoAluno('');
+      await carregar();
+      Alert.alert('Turma', 'Aluno adicionado a turma.');
+    } catch (error) {
+      console.log(error);
+      Alert.alert('Turma', mensagemErroAdicionarAluno(error));
+    } finally {
+      setVinculandoAluno(false);
+    }
+  };
+
+  const alternarLeitorQrAluno = async () => {
+    if (lendoQrAluno) {
+      setLendoQrAluno(false);
+      return;
+    }
+
+    if (Platform.OS === 'web') {
+      Alert.alert('QR Code', 'A leitura por camera deve ser testada no celular.');
+      return;
+    }
+
+    if (!permission?.granted) {
+      const resposta = await requestPermission();
+
+      if (!resposta.granted) {
+        Alert.alert('Camera', 'Permita o uso da camera para ler o QR Code.');
+        return;
+      }
+    }
+
+    setLendoQrAluno(true);
   };
 
   if (!turma) {
@@ -239,6 +287,52 @@ const DetalhesTurma = () => {
           <Picker.Item label="Crescente" value="asc" />
           <Picker.Item label="Decrescente" value="desc" />
         </Picker>
+      </View>
+
+      <View style={styles.portalQuadroRelatorio}>
+        <Text style={styles.portalSubtitulo}>Adicionar aluno por codigo</Text>
+        <TextInput
+          style={styles.input}
+          value={codigoAluno}
+          onChangeText={(texto) => setCodigoAluno(texto.toUpperCase())}
+          placeholder="Codigo do aluno"
+          autoCapitalize="characters"
+        />
+
+        <TouchableOpacity
+          style={[styles.botaoSalvar, vinculandoAluno && styles.botaoDesabilitado]}
+          disabled={vinculandoAluno || !codigoAluno.trim()}
+          onPress={() => adicionarAlunoPorCodigo()}
+        >
+          <Text style={styles.textoBotao}>
+            {vinculandoAluno ? 'Adicionando...' : 'Adicionar aluno'}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.botaoEditar, styles.botaoPerfilEspacado]}
+          onPress={alternarLeitorQrAluno}
+        >
+          <Text style={styles.textoBotao}>
+            {lendoQrAluno ? 'Fechar QR Code' : 'Ler QR Code do aluno'}
+          </Text>
+        </TouchableOpacity>
+
+        {lendoQrAluno && (
+          <View style={styles.qrScannerContainer}>
+            <CameraView
+              style={styles.qrScanner}
+              facing="back"
+              barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+              onBarcodeScanned={
+                vinculandoAluno ? undefined : ({ data }) => adicionarAlunoPorCodigo(data)
+              }
+            />
+            <Text style={styles.legendaTexto}>
+              Aponte a camera para o QR Code do aluno.
+            </Text>
+          </View>
+        )}
       </View>
 
       <Text style={styles.label}>Alunos</Text>
@@ -427,6 +521,18 @@ function nomeMateria(materia) {
   if (materia === 'portugues') return 'Portugues';
   if (materia === 'rimas') return 'Rimas';
   return materia;
+}
+
+function mensagemErroAdicionarAluno(error) {
+  if (error?.message === 'CODIGO_ALUNO_VAZIO') {
+    return 'Digite o codigo do aluno.';
+  }
+
+  if (error?.message === 'ALUNO_NAO_ENCONTRADO') {
+    return 'Nao encontramos um aluno ativo com esse codigo.';
+  }
+
+  return 'Nao foi possivel adicionar o aluno agora.';
 }
 
 export default DetalhesTurma;

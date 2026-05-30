@@ -33,6 +33,7 @@ export default function AvaliacaoInicial() {
   const [indice, setIndice] = useState(0);
   const [respostas, setRespostas] = useState([]);
   const [selecionada, setSelecionada] = useState(null);
+  const [respostaRevelada, setRespostaRevelada] = useState(false);
   const [rimaEsquerda, setRimaEsquerda] = useState(null);
   const [paresSelecionados, setParesSelecionados] = useState([]);
   const [finalizando, setFinalizando] = useState(false);
@@ -89,20 +90,23 @@ export default function AvaliacaoInicial() {
   }, [etapaRimas, questaoAtual]);
 
   function responderQuestao() {
-    if (selecionada === null) {
-      Alert.alert("Avaliacao", "Escolha uma resposta.");
+    if (selecionada === null) return;
+
+    if (!respostaRevelada) {
+      setRespostas(prev => [
+        ...prev,
+        {
+          materia: questaoAtual.materia,
+          correta: selecionada === questaoAtual.correta
+        }
+      ]);
+
+      setRespostaRevelada(true);
       return;
     }
 
-    setRespostas(prev => [
-      ...prev,
-      {
-        materia: questaoAtual.materia,
-        correta: selecionada === questaoAtual.correta
-      }
-    ]);
-
     setSelecionada(null);
+    setRespostaRevelada(false);
     setIndice(prev => prev + 1);
   }
 
@@ -263,9 +267,18 @@ export default function AvaliacaoInicial() {
             style={[
               styles.avaliacaoBotaoResposta,
               selecionada === respostaIndex &&
-                styles.avaliacaoBotaoSelecionado
+                styles.avaliacaoBotaoSelecionado,
+              respostaRevelada &&
+                respostaIndex === questaoAtual.correta &&
+                styles.avaliacaoBotaoCorreto,
+              respostaRevelada &&
+                selecionada === respostaIndex &&
+                respostaIndex !== questaoAtual.correta &&
+                styles.avaliacaoBotaoErrado
             ]}
+            disabled={respostaRevelada}
             onPress={() => {
+              if (respostaRevelada) return;
               setSelecionada(respostaIndex);
               lerTextoSeAtivo(String(resposta));
             }}
@@ -275,6 +288,21 @@ export default function AvaliacaoInicial() {
         ))}
       </View>
 
+      {respostaRevelada && (
+        <View style={styles.avaliacaoFeedbackCard}>
+          <Text style={styles.configuracaoTexto}>
+            {selecionada === questaoAtual.correta
+              ? "Voce acertou!"
+              : "Ainda nao foi dessa vez."}
+          </Text>
+          {selecionada !== questaoAtual.correta && (
+            <Text style={styles.legendaTexto}>
+              Resposta certa: {questaoAtual.respostas[questaoAtual.correta]}
+            </Text>
+          )}
+        </View>
+      )}
+
       <TouchableOpacity
         style={[
           styles.botaoConfirmarBase,
@@ -282,9 +310,12 @@ export default function AvaliacaoInicial() {
             ? styles.botaoConfirmarVazio
             : styles.botaoConfirmarSelecionado
         ]}
+        disabled={selecionada === null}
         onPress={responderQuestao}
       >
-        <Text style={styles.textoBotao}>Continuar</Text>
+        <Text style={styles.textoBotao}>
+          {respostaRevelada ? "Proxima" : "Continuar"}
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );

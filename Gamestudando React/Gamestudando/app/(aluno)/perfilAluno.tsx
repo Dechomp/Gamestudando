@@ -1,10 +1,16 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Alert, View, Text, ScrollView, TouchableOpacity, Switch } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
+import QRCode from "react-native-qrcode-svg";
 
 import { carregarPerfil, atualizarConfiguracoes } from "../utils/perfilAluno";
 import { observarUsuarioLogado, sairDaConta } from "../utils/authUsuario";
 import { listarTurmasDoAluno } from "../utils/firebaseTurmas";
+import {
+  listarResponsaveisDoAluno,
+  montarValorQrAlunoResponsavel,
+  obterOuCriarCodigoAlunoResponsavel,
+} from "../utils/firebaseResponsaveis";
 import { PieChart } from "react-native-gifted-charts";
 import { styles } from "../styles";
 import { colors } from "../colors";
@@ -15,22 +21,42 @@ export default function PerfilAluno() {
   const [perfil, setPerfil] = useState(null);
   const [verificandoLogin, setVerificandoLogin] = useState(true);
   const [turmas, setTurmas] = useState([]);
+  const [responsaveis, setResponsaveis] = useState([]);
+  const [codigoAluno, setCodigoAluno] = useState("");
 
-  const carregar = async () => {
+  const carregar = useCallback(async () => {
     const dados = await carregarPerfil();
-    const turmasAluno = await listarTurmasDoAluno().catch((error) => {
-      console.log(error);
-      return [];
-    });
+
+    if (!dados?.progresso?.avaliacaoInicialConcluida) {
+      router.replace("/avaliacaoInicial");
+      return;
+    }
+
+    const [turmasAluno, responsaveisAluno, codigo] = await Promise.all([
+      listarTurmasDoAluno().catch((error) => {
+        console.log(error);
+        return [];
+      }),
+      listarResponsaveisDoAluno().catch((error) => {
+        console.log(error);
+        return [];
+      }),
+      obterOuCriarCodigoAlunoResponsavel().catch((error) => {
+        console.log(error);
+        return "";
+      }),
+    ]);
 
     setPerfil(dados);
     setTurmas(turmasAluno);
-  };
+    setResponsaveis(responsaveisAluno);
+    setCodigoAluno(codigo);
+  }, [router]);
 
   useFocusEffect(
     useCallback(() => {
       carregar();
-    }, [])
+    }, [carregar])
   );
 
   useEffect(() => {
@@ -127,6 +153,22 @@ export default function PerfilAluno() {
       </View>
 
       <View style={styles.card}>
+        <Text style={styles.areaTitulo}>Codigo do aluno</Text>
+        <Text style={styles.turmaCodigo}>{codigoAluno || "Carregando..."}</Text>
+        {!!codigoAluno && (
+          <View style={styles.turmaQrBox}>
+            <QRCode
+              value={montarValorQrAlunoResponsavel(codigoAluno)}
+              size={135}
+            />
+          </View>
+        )}
+        <Text style={styles.legendaTexto}>
+          Professor ou responsavel pode ler este codigo para vincular voce.
+        </Text>
+      </View>
+
+      <View style={styles.card}>
         <Text style={styles.areaTitulo}>Minhas turmas</Text>
 
         {turmas.length === 0 ? (
@@ -153,6 +195,36 @@ export default function PerfilAluno() {
         >
           <Text style={styles.textoBotao}>
             Entrar em turma
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.areaTitulo}>Meus responsaveis</Text>
+
+        {responsaveis.length === 0 ? (
+          <Text style={styles.legendaTexto}>
+            Nenhum responsavel vinculado ainda.
+          </Text>
+        ) : (
+          responsaveis.map((responsavel) => (
+            <View key={responsavel.id} style={styles.turmaAlunoItem}>
+              <Text style={styles.configuracaoTexto}>
+                {responsavel.nome || "Responsavel"}
+              </Text>
+              <Text style={styles.legendaTexto}>
+                {responsavel.email || "Sem email"}
+              </Text>
+            </View>
+          ))
+        )}
+
+        <TouchableOpacity
+          style={[styles.botaoEditar, styles.botaoPerfilEspacado]}
+          onPress={() => router.push("/vincularResponsavel")}
+        >
+          <Text style={styles.textoBotao}>
+            Vincular responsavel
           </Text>
         </TouchableOpacity>
       </View>

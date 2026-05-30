@@ -801,6 +801,7 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 8,
+    color: colors.textoPrimario,
   },
 
   input: {
@@ -809,6 +810,8 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
+    color: colors.textoPrimario,
+    backgroundColor: colors.fundoCampo,
   },
 
   tarefaScroll: {
@@ -1112,11 +1115,14 @@ export const styles = StyleSheet.create({
     borderColor: colors.cinzaClaro,
     borderRadius: 8,
     marginBottom: 16,
+    backgroundColor: colors.fundoCampo,
   },
 
   inputSenha: {
     flex: 1,
     padding: 12,
+    color: colors.textoPrimario,
+    backgroundColor: colors.fundoCampo,
   },
 
   botaoMostrarSenha: {
@@ -1206,6 +1212,24 @@ export const styles = StyleSheet.create({
 
   avaliacaoBotaoSelecionado: {
     backgroundColor: colors.selecionada,
+  },
+
+  avaliacaoBotaoCorreto: {
+    backgroundColor: colors.certa,
+  },
+
+  avaliacaoBotaoErrado: {
+    backgroundColor: colors.errada,
+  },
+
+  avaliacaoFeedbackCard: {
+    width: "100%",
+    maxWidth: 520,
+    backgroundColor: colors.fundoInfo,
+    borderRadius: 8,
+    padding: 14,
+    marginTop: 8,
+    alignItems: "center",
   },
 
 });

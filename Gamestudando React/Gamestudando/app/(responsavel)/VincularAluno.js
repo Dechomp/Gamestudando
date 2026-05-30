@@ -13,34 +13,37 @@ import { router } from "expo-router";
 
 import { styles } from "../styles";
 import {
-  entrarEmTurmaPorCodigo,
-  extrairCodigoTurma,
-} from "../utils/firebaseTurmas";
+  extrairCodigoAlunoResponsavel,
+  vincularAlunoPorCodigoResponsavel,
+} from "../utils/firebaseResponsaveis";
 
-export default function EntrarTurma() {
+export default function VincularAluno() {
   const [codigo, setCodigo] = useState("");
   const [lendoQr, setLendoQr] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
 
-  const entrar = async (valorCodigo = codigo) => {
+  const vincular = async (valorCodigo = codigo) => {
     if (salvando) return;
 
     try {
       setSalvando(true);
       setLendoQr(false);
-      const turma = await entrarEmTurmaPorCodigo(extrairCodigoTurma(valorCodigo));
+      const aluno = await vincularAlunoPorCodigoResponsavel(
+        extrairCodigoAlunoResponsavel(valorCodigo)
+      );
+
       setCodigo("");
 
       Alert.alert(
-        "Turma vinculada",
-        `Voce entrou na turma ${turma.nome}.`
+        "Aluno vinculado",
+        `${aluno.nome || "Aluno"} agora aparece nos seus relatorios.`
       );
 
-      router.back();
+      router.replace("/RelatorioResponsavel");
     } catch (error) {
       console.log(error);
-      Alert.alert("Turma", mensagemErro(error));
+      Alert.alert("Vincular aluno", mensagemErro(error));
     } finally {
       setSalvando(false);
     }
@@ -73,6 +76,7 @@ export default function EntrarTurma() {
     <ScrollView
       style={styles.portalContainer}
       contentContainerStyle={styles.portalContent}
+      keyboardShouldPersistTaps="handled"
     >
       <TouchableOpacity
         style={styles.botaoVoltarTarefa}
@@ -81,24 +85,24 @@ export default function EntrarTurma() {
         <Text style={styles.textoVoltarTarefa}>{"<-"} Voltar</Text>
       </TouchableOpacity>
 
-      <Text style={styles.portalTituloMenor}>Entrar em turma</Text>
+      <Text style={styles.portalTituloMenor}>Vincular aluno</Text>
 
-      <Text style={styles.label}>Codigo da turma</Text>
+      <Text style={styles.label}>Codigo do aluno</Text>
       <TextInput
         style={styles.input}
         value={codigo}
         onChangeText={(texto) => setCodigo(texto.toUpperCase())}
-        placeholder="Ex: ABC123"
+        placeholder="Ex: ABC1234"
         autoCapitalize="characters"
       />
 
       <TouchableOpacity
         style={[styles.botaoSalvar, salvando && styles.botaoDesabilitado]}
         disabled={salvando}
-        onPress={() => entrar()}
+        onPress={() => vincular()}
       >
         <Text style={styles.textoBotao}>
-          {salvando ? "Entrando..." : "Entrar por codigo"}
+          {salvando ? "Vinculando..." : "Vincular por codigo"}
         </Text>
       </TouchableOpacity>
 
@@ -119,11 +123,11 @@ export default function EntrarTurma() {
             barcodeScannerSettings={{
               barcodeTypes: ["qr"],
             }}
-            onBarcodeScanned={salvando ? undefined : ({ data }) => entrar(data)}
+            onBarcodeScanned={salvando ? undefined : ({ data }) => vincular(data)}
           />
 
           <Text style={styles.legendaTexto}>
-            Aponte a camera para o QR Code da turma.
+            Aponte a camera para o QR Code do aluno.
           </Text>
         </View>
       )}
@@ -132,9 +136,13 @@ export default function EntrarTurma() {
 }
 
 function mensagemErro(error) {
-  if (error?.message === "TURMA_NAO_ENCONTRADA") {
-    return "Nao encontramos uma turma ativa com esse codigo.";
+  if (error?.message === "CODIGO_ALUNO_VAZIO") {
+    return "Digite o codigo do aluno.";
   }
 
-  return "Nao foi possivel entrar na turma agora.";
+  if (error?.message === "ALUNO_NAO_ENCONTRADO") {
+    return "Nao encontramos um aluno ativo com esse codigo.";
+  }
+
+  return "Nao foi possivel vincular o aluno agora.";
 }

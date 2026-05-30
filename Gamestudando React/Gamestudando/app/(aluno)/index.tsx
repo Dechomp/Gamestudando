@@ -96,6 +96,8 @@ export default function MapaFases() {
       const rotaInicial = obterRotaInicialPorPerfil(perfil);
 
       if (rotaInicial !== "/") {
+        setUsuarioLogado(true);
+        setVerificandoLogin(false);
         router.replace(rotaInicial);
         return;
       }

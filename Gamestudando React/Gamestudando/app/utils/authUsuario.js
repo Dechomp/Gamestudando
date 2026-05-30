@@ -11,6 +11,7 @@ import {
   updatePassword,
   updateProfile
 } from "firebase/auth";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 import { auth } from "./firebase";
 import {
@@ -160,6 +161,8 @@ export async function enviarEmailRecuperacaoSenha(email) {
 }
 
 export async function sairDaConta() {
+  await GoogleSignin.revokeAccess().catch(() => {});
+  await GoogleSignin.signOut().catch(() => {});
   await signOut(auth);
   await limparPerfilLocal();
 }

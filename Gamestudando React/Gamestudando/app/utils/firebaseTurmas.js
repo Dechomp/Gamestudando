@@ -143,6 +143,51 @@ export async function removerAlunoDaTurma(turmaId, alunoId) {
   await deleteDoc(doc(db, "usuarios", alunoId, "turmas", turmaId));
 }
 
+export async function adicionarAlunoNaTurmaPorCodigo(turmaId, codigoAluno) {
+  const turma = await obterTurmaProfessor(turmaId);
+  const codigo = normalizarCodigoTurma(codigoAluno);
+
+  if (!codigo) {
+    throw new Error("CODIGO_ALUNO_VAZIO");
+  }
+
+  const codigoSnap = await getDoc(doc(db, "codigosAlunosResponsavel", codigo));
+
+  if (!codigoSnap.exists() || codigoSnap.data()?.ativo === false) {
+    throw new Error("ALUNO_NAO_ENCONTRADO");
+  }
+
+  const { alunoId } = codigoSnap.data();
+  const alunoSnap = await getDoc(doc(db, "usuarios", alunoId));
+
+  if (!alunoSnap.exists()) {
+    throw new Error("ALUNO_NAO_ENCONTRADO");
+  }
+
+  const aluno = alunoSnap.data();
+  const professorSnap = await getDoc(doc(db, "usuarios", turma.professorId));
+  const professor = professorSnap.exists() ? professorSnap.data() : {};
+  const resumoAluno = montarResumoAluno(alunoId, { displayName: aluno.nome }, aluno);
+
+  await setDoc(doc(db, "turmas", turma.id, "alunos", alunoId), {
+    ...resumoAluno,
+    entrouEm: serverTimestamp(),
+    atualizadoEm: serverTimestamp(),
+  }, { merge: true });
+
+  await setDoc(doc(db, "usuarios", alunoId, "turmas", turma.id), {
+    turmaId: turma.id,
+    nome: turma.nome,
+    codigo: turma.codigo,
+    professorId: turma.professorId,
+    professorNome: professor.nome || "Professor",
+    entrouEm: serverTimestamp(),
+    ativa: true,
+  }, { merge: true });
+
+  return resumoAluno;
+}
+
 export async function listarAlunosDaTurma(turmaId) {
   const snap = await getDocs(collection(db, "turmas", turmaId, "alunos"));
 
