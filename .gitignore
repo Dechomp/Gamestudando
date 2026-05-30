@@ -1,0 +1,17 @@
+# Unity
+MissaoEspacialUnity/Library/
+MissaoEspacialUnity/Temp/
+MissaoEspacialUnity/Obj/
+MissaoEspacialUnity/Build/
+MissaoEspacialUnity/Builds/
+MissaoEspacialUnity/Logs/
+MissaoEspacialUnity/UserSettings/
+
+# Unity generated files
+MissaoEspacialUnity/*.csproj
+MissaoEspacialUnity/*.sln
+MissaoEspacialUnity/*.user
+
+# Expo / React
+Gamestudando React/node_modules/
+Gamestudando React/Gamestudando/node_modules/
