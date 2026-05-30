@@ -15,6 +15,7 @@ import {
   moderarTarefaLocalmente,
   revisarTarefaComIA
 } from "./moderacaoTarefas";
+import { normalizarPalavra } from "./rimas";
 
 export async function criarQuestaoMultiplaEscolhaProfessor({
   materia,
@@ -285,15 +286,6 @@ function montarChaveParRima(palavraA, palavraB) {
   return [normalizarPalavra(palavraA), normalizarPalavra(palavraB)]
     .sort()
     .join("_");
-}
-
-function normalizarPalavra(texto) {
-  return String(texto)
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]/g, "");
 }
 
 function inferirTipoQuestao(texto, materia) {

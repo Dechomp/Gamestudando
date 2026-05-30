@@ -20,6 +20,7 @@ import {
   carregarQuestoesMultiplaEscolha,
   carregarQuestoesRimas
 } from "../utils/repositorioQuestoes";
+import { parecemRimar } from "../utils/rimas";
 import { styles } from "../styles";
 
 const NIVEIS_MATEMATICA = [1, 1, 2, 2, 3, 3, 4];
@@ -36,6 +37,8 @@ export default function AvaliacaoInicial() {
   const [respostaRevelada, setRespostaRevelada] = useState(false);
   const [rimaEsquerda, setRimaEsquerda] = useState(null);
   const [paresSelecionados, setParesSelecionados] = useState([]);
+  const [rimaFeedback, setRimaFeedback] = useState(null);
+  const [rimaErros, setRimaErros] = useState(0);
   const [finalizando, setFinalizando] = useState(false);
   const [verificandoAvaliacao, setVerificandoAvaliacao] = useState(true);
 
@@ -111,11 +114,15 @@ export default function AvaliacaoInicial() {
   }
 
   function selecionarRimaEsquerda(item) {
+    if (rimaFeedback) return;
+
     setRimaEsquerda(item);
     lerTextoSeAtivo(item.texto);
   }
 
   function selecionarRimaDireita(item) {
+    if (rimaFeedback) return;
+
     if (!rimaEsquerda) {
       lerTextoSeAtivo(item.texto);
       return;
@@ -134,17 +141,48 @@ export default function AvaliacaoInicial() {
       return;
     }
 
-    setParesSelecionados(prev => [
-      ...prev,
-      {
+    lerTextoSeAtivo(item.texto);
+
+    const correta =
+      rimaEsquerda.par === item.par &&
+      parecemRimar(rimaEsquerda.texto, item.texto);
+
+    const direitaCorreta = paresRimas
+      .map(par => par.direita)
+      .find(direita => (
+        direita.par === rimaEsquerda.par &&
+        parecemRimar(rimaEsquerda.texto, direita.texto)
+      ));
+
+    if (correta) {
+      setParesSelecionados(prev => [
+        ...prev,
+        {
+          esquerda: rimaEsquerda,
+          direita: item,
+          correta: true
+        }
+      ]);
+      setRimaFeedback({
+        correta: true,
         esquerda: rimaEsquerda,
         direita: item,
-        correta: rimaEsquerda.par === item.par
-      }
-    ]);
+        direitaCorreta: item
+      });
+    } else {
+      setRimaErros(prev => prev + 1);
+      setRimaFeedback({
+        correta: false,
+        esquerda: rimaEsquerda,
+        direita: item,
+        direitaCorreta
+      });
+    }
 
-    setRimaEsquerda(null);
-    lerTextoSeAtivo(item.texto);
+    setTimeout(() => {
+      setRimaFeedback(null);
+      setRimaEsquerda(null);
+    }, correta ? 700 : 1600);
   }
 
   async function finalizarAvaliacao() {
@@ -153,7 +191,7 @@ export default function AvaliacaoInicial() {
       return;
     }
 
-    const resultado = calcularResultado(respostas, paresSelecionados);
+    const resultado = calcularResultado(respostas, paresSelecionados, rimaErros);
 
     try {
       setFinalizando(true);
@@ -198,6 +236,10 @@ export default function AvaliacaoInicial() {
                   style={[
                     styles.itemNormal,
                     rimaEsquerda?.id === esquerda.id && styles.itemSelecionado,
+                    rimaFeedback?.esquerda?.id === esquerda.id &&
+                      (rimaFeedback.correta
+                        ? styles.itemSelecionado
+                        : styles.itemErro),
                     usada && styles.itemDesativado
                   ]}
                   onPress={() => selecionarRimaEsquerda(esquerda)}
@@ -220,6 +262,13 @@ export default function AvaliacaoInicial() {
                   disabled={usada}
                   style={[
                     styles.itemNormal,
+                    rimaFeedback?.direita?.id === direita.id &&
+                      (rimaFeedback.correta
+                        ? styles.itemSelecionado
+                        : styles.itemErro),
+                    rimaFeedback?.direitaCorreta?.id === direita.id &&
+                      !rimaFeedback.correta &&
+                      styles.itemSelecionado,
                     usada && styles.itemDesativado
                   ]}
                   onPress={() => selecionarRimaDireita(direita)}
@@ -230,6 +279,22 @@ export default function AvaliacaoInicial() {
             })}
           </View>
         </View>
+
+        {rimaFeedback && (
+          <View style={styles.avaliacaoFeedbackCard}>
+            <Text style={styles.configuracaoTexto}>
+              {rimaFeedback.correta
+                ? "Voce acertou!"
+                : "Ainda nao foi dessa vez."}
+            </Text>
+            {!rimaFeedback.correta && rimaFeedback.direitaCorreta && (
+              <Text style={styles.legendaTexto}>
+                Rima certa: {rimaFeedback.esquerda.texto} com{" "}
+                {rimaFeedback.direitaCorreta.texto}
+              </Text>
+            )}
+          </View>
+        )}
 
         <TouchableOpacity
           style={[
@@ -357,13 +422,22 @@ function selecionarPorNiveis(lista, niveis, materia) {
 
 function montarParesRimas(esquerdaBase, direitaBase) {
   const paresUsados = new Set();
+  const esquerdaValidas = esquerdaBase.filter(esquerda =>
+    direitaBase.some(direita =>
+      direita.par === esquerda.par && parecemRimar(esquerda.texto, direita.texto)
+    )
+  );
+  const baseSegura = esquerdaValidas.length ? esquerdaValidas : esquerdaBase;
+
   const pares = NIVEIS_RIMAS.map((nivel) => {
-    const esquerda = esquerdaBase.find(item => (
+    const esquerda = baseSegura.find(item => (
       item.nivel === nivel && !paresUsados.has(item.par)
-    )) || esquerdaBase.find(item => item.nivel === nivel);
+    )) || baseSegura.find(item => item.nivel === nivel) || baseSegura[0];
 
     const direita =
-      direitaBase.find(item => item.par === esquerda.par) ||
+      direitaBase.find(item => (
+        item.par === esquerda.par && parecemRimar(esquerda.texto, item.texto)
+      )) ||
       direitaBase[0];
 
     paresUsados.add(esquerda.par);
@@ -383,7 +457,7 @@ function montarParesRimas(esquerdaBase, direitaBase) {
     .sort(() => Math.random() - 0.5);
 }
 
-function calcularResultado(respostas, paresSelecionados) {
+function calcularResultado(respostas, paresSelecionados, rimaErros = 0) {
   const resultado = {
     portugues: { acertos: 0, erros: 0 },
     matematica: { acertos: 0, erros: 0 },
@@ -405,6 +479,8 @@ function calcularResultado(respostas, paresSelecionados) {
       resultado.rimas.erros += 1;
     }
   });
+
+  resultado.rimas.erros += rimaErros;
 
   return resultado;
 }

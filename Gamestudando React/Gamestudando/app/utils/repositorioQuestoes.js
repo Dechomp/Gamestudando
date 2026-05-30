@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { collection, getDocs, query, where } from "firebase/firestore";
 
 import { db } from "./firebase";
+import { parecemRimar } from "./rimas";
 
 const CACHE_PREFIXO = "questoes_cache_";
 
@@ -68,8 +69,10 @@ export async function carregarQuestoesRimas(
     console.log("Erro buscando perguntas de rimas:", error);
   }
 
-  if (cache?.esquerda?.length && cache?.direita?.length) {
-    return cache;
+  const cacheValido = filtrarColunasRimasValidas(cache);
+
+  if (cacheValido?.esquerda?.length && cacheValido?.direita?.length) {
+    return cacheValido;
   }
 
   return {
@@ -119,6 +122,7 @@ function normalizarMultiplaEscolha(id, dados) {
 
 function normalizarParRima(id, dados) {
   if (!dados?.esquerda?.texto || !dados?.direita?.texto) return null;
+  if (!parecemRimar(dados.esquerda.texto, dados.direita.texto)) return null;
 
   return {
     id,
@@ -147,4 +151,22 @@ function converterParesParaColunas(pares) {
       nivel: par.direita.nivel || par.nivel
     }))
   };
+}
+
+function filtrarColunasRimasValidas(colunas) {
+  if (!colunas?.esquerda?.length || !colunas?.direita?.length) return null;
+
+  const esquerda = colunas.esquerda.filter(item =>
+    colunas.direita.some(direita =>
+      direita.par === item.par && parecemRimar(item.texto, direita.texto)
+    )
+  );
+
+  const direita = colunas.direita.filter(item =>
+    esquerda.some(esquerdaItem =>
+      esquerdaItem.par === item.par && parecemRimar(esquerdaItem.texto, item.texto)
+    )
+  );
+
+  return { esquerda, direita };
 }

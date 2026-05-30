@@ -24,6 +24,7 @@ import {
   palavrasDireita
 } from "../perguntasQuizRimas";
 import { carregarQuestoesRimas } from "../utils/repositorioQuestoes";
+import { parecemRimar } from "../utils/rimas";
 
 import {
   atualizarPerfil,
@@ -69,6 +70,7 @@ function gerarRodadaIA(nivelAluno = 3, esquerdaBase = palavrasEsquerda, direitaB
         direitaBase.filter(d =>
 
           d.par === esq.par &&
+          parecemRimar(esq.texto, d.texto) &&
           d.texto !== esq.texto &&
           !palavrasUsadas.includes(d.texto)
 
@@ -346,7 +348,8 @@ export default function Index() {
     if (
 
       selecionadoEsquerda.grupo ===
-      selecionadoDireita.grupo
+      selecionadoDireita.grupo &&
+      parecemRimar(selecionadoEsquerda.texto, selecionadoDireita.texto)
 
     ) {
 

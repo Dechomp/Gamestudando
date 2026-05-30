@@ -1,6 +1,7 @@
 import { httpsCallable } from "firebase/functions";
 
 import { cloudFunctions } from "./firebase";
+import { parecemRimar, normalizarPalavra } from "./rimas";
 
 const PALAVRAS_BLOQUEADAS = [
   "agredir",
@@ -169,28 +170,15 @@ function extrairTextos(tarefa) {
   ].filter(Boolean);
 }
 
-function parecemRimar(palavraA, palavraB) {
-  const a = normalizarPalavra(palavraA);
-  const b = normalizarPalavra(palavraB);
-
-  if (a.length < 2 || b.length < 2) return false;
-
-  return a.slice(-3) === b.slice(-3) || a.slice(-2) === b.slice(-2);
-}
-
 function normalizarTexto(texto) {
-  return ` ${normalizarPalavra(texto)} `;
-}
-
-function normalizarPalavra(texto) {
-  return String(texto)
+  return ` ${String(texto)
     .trim()
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9\s]/g, " ")
     .replace(/\s+/g, " ")
-    .trim();
+    .trim()} `;
 }
 
 function aprovarLocalmente() {

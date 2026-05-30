@@ -1,17 +1,19 @@
 import * as Speech from "expo-speech";
 import { carregarPerfil } from "./perfilAluno";
 
-function prepararTextoParaLeitura(texto) {
-  let textoPreparado = String(texto);
+const LETRA = "A-Za-z\\u00C0-\\u00FF";
 
-  while (/[A-Za-zÀ-ÿ]\s*-\s*[A-Za-zÀ-ÿ]/.test(textoPreparado)) {
-    textoPreparado = textoPreparado.replace(
-      /([A-Za-zÀ-ÿ])\s*-\s*([A-Za-zÀ-ÿ])/g,
-      "$1, $2"
-    );
+export function prepararTextoParaLeitura(texto) {
+  let textoPreparado = String(texto);
+  const silabaComHifen = new RegExp(`([${LETRA}])\\s*-\\s*([${LETRA}])`, "g");
+
+  while (silabaComHifen.test(textoPreparado)) {
+    textoPreparado = textoPreparado.replace(silabaComHifen, "$1, $2");
+    silabaComHifen.lastIndex = 0;
   }
 
   return textoPreparado
+    .replace(/\b[A-Z\u00C0-\u00DD]{1,2}\b/g, trecho => trecho.toLowerCase())
     .replace(/\+/g, " mais ")
     .replace(/(\d)\s*-\s*(\d)/g, "$1 menos $2")
     .replace(/-/g, " menos ")
