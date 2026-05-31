@@ -150,7 +150,7 @@ export default function MapaFases() {
   }
 
   function escolherTela(materia) {
-    if (materia === "matematica") return "/telaQuiz4Matematica";
+    if (materia === "matematica") return "/jogoBatalhaMatematica";
     if (materia === "portugues") return "/telaQuiz4Portugues";
     if (materia === "rimas") return "/telaQuizRimas";
 

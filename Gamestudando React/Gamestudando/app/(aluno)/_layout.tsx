@@ -31,6 +31,16 @@ export default function AlunoLayout() {
       />
 
       <Tabs.Screen
+        name="jogos"
+        options={{
+          title: "Jogos",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="game-controller" color={color} size={size} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
         name="avaliacaoInicial"
         options={{
           href: null,
@@ -42,6 +52,7 @@ export default function AlunoLayout() {
       <Tabs.Screen name="vincularResponsavel" options={{ href: null }} />
       <Tabs.Screen name="telaMapa" options={{ href: null }} />
       <Tabs.Screen name="telaQuiz" options={{ href: null }} />
+      <Tabs.Screen name="jogoBatalhaMatematica" options={{ href: null }} />
       <Tabs.Screen name="telaQuiz4Matematica" options={{ href: null }} />
       <Tabs.Screen name="telaQuiz4Portugues" options={{ href: null }} />
       <Tabs.Screen name="telaQuizRimas" options={{ href: null }} />
