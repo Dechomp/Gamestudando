@@ -545,6 +545,13 @@ export const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
+  mapaMissaoEspacialBotao: {
+    alignSelf: "center",
+    width: "100%",
+    maxWidth: 360,
+    marginBottom: 18,
+  },
+
   faseContainer: {
     alignItems: "center",
   },
@@ -1230,6 +1237,394 @@ export const styles = StyleSheet.create({
     padding: 14,
     marginTop: 8,
     alignItems: "center",
+  },
+
+  missaoContainer: {
+    flex: 1,
+    backgroundColor: colors.espacoFundo,
+  },
+
+  missaoFundoImagem: {
+    position: "absolute",
+  },
+
+  missaoCanvas: {
+    flex: 1,
+  },
+
+  missaoSpriteTerra: {
+    position: "absolute",
+    width: 84,
+    height: 84,
+  },
+
+  missaoSpriteAsteroide: {
+    position: "absolute",
+  },
+
+  missaoSpriteNave: {
+    position: "absolute",
+    width: 60,
+    height: 72,
+  },
+
+  missaoSpriteLaser: {
+    position: "absolute",
+    width: 18,
+    height: 46,
+  },
+
+  missaoSpritePickup: {
+    position: "absolute",
+    width: 44,
+    height: 52,
+  },
+
+  missaoUpgradePickup: {
+    position: "absolute",
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.palavraAtual,
+    borderWidth: 2,
+    borderColor: colors.branco,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  missaoUpgradePickupTexto: {
+    color: colors.espacoFundo,
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+
+  missaoTouchArea: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+
+  missaoHudTopo: {
+    position: "absolute",
+    top: 46,
+    left: 14,
+    right: 14,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+  },
+
+  missaoHudBloco: {
+    backgroundColor: colors.hudJogo,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    minWidth: 138,
+  },
+
+  missaoHudTexto: {
+    color: colors.branco,
+    fontSize: 15,
+    fontWeight: "bold",
+  },
+
+  missaoObjetoLabel: {
+    color: colors.branco,
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+    textShadowColor: colors.preto,
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+  },
+
+  missaoFuelBarra: {
+    width: 126,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.palavraFutura,
+    overflow: "hidden",
+    marginVertical: 5,
+  },
+
+  missaoFuelBarraPreenchida: {
+    height: "100%",
+    borderRadius: 5,
+    backgroundColor: colors.combustivel,
+  },
+
+  missaoVidasLinha: {
+    flexDirection: "row",
+    gap: 6,
+    marginTop: 4,
+  },
+
+  missaoVidaNave: {
+    width: 20,
+    height: 24,
+  },
+
+  missaoVidaNaveApagada: {
+    opacity: 0.35,
+  },
+
+  missaoPauseBotao: {
+    width: 52,
+    height: 52,
+    borderRadius: 8,
+    backgroundColor: colors.laranja,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  missaoPauseTexto: {
+    color: colors.branco,
+    fontSize: 22,
+    fontWeight: "bold",
+  },
+
+  missaoPensamento: {
+    position: "absolute",
+    top: 118,
+    left: 24,
+    right: 24,
+    alignItems: "center",
+  },
+
+  missaoPensamentoTexto: {
+    color: colors.branco,
+    backgroundColor: colors.hudJogo,
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    fontSize: 15,
+    textAlign: "center",
+    overflow: "hidden",
+  },
+
+  missaoPalavra: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 26,
+    alignItems: "center",
+  },
+
+  missaoPalavraLinha: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "center",
+  },
+
+  missaoLetraSlot: {
+    width: 34,
+    alignItems: "center",
+  },
+
+  missaoLetraTexto: {
+    fontSize: 32,
+    fontWeight: "bold",
+  },
+
+  missaoIndicadorLetra: {
+    color: colors.palavraAtual,
+    fontSize: 16,
+    lineHeight: 16,
+    fontWeight: "bold",
+  },
+
+  missaoControleArea: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 106,
+    paddingHorizontal: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  missaoDirecional: {
+    width: 178,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  missaoDirecionalLinha: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginVertical: 8,
+  },
+
+  missaoControleGrupo: {
+    flexDirection: "row",
+    gap: 12,
+  },
+
+  missaoControleDica: {
+    minWidth: 132,
+    minHeight: 54,
+    borderRadius: 8,
+    backgroundColor: colors.hudJogo,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 12,
+  },
+
+  missaoControleDicaGrupo: {
+    minWidth: 178,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+
+  missaoPararBotao: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: colors.controleJogo,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.laranja,
+  },
+
+  missaoControleDicaTexto: {
+    color: colors.branco,
+    fontSize: 14,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+
+  missaoControleBotao: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: colors.controleJogo,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.palavraFutura,
+  },
+
+  missaoControleBotaoGrande: {
+    width: 78,
+    height: 78,
+    borderRadius: 39,
+  },
+
+  missaoControleBotaoAtivo: {
+    backgroundColor: colors.controleJogoAtivo,
+    borderColor: colors.laranja,
+  },
+
+  missaoControleTexto: {
+    color: colors.branco,
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+
+  missaoOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.72)",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+  },
+
+  missaoOverlayBox: {
+    width: "100%",
+    maxWidth: 420,
+    backgroundColor: colors.hudJogo,
+    borderRadius: 8,
+    padding: 22,
+    alignItems: "center",
+  },
+
+  missaoOverlayTitulo: {
+    color: colors.branco,
+    fontSize: 26,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+
+  missaoOverlayProgresso: {
+    color: colors.palavraAtual,
+    fontSize: 15,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+
+  missaoOverlayTexto: {
+    color: colors.branco,
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 18,
+  },
+
+  missaoModoControleBox: {
+    width: "100%",
+    marginBottom: 8,
+  },
+
+  missaoModoControleLinha: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 8,
+  },
+
+  missaoModoControleBotao: {
+    flex: 1,
+    minHeight: 42,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.palavraFutura,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.controleJogo,
+    paddingHorizontal: 6,
+  },
+
+  missaoModoControleBotaoAtivo: {
+    backgroundColor: colors.controleJogoAtivo,
+    borderColor: colors.laranja,
+  },
+
+  missaoModoControleTexto: {
+    color: colors.branco,
+    fontSize: 13,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+
+  missaoOverlayBotao: {
+    width: "100%",
+    minHeight: 48,
+    borderRadius: 8,
+    backgroundColor: colors.laranja,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
+  },
+
+  missaoOverlayBotaoSecundario: {
+    backgroundColor: colors.secundaria,
+  },
+
+  missaoOverlayBotaoTexto: {
+    color: colors.branco,
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
   },
 
 });

@@ -59,6 +59,7 @@ export async function criarQuestaoMultiplaEscolhaProfessor({
 export async function criarQuestaoRimaProfessor({
   palavraA,
   palavraB,
+  palavraMissao,
   nivel
 }) {
   const usuario = auth.currentUser;
@@ -69,6 +70,7 @@ export async function criarQuestaoRimaProfessor({
 
   const primeira = palavraA.trim().toUpperCase();
   const segunda = palavraB.trim().toUpperCase();
+  const palavraCosmoletrando = String(palavraMissao || primeira).trim().toUpperCase();
   const chavePar = montarChaveParRima(primeira, segunda);
   const jaExiste = await verificarParRimaExistente(chavePar, primeira, segunda);
 
@@ -91,6 +93,10 @@ export async function criarQuestaoRimaProfessor({
     direita: {
       texto: segunda,
       nivel: Number(nivel),
+    },
+    palavraMissao: palavraCosmoletrando,
+    cosmoletrando: {
+      palavra: palavraCosmoletrando,
     },
     nivel: Number(nivel),
   };
@@ -236,6 +242,10 @@ function montarDadosAtualizacao(dados) {
       direita: {
         texto: segunda,
         nivel: Number(dados.nivel),
+      },
+      palavraMissao: String(dados.palavraMissao || primeira).trim().toUpperCase(),
+      cosmoletrando: {
+        palavra: String(dados.palavraMissao || primeira).trim().toUpperCase(),
       },
       nivel: Number(dados.nivel),
     };

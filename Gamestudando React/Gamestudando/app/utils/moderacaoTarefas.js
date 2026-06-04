@@ -157,6 +157,8 @@ function extrairTextos(tarefa) {
   if (tarefa.formato === "conectar_pares") {
     return [
       tarefa.instrucao,
+      tarefa.palavraMissao,
+      tarefa.cosmoletrando?.palavra,
       tarefa.esquerda?.texto,
       tarefa.direita?.texto,
       tarefa.palavraA,

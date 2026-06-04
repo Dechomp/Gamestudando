@@ -81,6 +81,38 @@ export async function carregarQuestoesRimas(
   };
 }
 
+export async function carregarPalavraCosmoletrando(palavraFallback = "GATO") {
+  const cacheKey = `${CACHE_PREFIXO}cosmoletrando_palavra`;
+  const cache = await carregarCache(cacheKey);
+  const fallback = normalizarPalavraMissao(palavraFallback) || "GATO";
+
+  try {
+    const consulta = query(
+      collection(db, "questoes"),
+      where("materia", "==", "rimas"),
+      where("formato", "==", "conectar_pares"),
+      where("ativa", "==", true),
+      where("statusRevisao", "==", "aprovada")
+    );
+
+    const snap = await getDocs(consulta);
+    const palavras = snap.docs
+      .flatMap(docSnap => extrairPalavrasCosmoletrando(docSnap.data()))
+      .map(normalizarPalavraMissao)
+      .filter(palavra => palavra.length >= 2 && palavra.length <= 10);
+
+    if (palavras.length) {
+      const escolhida = palavras[Math.floor(Math.random() * palavras.length)];
+      await salvarCache(cacheKey, escolhida);
+      return escolhida;
+    }
+  } catch (error) {
+    console.log("Erro buscando palavra do Cosmoletrando:", error);
+  }
+
+  return normalizarPalavraMissao(cache) || fallback;
+}
+
 export async function sincronizarPerguntasIniciais() {
   await Promise.allSettled([
     carregarQuestoesMultiplaEscolha("matematica"),
@@ -112,12 +144,18 @@ function normalizarMultiplaEscolha(id, dados) {
 
   return {
     id,
-    pergunta: dados.pergunta,
-    respostas: dados.respostas,
+    pergunta: normalizarTextoQuestao(dados.pergunta),
+    respostas: dados.respostas.map(normalizarTextoQuestao),
     correta: dados.correta,
     nivel: dados.nivel || 1,
     tipoQuestao: dados.tipoQuestao || dados.materia
   };
+}
+
+function normalizarTextoQuestao(valor) {
+  return String(valor || "")
+    .trim()
+    .toUpperCase();
 }
 
 function normalizarParRima(id, dados) {
@@ -132,6 +170,22 @@ function normalizarParRima(id, dados) {
     esquerda: dados.esquerda,
     direita: dados.direita
   };
+}
+
+function extrairPalavrasCosmoletrando(dados) {
+  return [
+    dados?.palavraMissao,
+    dados?.cosmoletrando?.palavra,
+    dados?.esquerda?.texto,
+    dados?.direita?.texto
+  ].filter(Boolean);
+}
+
+function normalizarPalavraMissao(valor) {
+  return String(valor || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]/g, "");
 }
 
 function converterParesParaColunas(pares) {

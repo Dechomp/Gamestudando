@@ -45,4 +45,28 @@ export const colors = {
   // =========================
   card: "#FFFFFF",
 
+  // =========================
+  // JOGO - MISSAO ESPACIAL
+  // =========================
+  espacoFundo: "#090A22",
+  espacoFundoProfundo: "#151342",
+  espacoEstrela: "#F8FBFF",
+  espacoNebulosa: "#243B7A",
+  navePrimaria: "#56E0FF",
+  naveSecundaria: "#FFFFFF",
+  naveSombra: "#1C4B8F",
+  laser: "#61F3FF",
+  asteroide: "#8C86A5",
+  asteroideSombra: "#5B5278",
+  asteroideCristal: "#B77CFF",
+  combustivel: "#86E56C",
+  combustivelDetalhe: "#FFD766",
+  terraAgua: "#38A6FF",
+  terraGrama: "#7EE36C",
+  palavraFutura: "rgba(255, 255, 255, 0.35)",
+  palavraAtual: "#FFE34D",
+  hudJogo: "rgba(5, 7, 24, 0.72)",
+  controleJogo: "rgba(255, 255, 255, 0.18)",
+  controleJogoAtivo: "rgba(255, 227, 77, 0.9)",
+
 };

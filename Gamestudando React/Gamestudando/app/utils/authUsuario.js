@@ -11,7 +11,6 @@ import {
   updatePassword,
   updateProfile
 } from "firebase/auth";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 import { auth } from "./firebase";
 import {
@@ -34,14 +33,14 @@ export function obterUsuarioLogado() {
 }
 
 export function obterRotaInicialPorPerfil(perfil) {
-  if (!perfil) return "/tipoContaGoogle";
-  if (perfil?.tipo === "professor") return "/PerfilProfessor";
-  if (perfil?.tipo === "responsavel") return "/PerfilResponsavel";
+  if (!perfil) return "/Auth/tipoContaGoogle";
+  if (perfil?.tipo === "professor") return "/Professor/PerfilProfessor";
+  if (perfil?.tipo === "responsavel") return "/Responsavel/PerfilResponsavel";
   if (!perfil?.progresso?.avaliacaoInicialConcluida) {
-    return "/avaliacaoInicial";
+    return "/Aluno/avaliacaoInicial";
   }
 
-  return "/";
+  return "/Aluno";
 }
 
 export async function cadastrarAlunoEmail({ nome, email, senha, tipo = "aluno" }) {
@@ -161,8 +160,10 @@ export async function enviarEmailRecuperacaoSenha(email) {
 }
 
 export async function sairDaConta() {
-  await GoogleSignin.revokeAccess().catch(() => {});
-  await GoogleSignin.signOut().catch(() => {});
+  const googleSignin = obterGoogleSignin();
+
+  await googleSignin?.revokeAccess?.().catch(() => {});
+  await googleSignin?.signOut?.().catch(() => {});
   await signOut(auth);
   await limparPerfilLocal();
 }
@@ -254,4 +255,12 @@ function converterPerfilFirebaseParaLocal(perfilFirebase) {
     },
     estatisticas: perfilFirebase.estatisticas || {}
   };
+}
+
+function obterGoogleSignin() {
+  try {
+    return require("@react-native-google-signin/google-signin").GoogleSignin;
+  } catch (_error) {
+    return null;
+  }
 }
