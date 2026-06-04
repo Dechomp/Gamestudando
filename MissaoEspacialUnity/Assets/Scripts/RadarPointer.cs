@@ -37,14 +37,14 @@ public class RadarPointer : MonoBehaviour
     {
         trackedLetter = letter;
         target = FindClosestLetter(letter);
-        if (label) label.text = expanded ? $"Proxima letra: {letter}" : letter.ToString();
+        if (label) label.text = expanded ? $"Proxima letra: {letter}" : "^";
     }
 
     public void TrackTarget(Transform newTarget)
     {
         trackedLetter = '\0';
         target = newTarget;
-        if (label) label.text = expanded ? "Voltar para a Terra" : "Terra";
+        if (label) label.text = expanded ? "Voltar para a Terra" : "^";
     }
 
     public void ToggleExpanded()

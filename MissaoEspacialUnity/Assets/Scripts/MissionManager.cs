@@ -4,14 +4,16 @@ using UnityEngine;
 public class MissionManager : MonoBehaviour
 {
     [SerializeField] private WordHud wordHud;
-    [SerializeField] private RadarPointer radarPointer;
+    [SerializeField] private WorldRadarPointer worldRadarPointer;
     [SerializeField] private ThoughtBubble thoughtBubble;
     [SerializeField] private Transform earthTarget;
     [SerializeField] private MissionData fallbackMission;
 
     public event Action<char> NextLetterChanged;
     public event Action MissionCompleted;
+    public event Action MissionSucceeded;
     public event Action MissionFailed;
+    public event Action ReturnAttemptedWithIncompleteWord;
 
     private string missionWord;
     private int collectedIndex;
@@ -34,7 +36,7 @@ public class MissionManager : MonoBehaviour
 
         wordHud.SetWord(missionWord);
         wordHud.SetProgress(collectedIndex);
-        radarPointer.TrackLetter(NextLetter);
+        TrackNextLetter();
         thoughtBubble.Show($"Sua missao e trazer a palavra {missionWord} do espaco!");
         NextLetterChanged?.Invoke(NextLetter);
     }
@@ -59,12 +61,12 @@ public class MissionManager : MonoBehaviour
         {
             returningToEarth = true;
             thoughtBubble.Show("Hora de retornar para casa!");
-            radarPointer.TrackTarget(earthTarget);
+            worldRadarPointer?.TrackTarget(earthTarget);
             MissionCompleted?.Invoke();
             return true;
         }
 
-        radarPointer.TrackLetter(NextLetter);
+        TrackNextLetter();
         NextLetterChanged?.Invoke(NextLetter);
         return true;
     }
@@ -75,9 +77,33 @@ public class MissionManager : MonoBehaviour
         MissionFailed?.Invoke();
     }
 
+    public void HandleEarthReached()
+    {
+        if (returningToEarth && IsWordComplete)
+        {
+            thoughtBubble.Show("Missao completa!");
+            MissionSucceeded?.Invoke();
+            return;
+        }
+
+        thoughtBubble.Show("A palavra ainda esta incompleta.");
+        ReturnAttemptedWithIncompleteWord?.Invoke();
+    }
+
+    public void ReturnWithoutFullReward()
+    {
+        thoughtBubble.Show("Voltando para casa sem todos os premios.");
+        MissionSucceeded?.Invoke();
+    }
+
     private static string SanitizeWord(string value)
     {
         string text = string.IsNullOrWhiteSpace(value) ? "GATO" : value.Trim().ToUpperInvariant();
         return text.Replace(" ", string.Empty);
+    }
+
+    private void TrackNextLetter()
+    {
+        worldRadarPointer?.TrackLetter(NextLetter);
     }
 }
