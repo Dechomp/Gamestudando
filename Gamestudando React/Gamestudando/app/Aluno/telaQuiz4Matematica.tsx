@@ -9,6 +9,26 @@ import { atualizarPerfil, carregarPerfil } from "../utils/perfilAluno";
 import { lerTextoSeAtivo, pararLeitura } from "../utils/leituraPerguntas";
 import { carregarQuestoesMultiplaEscolha } from "../utils/repositorioQuestoes";
 
+
+function embaralharPergunta(pergunta) {
+  const respostasComIndice = pergunta.respostas.map((resposta, indice) => ({
+    resposta,
+    indiceOriginal: indice
+  }));
+
+  const respostasEmbaralhadas = embaralhar(respostasComIndice);
+
+  const novaCorreta = respostasEmbaralhadas.findIndex(
+    item => item.indiceOriginal === pergunta.correta
+  );
+
+  return {
+    ...pergunta,
+    respostas: respostasEmbaralhadas.map(item => item.resposta),
+    correta: novaCorreta
+  };
+}
+
 // =========================
 // 🔀 EMBARALHAR
 // =========================
@@ -23,6 +43,7 @@ function selecionarPerguntasIA(lista, nivelAluno = 3, quantidade = 5) {
   const niveis = lista.map(p => p.nivel);
   const menorNivel = Math.min(...niveis);
   const maiorNivel = Math.max(...niveis);
+
   const nivelSeguro = Math.max(
     menorNivel,
     Math.min(nivelAluno, maiorNivel)
@@ -49,7 +70,9 @@ function selecionarPerguntasIA(lista, nivelAluno = 3, quantidade = 5) {
     perguntas.push(...extras.slice(0, quantidade - perguntas.length));
   }
 
-  return perguntas.slice(0, quantidade);
+  return perguntas
+    .slice(0, quantidade)
+    .map(embaralharPergunta);
 }
 
 export default function Index() {

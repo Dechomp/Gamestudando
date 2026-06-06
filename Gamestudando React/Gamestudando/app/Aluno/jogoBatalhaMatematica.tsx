@@ -86,7 +86,15 @@ const INTRO_STEPS = [
 ];
 
 function shuffle<T>(items: T[]) {
-  return [...items].sort(() => Math.random() - 0.5);
+  const array = [...items];
+
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+
+  return array;
 }
 
 function uppercaseQuestion(question: Question): Question {
@@ -96,6 +104,51 @@ function uppercaseQuestion(question: Question): Question {
     respostas: question.respostas.map((answer) =>
       String(answer || "").toUpperCase()
     ),
+  };
+}
+
+function embaralharPergunta(question: Question): Question {
+  const respostas = question.respostas.map((texto, indice) => ({
+    texto,
+    original: indice,
+  }));
+
+  const respostasEmbaralhadas = [...respostas].sort(
+    () => Math.random() - 0.5
+  );
+
+  const novaCorreta = respostasEmbaralhadas.findIndex(
+    (item) => item.original === question.correta
+  );
+
+  return {
+    ...question,
+    respostas: respostasEmbaralhadas.map((item) => item.texto),
+    correta: novaCorreta,
+  };
+}
+
+function embaralharAlternativas(question: Question): Question {
+  const respostasOriginais = [...question.respostas];
+  const indiceCorretoOriginal = question.correta;
+
+  let indices = [0, 1, 2, 3];
+
+  // Garante que a correta não fique na mesma posição
+  do {
+    indices = [...indices].sort(() => Math.random() - 0.5);
+  } while (indices[indiceCorretoOriginal] === indiceCorretoOriginal);
+
+  const novasRespostas = indices.map(i => respostasOriginais[i]);
+
+  const novaCorreta = indices.findIndex(
+    i => i === indiceCorretoOriginal
+  );
+
+  return {
+    ...question,
+    respostas: novasRespostas,
+    correta: novaCorreta,
   };
 }
 
@@ -119,10 +172,14 @@ function selectQuestions(list: Question[], level = 3, amount = TOTAL_MONSTERS) {
 
   const enemyOrder = shuffle(ENEMY_TYPES);
 
-  return chosen.slice(0, amount).map((question, index) => ({
-    ...question,
-    enemyType: enemyOrder[index % enemyOrder.length],
-  }));
+  return chosen.slice(0, amount).map((question, index) => {
+    const perguntaEmbaralhada = embaralharAlternativas(question);
+
+    return {
+      ...perguntaEmbaralhada,
+        enemyType: enemyOrder[index % enemyOrder.length],
+    };
+  });
 }
 
 export default function JogoBatalhaMatematica() {

@@ -81,10 +81,11 @@ export async function carregarQuestoesRimas(
   };
 }
 
-export async function carregarPalavraCosmoletrando(palavraFallback = "GATO") {
+export async function carregarPalavraCosmoletrando(palavraFallback = "GATO", palavraAtual = "") {
   const cacheKey = `${CACHE_PREFIXO}cosmoletrando_palavra`;
   const cache = await carregarCache(cacheKey);
   const fallback = normalizarPalavraMissao(palavraFallback) || "GATO";
+  const atual = normalizarPalavraMissao(palavraAtual);
 
   try {
     const snaps = await Promise.all([
@@ -111,7 +112,9 @@ export async function carregarPalavraCosmoletrando(palavraFallback = "GATO") {
       .filter(palavra => palavra.length >= 2 && palavra.length <= 10);
 
     if (palavras.length) {
-      const escolhida = palavras[Math.floor(Math.random() * palavras.length)];
+      const candidatas = palavras.filter(palavra => palavra !== atual);
+      const baseSorteio = candidatas.length ? candidatas : palavras;
+      const escolhida = baseSorteio[Math.floor(Math.random() * baseSorteio.length)];
       await salvarCache(cacheKey, escolhida);
       return escolhida;
     }

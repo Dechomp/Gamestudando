@@ -514,6 +514,21 @@ export default function MissaoEspacial() {
     };
   }, [fallbackMissionWord]);
 
+  const restartWithNewWord = useCallback(async () => {
+    const palavra = await carregarPalavraCosmoletrando(
+      fallbackMissionWord,
+      missionWordRef.current
+    );
+    const normalizada = normalizeWord(palavra);
+
+    if (normalizada && normalizada !== missionWordRef.current) {
+      setMissionWordBanco(normalizada);
+      return;
+    }
+
+    resetMission();
+  }, [fallbackMissionWord, resetMission]);
+
   const camera = {
     x: gameRef.current.ship.x,
     y: gameRef.current.ship.y
@@ -636,8 +651,8 @@ export default function MissaoEspacial() {
 
   useFocusEffect(
     useCallback(() => {
-      resetMission();
-    }, [resetMission])
+      restartWithNewWord();
+    }, [restartWithNewWord])
   );
 
   const continueMission = useCallback(() => {
@@ -1692,9 +1707,11 @@ export default function MissaoEspacial() {
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.missaoOverlayBotao, styles.missaoOverlayBotaoSecundario]}
-              onPress={resetMission}
+              onPress={restartWithNewWord}
             >
-              <Text style={styles.missaoOverlayBotaoTexto}>Jogar novamente</Text>
+              <Text style={styles.missaoOverlayBotaoTexto}>
+                Jogar novamente
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
