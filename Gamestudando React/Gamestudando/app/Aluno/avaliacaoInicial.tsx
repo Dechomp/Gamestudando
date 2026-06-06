@@ -1,27 +1,28 @@
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View
+    Alert,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
-import { useRouter } from "expo-router";
 
+import { useVideoTransition } from "../_components/VideoTransition";
 import { perguntasMatematica } from "../perguntasMatematicaQuiz4";
 import { perguntasPortugues } from "../perguntasPortuguesQuiz4";
 import { palavrasDireita, palavrasEsquerda } from "../perguntasQuizRimas";
-import {
-  carregarPerfil,
-  concluirAvaliacaoInicial
-} from "../utils/perfilAluno";
+import { styles } from "../styles";
 import { lerTextoSeAtivo, pararLeitura } from "../utils/leituraPerguntas";
 import {
-  carregarQuestoesMultiplaEscolha,
-  carregarQuestoesRimas
+    carregarPerfil,
+    concluirAvaliacaoInicial
+} from "../utils/perfilAluno";
+import {
+    carregarQuestoesMultiplaEscolha,
+    carregarQuestoesRimas
 } from "../utils/repositorioQuestoes";
 import { parecemRimar } from "../utils/rimas";
-import { styles } from "../styles";
 
 const NIVEIS_MATEMATICA = [1, 1, 2, 2, 3, 3, 4];
 const NIVEIS_PORTUGUES = [1, 2, 3, 4, 4, 5, 6];
@@ -41,6 +42,7 @@ export default function AvaliacaoInicial() {
   const [rimaErros, setRimaErros] = useState(0);
   const [finalizando, setFinalizando] = useState(false);
   const [verificandoAvaliacao, setVerificandoAvaliacao] = useState(true);
+  const { showVideo, hideVideo } = useVideoTransition();
 
   const etapaRimas = indice >= questoes.length;
   const questaoAtual = questoes[indice];
@@ -49,29 +51,34 @@ export default function AvaliacaoInicial() {
     let ativo = true;
 
     const carregar = async () => {
-      pararLeitura();
+      showVideo();
+      try {
+        pararLeitura();
 
-      const perfil = await carregarPerfil();
+        const perfil = await carregarPerfil();
 
-      if (!ativo) return;
+        if (!ativo) return;
 
-      if (perfil?.progresso?.avaliacaoInicialConcluida) {
-        router.replace("/Aluno");
-        return;
+        if (perfil?.progresso?.avaliacaoInicialConcluida) {
+          router.replace("/Aluno");
+          return;
+        }
+
+        setVerificandoAvaliacao(false);
+
+        const [portugues, matematica, rimas] = await Promise.all([
+          carregarQuestoesMultiplaEscolha("portugues", perguntasPortugues),
+          carregarQuestoesMultiplaEscolha("matematica", perguntasMatematica),
+          carregarQuestoesRimas(palavrasEsquerda, palavrasDireita),
+        ]);
+
+        if (!ativo) return;
+
+        setQuestoes(montarQuestoesAvaliacao(portugues, matematica));
+        setParesRimas(montarParesRimas(rimas.esquerda, rimas.direita));
+      } finally {
+        hideVideo();
       }
-
-      setVerificandoAvaliacao(false);
-
-      const [portugues, matematica, rimas] = await Promise.all([
-        carregarQuestoesMultiplaEscolha("portugues", perguntasPortugues),
-        carregarQuestoesMultiplaEscolha("matematica", perguntasMatematica),
-        carregarQuestoesRimas(palavrasEsquerda, palavrasDireita)
-      ]);
-
-      if (!ativo) return;
-
-      setQuestoes(montarQuestoesAvaliacao(portugues, matematica));
-      setParesRimas(montarParesRimas(rimas.esquerda, rimas.direita));
     };
 
     carregar();
@@ -80,7 +87,7 @@ export default function AvaliacaoInicial() {
       ativo = false;
       pararLeitura();
     };
-  }, [router]);
+  }, [hideVideo, router, showVideo]);
 
   useEffect(() => {
     if (!questaoAtual || etapaRimas) return;
@@ -144,13 +151,13 @@ export default function AvaliacaoInicial() {
     lerTextoSeAtivo(item.texto);
 
     const correta =
-      rimaEsquerda.par === item.par &&
+      rimaEsquerda.grupo === item.grupo &&
       parecemRimar(rimaEsquerda.texto, item.texto);
 
     const direitaCorreta = paresRimas
       .map(par => par.direita)
       .find(direita => (
-        direita.par === rimaEsquerda.par &&
+        direita.grupo === rimaEsquerda.grupo &&
         parecemRimar(rimaEsquerda.texto, direita.texto)
       ));
 
@@ -195,6 +202,7 @@ export default function AvaliacaoInicial() {
 
     try {
       setFinalizando(true);
+      showVideo();
       await concluirAvaliacaoInicial(resultado);
       router.replace("/Aluno");
     } catch (error) {
@@ -202,6 +210,7 @@ export default function AvaliacaoInicial() {
       Alert.alert("Avaliacao", "Nao foi possivel finalizar agora.");
     } finally {
       setFinalizando(false);
+      hideVideo();
     }
   }
 
@@ -424,23 +433,23 @@ function montarParesRimas(esquerdaBase, direitaBase) {
   const paresUsados = new Set();
   const esquerdaValidas = esquerdaBase.filter(esquerda =>
     direitaBase.some(direita =>
-      direita.par === esquerda.par && parecemRimar(esquerda.texto, direita.texto)
+      direita.grupo === esquerda.grupo && parecemRimar(esquerda.texto, direita.texto)
     )
   );
   const baseSegura = esquerdaValidas.length ? esquerdaValidas : esquerdaBase;
 
   const pares = NIVEIS_RIMAS.map((nivel) => {
     const esquerda = baseSegura.find(item => (
-      item.nivel === nivel && !paresUsados.has(item.par)
+      item.nivel === nivel && !paresUsados.has(item.grupo)
     )) || baseSegura.find(item => item.nivel === nivel) || baseSegura[0];
 
     const direita =
       direitaBase.find(item => (
-        item.par === esquerda.par && parecemRimar(esquerda.texto, item.texto)
+        item.grupo === esquerda.grupo && parecemRimar(esquerda.texto, item.texto)
       )) ||
       direitaBase[0];
 
-    paresUsados.add(esquerda.par);
+    paresUsados.add(esquerda.grupo);
 
     return { esquerda, direita };
   });

@@ -1,8 +1,9 @@
-import { useEffect } from "react";
-import { Appearance } from "react-native";
-import { StatusBar } from "expo-status-bar";
 import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
+import { Appearance } from "react-native";
+import { VideoTransitionProvider } from "./_components/VideoTransition";
 import { colors } from "./colors";
 
 const temaClaro = {
@@ -26,12 +27,13 @@ export default function Layout() {
   return (
     <ThemeProvider value={temaClaro}>
       <StatusBar style="dark" backgroundColor={colors.branco} />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: colors.branco },
-        }}
-      >
+      <VideoTransitionProvider>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: colors.branco },
+          }}
+        >
         <Stack.Screen name="Aluno" />
         <Stack.Screen name="Auth" />
         <Stack.Screen name="Professor" />
@@ -39,6 +41,7 @@ export default function Layout() {
         <Stack.Screen name="Tarefas" />
         <Stack.Screen name="Legado" />
       </Stack>
+      </VideoTransitionProvider>
     </ThemeProvider>
   );
 }

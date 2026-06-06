@@ -1,24 +1,26 @@
+import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useRef, useState } from "react";
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from "react-native";
-import { useFocusEffect, useRouter } from "expo-router";
 
-import {
-  cadastrarAlunoEmail,
-  obterRotaInicialPorPerfil
-} from "../utils/authUsuario";
+import { useVideoTransition } from "../_components/VideoTransition";
 import { styles } from "../styles";
+import {
+    cadastrarAlunoEmail,
+    obterRotaInicialPorPerfil
+} from "../utils/authUsuario";
 
 export default function Cadastro() {
   const router = useRouter();
+  const { showVideo, hideVideo } = useVideoTransition();
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -61,13 +63,19 @@ export default function Cadastro() {
       return;
     }
 
-    if (senha.length < 6) {
-      Alert.alert("Cadastro", "A senha precisa ter pelo menos 6 caracteres.");
+    const senhaForteRegex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}/;
+
+    if (!senhaForteRegex.test(senha)) {
+      Alert.alert(
+        "Cadastro",
+        "A senha precisa ter pelo menos 8 caracteres, incluindo letra maiúscula, letra minúscula, número e caractere especial."
+      );
       return;
     }
 
     try {
       setCarregando(true);
+      showVideo();
       const { perfil } = await cadastrarAlunoEmail({
         nome,
         email,
@@ -75,6 +83,7 @@ export default function Cadastro() {
         tipo: tipoConta
       });
 
+      hideVideo();
       Alert.alert(
         "Conta criada",
         "Enviamos um email de verificacao. Voce ja pode comecar a usar o app."
@@ -82,6 +91,7 @@ export default function Cadastro() {
 
       router.replace(obterRotaInicialPorPerfil(perfil));
     } catch (error) {
+      hideVideo();
       console.log("Erro no cadastro:", error);
       Alert.alert("Cadastro", mensagemErroAuth(error));
     } finally {
@@ -161,7 +171,7 @@ export default function Cadastro() {
               onChangeText={setSenha}
               style={styles.inputSenha}
               secureTextEntry={!mostrarSenha}
-              placeholder="Minimo 6 caracteres"
+              placeholder="Mínimo 8 caracteres, com maiúscula, minúscula, número e símbolo"
               onFocus={rolarParaBaixo}
             />
 
@@ -204,9 +214,7 @@ export default function Cadastro() {
             disabled={carregando}
             onPress={cadastrar}
           >
-            <Text style={styles.textoBotao}>
-              {carregando ? "Criando..." : "Criar conta"}
-            </Text>
+            <Text style={styles.textoBotao}>Criar conta</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -235,7 +243,7 @@ function mensagemErroAuth(error) {
   }
 
   if (codigo.includes("weak-password")) {
-    return "A senha esta fraca. Use pelo menos 6 caracteres.";
+    return "A senha esta fraca. Use pelo menos 8 caracteres, incluindo maiúscula, minúscula, número e caractere especial.";
   }
 
   return "Nao foi possivel criar a conta agora.";

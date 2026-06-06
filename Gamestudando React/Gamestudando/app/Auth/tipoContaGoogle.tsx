@@ -1,18 +1,19 @@
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import { router } from "expo-router";
 
-import {
-  finalizarCadastroGoogle,
-  obterRotaInicialPorPerfil,
-  sairDaConta,
-} from "../utils/authUsuario";
+import { useVideoTransition } from "../_components/VideoTransition";
 import { styles } from "../styles";
+import {
+    finalizarCadastroGoogle,
+    obterRotaInicialPorPerfil,
+    sairDaConta,
+} from "../utils/authUsuario";
 
 const TIPOS = [
   { valor: "aluno", texto: "Estudante" },
@@ -24,12 +25,17 @@ export default function TipoContaGoogle() {
   const [tipoConta, setTipoConta] = useState("aluno");
   const [salvando, setSalvando] = useState(false);
 
+  const { showVideo, hideVideo } = useVideoTransition();
+
   async function continuar() {
     try {
       setSalvando(true);
+      showVideo();
       const perfil = await finalizarCadastroGoogle({ tipo: tipoConta });
+      hideVideo();
       router.replace(obterRotaInicialPorPerfil(perfil));
     } catch (error) {
+      hideVideo();
       console.log("Erro finalizando Google:", error);
       Alert.alert("Conta Google", "Nao foi possivel finalizar seu cadastro.");
     } finally {

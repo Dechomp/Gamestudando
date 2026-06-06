@@ -9,14 +9,16 @@ export function escolherProximaAtividade(perfil) {
   const pesoMat = calcularPeso(mat);
   const pesoPort = calcularPeso(port);
   const pesoRimas = calcularPeso(rimas);
+  const pesoCosmoletrando = pesoPort * 0.65;
 
-  const soma = pesoMat + pesoPort + pesoRimas;
+  const soma = pesoMat + pesoPort + pesoRimas + pesoCosmoletrando;
 
   const rand = Math.random() * soma;
 
   if (rand < pesoMat) return { materia: "matematica" };
   if (rand < pesoMat + pesoPort) return { materia: "portugues" };
-  return { materia: "rimas" };
+  if (rand < pesoMat + pesoPort + pesoRimas) return { materia: "rimas" };
+  return { materia: "cosmoletrando" };
 }
 
 function calcularPeso(dados) {

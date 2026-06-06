@@ -1,22 +1,23 @@
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import * as Haptics from "expo-haptics";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Image,
-  Pressable,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
+    Image,
+    Pressable,
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    useWindowDimensions,
+    View,
 } from "react-native";
 
+import { useVideoTransition } from "../_components/VideoTransition";
 import { perguntasMatematica } from "../perguntasMatematicaQuiz4";
 import { perguntasPortugues } from "../perguntasPortuguesQuiz4";
-import { atualizarPerfil, carregarPerfil } from "../utils/perfilAluno";
-import { lerTextoSeAtivo, pararLeitura } from "../utils/leituraPerguntas";
-import { carregarQuestoesMultiplaEscolha } from "../utils/repositorioQuestoes";
 import { batalhaAssets } from "../utils/batalhaAssets";
+import { lerTextoSeAtivo, pararLeitura } from "../utils/leituraPerguntas";
+import { atualizarPerfil, carregarPerfil } from "../utils/perfilAluno";
+import { carregarQuestoesMultiplaEscolha } from "../utils/repositorioQuestoes";
 
 type Question = {
   pergunta: string;
@@ -159,6 +160,7 @@ export default function JogoBatalhaMatematica() {
   const [introStep, setIntroStep] = useState(0);
   const [message, setMessage] = useState("Escolha a resposta certa para atacar!");
   const [startedAt, setStartedAt] = useState(Date.now());
+  const { showVideo, hideVideo } = useVideoTransition();
   const [attackPulse, setAttackPulse] = useState(0);
   const [attackElement, setAttackElement] = useState<BattleElement | null>(null);
   const [attackFrame, setAttackFrame] = useState(0);
@@ -217,14 +219,19 @@ export default function JogoBatalhaMatematica() {
   }, []);
 
   const prepararNovaPartida = useCallback(async (active = true) => {
-    const profile = await carregarPerfil();
-    const level = profile?.[subject]?.nivel || 3;
-    const fallbackQuestions =
-      subject === "portugues" ? perguntasPortugues : perguntasMatematica;
-    const loadedQuestions = await carregarQuestoesMultiplaEscolha(
-      subject,
-      fallbackQuestions
-    );
+    if (active) {
+      showVideo();
+    }
+
+    try {
+      const profile = await carregarPerfil();
+      const level = profile?.[subject]?.nivel || 3;
+      const fallbackQuestions =
+        subject === "portugues" ? perguntasPortugues : perguntasMatematica;
+      const loadedQuestions = await carregarQuestoesMultiplaEscolha(
+        subject,
+        fallbackQuestions
+      );
     const selected = selectQuestions(loadedQuestions, level, TOTAL_MONSTERS);
 
     if (!active) return;
@@ -250,7 +257,12 @@ export default function JogoBatalhaMatematica() {
     setCenarioIndex(Math.floor(Math.random() * batalhaAssets.cenarios.length));
     setStartedAt(Date.now());
     setMessage("Escolha a resposta certa para atacar!");
-  }, [spawnX, subject]);
+  } finally {
+    if (active) {
+      hideVideo();
+    }
+  }
+}, [spawnX, subject, showVideo, hideVideo]);
 
   useFocusEffect(
     useCallback(() => {

@@ -1,11 +1,11 @@
 import { doc, serverTimestamp, writeBatch } from "firebase/firestore";
-import { db } from "./firebase";
 import { perguntasMatematica } from "../perguntasMatematicaQuiz4";
 import { perguntasPortugues } from "../perguntasPortuguesQuiz4";
 import {
-  palavrasDireita,
-  palavrasEsquerda
+    palavrasDireita,
+    palavrasEsquerda
 } from "../perguntasQuizRimas";
+import { db } from "./firebase";
 
 export async function semearPerguntasIniciaisFirebase() {
   const questoes = [
@@ -57,7 +57,7 @@ function montarQuestoesMultiplaEscolha(materia, perguntas) {
 function montarQuestoesRimas() {
   return palavrasEsquerda
     .map(esquerda => {
-      const direita = palavrasDireita.find(item => item.par === esquerda.par);
+      const direita = palavrasDireita.find(item => item.grupo === esquerda.grupo);
 
       if (!direita) return null;
 

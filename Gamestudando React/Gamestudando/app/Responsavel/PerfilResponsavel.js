@@ -1,23 +1,23 @@
-import React, { useCallback, useState } from "react";
-import {
-  Alert,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
 import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
+import {
+    Alert,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
 import { styles } from "../styles";
 import {
-  carregarPerfilUsuarioAtual,
-  sairDaConta,
+    carregarPerfilUsuarioAtual,
+    sairDaConta,
 } from "../utils/authUsuario";
 import {
-  listarAlunosResponsavel,
-  montarValorQrResponsavel,
-  obterOuCriarCodigoResponsavel,
+    listarAlunosResponsavel,
+    montarValorQrResponsavel,
+    obterOuCriarCodigoResponsavel,
 } from "../utils/firebaseResponsaveis";
 
 export default function PerfilResponsavel() {
@@ -158,6 +158,13 @@ export default function PerfilResponsavel() {
         onPress={deslogar}
       >
         <Text style={styles.textoBotao}>Sair da conta</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.botaoEditar}
+        onPress={() => router.push('/Responsavel/EdicaoPerfilResponsavel')}
+      >
+        <Text style={styles.botaoTexto}>Editar perfil</Text>
       </TouchableOpacity>
     </ScrollView>
   );

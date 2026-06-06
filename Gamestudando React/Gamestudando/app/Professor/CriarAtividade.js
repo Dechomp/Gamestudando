@@ -1,21 +1,22 @@
-import React, { useRef, useState } from 'react';
-import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Switch,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
-} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { useRef, useState } from 'react';
+import {
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    Switch,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from 'react-native';
 
 import { styles } from '../styles';
 import {
-  criarQuestaoMultiplaEscolhaProfessor,
-  criarQuestaoRimaProfessor
+    criarQuestaoCosmoletrando,
+    criarQuestaoMultiplaEscolhaProfessor,
+    criarQuestaoRimaProfessor
 } from '../utils/firebaseTarefas';
 
 const CriarAtividade = ({ embutida = false }) => {
@@ -28,9 +29,11 @@ const CriarAtividade = ({ embutida = false }) => {
   const [palavraA, setPalavraA] = useState('');
   const [palavraB, setPalavraB] = useState('');
   const [palavraMissao, setPalavraMissao] = useState('');
+  const [cosmoPalavra, setCosmoPalavra] = useState('');
   const [salvando, setSalvando] = useState(false);
 
   const criandoRima = materia === 'rimas';
+  const criandoCosmoletrando = materia === 'cosmoletrando';
 
   const rolarParaBaixo = () => {
     setTimeout(() => {
@@ -50,6 +53,8 @@ const CriarAtividade = ({ embutida = false }) => {
 
       if (criandoRima) {
         await salvarRima();
+      } else if (criandoCosmoletrando) {
+        await salvarCosmoletrando();
       } else {
         await salvarMultiplaEscolha();
       }
@@ -115,6 +120,17 @@ const CriarAtividade = ({ embutida = false }) => {
     });
   };
 
+  const salvarCosmoletrando = async () => {
+    if (!cosmoPalavra.trim()) {
+      throw new Error('COSMOLETRANDO_VAZIO');
+    }
+
+    await criarQuestaoCosmoletrando({
+      palavra: cosmoPalavra,
+      nivel
+    });
+  };
+
   const limparFormulario = () => {
     setMateria('matematica');
     setPergunta('');
@@ -124,6 +140,7 @@ const CriarAtividade = ({ embutida = false }) => {
     setPalavraA('');
     setPalavraB('');
     setPalavraMissao('');
+    setCosmoPalavra('');
   };
 
   const conteudo = (
@@ -137,12 +154,13 @@ const CriarAtividade = ({ embutida = false }) => {
           onValueChange={(value) => setMateria(value)}
         >
           <Picker.Item label="Matematica" value="matematica" />
-          <Picker.Item label="Rimas" value="rimas" />
           <Picker.Item label="Portugues" value="portugues" />
+          <Picker.Item label="Rimas" value="rimas" />
+          <Picker.Item label="Cosmo Letrando" value="cosmoletrando" />
         </Picker>
       </View>
 
-      {!criandoRima ? (
+      {!criandoRima && !criandoCosmoletrando ? (
         <>
           <Text style={styles.label}>Pergunta</Text>
           <TextInput
@@ -176,7 +194,7 @@ const CriarAtividade = ({ embutida = false }) => {
             </View>
           ))}
         </>
-      ) : (
+      ) : criandoRima ? (
         <>
           <Text style={styles.label}>Primeira palavra</Text>
           <TextInput
@@ -197,13 +215,15 @@ const CriarAtividade = ({ embutida = false }) => {
             autoCapitalize="characters"
             onFocus={rolarParaBaixo}
           />
-
-          <Text style={styles.label}>Palavra para o Cosmoletrando</Text>
+        </>
+      ) : (
+        <>
+          <Text style={styles.label}>Palavra</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ex: GATO"
-            value={palavraMissao}
-            onChangeText={setPalavraMissao}
+            placeholder="Digite a palavra"
+            value={cosmoPalavra}
+            onChangeText={setCosmoPalavra}
             autoCapitalize="characters"
             onFocus={rolarParaBaixo}
           />
@@ -311,6 +331,10 @@ function mensagemErro(error) {
 
   if (error?.message === 'RIMA_DUPLICADA') {
     return 'Ja existe uma rima usando esse mesmo par de palavras.';
+  }
+
+  if (error?.message === 'COSMOLETRANDO_VAZIO') {
+    return 'Digite a palavra para o Cosmo Letrando.';
   }
 
   if (error?.message === 'MODERACAO_LOCAL') {

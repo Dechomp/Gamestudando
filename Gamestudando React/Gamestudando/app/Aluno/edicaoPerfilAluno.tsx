@@ -1,24 +1,24 @@
 import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Alert
+    Alert,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from "react-native";
 
 import { useRouter } from "expo-router";
 import { styles } from "../styles";
 
 import {
-  carregarPerfil,
-  atualizarDadosBasicos,
-  resetarPerfil
-} from "../utils/perfilAluno";
-import {
-  atualizarEmailConta,
-  atualizarSenhaConta
+    atualizarEmailConta,
+    atualizarSenhaConta
 } from "../utils/authUsuario";
+import {
+    atualizarDadosBasicos,
+    carregarPerfil,
+    resetarPerfil
+} from "../utils/perfilAluno";
 
 export default function PerfilEditar() {
 
@@ -49,8 +49,13 @@ export default function PerfilEditar() {
         return;
       }
 
-      if (novaSenha.length < 6) {
-        Alert.alert("Senha", "A senha precisa ter pelo menos 6 caracteres.");
+      const senhaForteRegex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}/;
+
+      if (!senhaForteRegex.test(novaSenha)) {
+        Alert.alert(
+          "Senha",
+          "A nova senha precisa ter pelo menos 8 caracteres, incluindo letra maiúscula, minúscula, número e caractere especial."
+        );
         return;
       }
     }
@@ -144,7 +149,7 @@ export default function PerfilEditar() {
           onChangeText={setNovaSenha}
           style={styles.inputSenha}
           secureTextEntry={!mostrarSenha}
-          placeholder="Deixe vazio para manter"
+          placeholder="Deixe vazio para manter (mín. 8 chars, maiúscula, minúscula, número e símbolo)"
         />
 
         <TouchableOpacity
@@ -212,7 +217,7 @@ function mensagemErroAuth(error) {
   }
 
   if (codigo.includes("weak-password")) {
-    return "A nova senha esta fraca. Use pelo menos 6 caracteres.";
+    return "A nova senha esta fraca. Use pelo menos 8 caracteres, incluindo maiúscula, minúscula, número e caractere especial.";
   }
 
   return "Nao foi possivel atualizar os dados agora.";

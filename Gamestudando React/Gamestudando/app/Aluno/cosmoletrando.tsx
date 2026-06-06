@@ -17,6 +17,7 @@ import Svg, {
 import { colors } from "../colors";
 import { styles } from "../styles";
 import { cosmoletrandoAssets } from "../utils/cosmoletrandoAssets";
+import { atualizarPerfil } from "../utils/perfilAluno";
 import { carregarPalavraCosmoletrando } from "../utils/repositorioQuestoes";
 
 type Vector2 = {
@@ -427,6 +428,11 @@ function getUpgradePickupLabel(upgrade?: AsteroidObject["upgrade"]) {
 export default function MissaoEspacial() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const faseId = useMemo(() => {
+    const rawFaseId = Array.isArray(params.faseId) ? params.faseId[0] : params.faseId;
+    const parsed = parseInt(String(rawFaseId || ""), 10);
+    return Number.isNaN(parsed) ? null : parsed;
+  }, [params.faseId]);
   const { width, height } = useWindowDimensions();
   const fallbackMissionWord = useMemo(() => normalizeWord(params.missionWord), [params.missionWord]);
   const [missionWordBanco, setMissionWordBanco] = useState("");
@@ -449,6 +455,7 @@ export default function MissaoEspacial() {
     fire: false
   });
   const lastShotRef = useRef(0);
+  const completionSavedRef = useRef(false);
   const lastFrameRef = useRef<number | null>(null);
   const lastRenderRef = useRef(0);
   const accumulatedFrameRef = useRef(0);
@@ -535,6 +542,7 @@ export default function MissaoEspacial() {
   const resetMission = useCallback(() => {
     const letters = createLetters(missionWord);
     const maxFuel = fuelForWord(missionWord);
+    completionSavedRef.current = false;
 
     gameRef.current = {
       maxFuel,
@@ -1018,6 +1026,15 @@ export default function MissaoEspacial() {
     }
   }
 
+  const registrarConclusaoDaFase = useCallback(() => {
+    if (completionSavedRef.current || !faseId) return;
+
+    completionSavedRef.current = true;
+    atualizarPerfil("cosmoletrando", missionWordRef.current.length, 0, faseId).catch((error) => {
+      console.log("Erro ao salvar progresso do Cosmoletrando:", error);
+    });
+  }, [faseId]);
+
   function handleEarthCollision() {
     const game = gameRef.current;
     const reachedEarth = distance(game.ship, game.earth) <= EARTH_RADIUS + SHIP_RADIUS;
@@ -1034,6 +1051,7 @@ export default function MissaoEspacial() {
       game.ship.vy = 0;
       phaseRef.current = "success";
       setPhase("success");
+      registrarConclusaoDaFase();
       showMessage("Missao completa!", 2400);
       return;
     }
@@ -1105,9 +1123,24 @@ export default function MissaoEspacial() {
   }, []);
 
   const goToMap = useCallback(() => {
+    const missionCompleted = phaseRef.current === "success";
+
+    if (missionCompleted) {
+      registrarConclusaoDaFase();
+    }
+
     resetMission();
+
+    if (missionCompleted && faseId) {
+      router.replace({
+        pathname: "/Aluno",
+        params: { faseConcluida: String(faseId) }
+      });
+      return;
+    }
+
     router.replace("/Aluno");
-  }, [resetMission, router]);
+  }, [faseId, registrarConclusaoDaFase, resetMission, router]);
 
   function handleShipAsteroidCollision() {
     const game = gameRef.current;

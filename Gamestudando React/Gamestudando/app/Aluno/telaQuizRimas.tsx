@@ -1,39 +1,39 @@
 import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useRef
+    useCallback,
+    useEffect,
+    useRef,
+    useState
 } from "react";
 
 import {
-  Text,
-  View,
-  Pressable
+    Pressable,
+    Text,
+    View
 } from "react-native";
 
 import {
-  useRouter,
-  useLocalSearchParams,
-  useFocusEffect
+    useFocusEffect,
+    useLocalSearchParams,
+    useRouter
 } from "expo-router";
 
 import { styles } from "../styles";
 
 import {
-  palavrasEsquerda,
-  palavrasDireita
+    palavrasDireita,
+    palavrasEsquerda
 } from "../perguntasQuizRimas";
 import { carregarQuestoesRimas } from "../utils/repositorioQuestoes";
 import { parecemRimar } from "../utils/rimas";
 
 import {
-  atualizarPerfil,
-  carregarPerfil
+    atualizarPerfil,
+    carregarPerfil
 } from "../utils/perfilAluno";
 
 import {
-  lerTextoSeAtivo,
-  pararLeitura
+    lerTextoSeAtivo,
+    pararLeitura
 } from "../utils/leituraPerguntas";
 
 // =========================
@@ -69,7 +69,7 @@ function gerarRodadaIA(nivelAluno = 3, esquerdaBase = palavrasEsquerda, direitaB
       const opcoes =
         direitaBase.filter(d =>
 
-          d.par === esq.par &&
+          d.grupo === esq.grupo &&
           parecemRimar(esq.texto, d.texto) &&
           d.texto !== esq.texto &&
           !palavrasUsadas.includes(d.texto)

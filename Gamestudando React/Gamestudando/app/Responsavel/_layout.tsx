@@ -44,6 +44,13 @@ export default function ResponsavelLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="EdicaoPerfilResponsavel"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

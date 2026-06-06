@@ -1,0 +1,115 @@
+<mxfile host="app.diagrams.net" modified="2026-06-05T22:05:00.000Z" agent="Codex" version="24.7.17">
+  <diagram id="dominio-problema-gamestudando" name="Dominio do Problema">
+    <mxGraphModel dx="1434" dy="844" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="titulo" value="Modelo de Domínio do Problema - Gamestudando" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="330" y="20" width="740" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitulo" value="Representa os principais conceitos do problema educacional, sem detalhar campos técnicos do banco de dados." style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=13;fontColor=#475569;" vertex="1" parent="1">
+          <mxGeometry x="310" y="60" width="780" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="estudante" value="&lt;b&gt;ESTUDANTE&lt;/b&gt;&lt;hr&gt;Criança em fase de alfabetização que realiza atividades, jogos e avaliações para desenvolver aprendizagem." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#15803D;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="580" y="340" width="260" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="professor" value="&lt;b&gt;PROFESSOR&lt;/b&gt;&lt;hr&gt;Usuário que cria tarefas, organiza turmas e acompanha o desempenho dos estudantes." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#B45309;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="120" y="560" width="260" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="responsavel" value="&lt;b&gt;RESPONSÁVEL&lt;/b&gt;&lt;hr&gt;Usuário que acompanha a evolução do estudante vinculado à sua conta." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FCE7F3;strokeColor=#BE185D;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="120" y="230" width="260" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="turma" value="&lt;b&gt;TURMA&lt;/b&gt;&lt;hr&gt;Grupo criado pelo professor para acompanhar vários estudantes em conjunto." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#4338CA;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="420" y="560" width="260" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="atividade" value="&lt;b&gt;ATIVIDADE&lt;/b&gt;&lt;hr&gt;Exercício educacional realizado pelo estudante, podendo ser quiz, rima ou jogo educativo." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#C2410C;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="580" y="730" width="260" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="tarefaProfessor" value="&lt;b&gt;TAREFA DO PROFESSOR&lt;/b&gt;&lt;hr&gt;Atividade cadastrada pelo professor para alimentar o conjunto de questões utilizado pelo sistema." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFEDD5;strokeColor=#EA580C;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="120" y="730" width="260" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="avaliacaoInicial" value="&lt;b&gt;AVALIAÇÃO INICIAL&lt;/b&gt;&lt;hr&gt;Conjunto de questões usado para estimar o nível inicial do estudante." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F0FDFA;strokeColor=#0F766E;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="580" y="135" width="260" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="desempenho" value="&lt;b&gt;DESEMPENHO&lt;/b&gt;&lt;hr&gt;Resultado das atividades, incluindo acertos, erros, tempo de resposta e progresso." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ECFDF5;strokeColor=#047857;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1010" y="250" width="260" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="dificuldade" value="&lt;b&gt;DIFICULDADE&lt;/b&gt;&lt;hr&gt;Conteúdo, matéria ou tipo de questão em que o estudante apresenta maior necessidade de reforço." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FEE2E2;strokeColor=#B91C1C;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1010" y="430" width="260" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="recomendacao" value="&lt;b&gt;RECOMENDAÇÃO&lt;/b&gt;&lt;hr&gt;Sugestão de próxima atividade ou tema de reforço com base no desempenho do estudante." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EDE9FE;strokeColor=#6D28D9;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1010" y="610" width="260" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rel_responsavel_estudante" value="acompanha" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#BE185D;fontSize=12;fontStyle=1;" edge="1" parent="1" source="responsavel" target="estudante">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_professor_turma" value="cria e gerencia" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#4338CA;fontSize=12;fontStyle=1;" edge="1" parent="1" source="professor" target="turma">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_turma_estudante" value="possui estudantes" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#15803D;fontSize=12;fontStyle=1;" edge="1" parent="1" source="turma" target="estudante">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="710" y="615" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_professor_tarefa" value="publica" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#C2410C;fontSize=12;fontStyle=1;" edge="1" parent="1" source="professor" target="tarefaProfessor">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_tarefa_atividade" value="alimenta" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#C2410C;fontSize=12;fontStyle=1;" edge="1" parent="1" source="tarefaProfessor" target="atividade">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_estudante_avaliacao" value="realiza" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#0F766E;fontSize=12;fontStyle=1;" edge="1" parent="1" source="estudante" target="avaliacaoInicial">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_estudante_atividade" value="realiza" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#C2410C;fontSize=12;fontStyle=1;" edge="1" parent="1" source="estudante" target="atividade">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_atividade_desempenho" value="gera" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#047857;fontSize=12;fontStyle=1;" edge="1" parent="1" source="atividade" target="desempenho">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="790" />
+              <mxPoint x="900" y="310" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_desempenho_dificuldade" value="identifica" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#B91C1C;fontSize=12;fontStyle=1;" edge="1" parent="1" source="desempenho" target="dificuldade">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_dificuldade_recomendacao" value="orienta" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#6D28D9;fontSize=12;fontStyle=1;" edge="1" parent="1" source="dificuldade" target="recomendacao">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_recomendacao_atividade" value="define próxima atividade" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#6D28D9;fontSize=12;fontStyle=1;" edge="1" parent="1" source="recomendacao" target="atividade">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1140" y="800" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_desempenho_professor" value="gera relatório para" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#B45309;fontSize=11;" edge="1" parent="1" source="desempenho" target="professor">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1140" y="890" />
+              <mxPoint x="250" y="890" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_desempenho_responsavel" value="gera relatório para" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#BE185D;fontSize=11;" edge="1" parent="1" source="desempenho" target="responsavel">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1320" y="310" />
+              <mxPoint x="1320" y="110" />
+              <mxPoint x="250" y="110" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="legenda" value="Fonte: Os Autores (2026). O modelo mostra os conceitos centrais do problema: acompanhamento da alfabetização, desempenho, dificuldades e recomendação de atividades." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#CBD5E1;fontColor=#334155;align=left;spacingLeft=10;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="430" y="885" width="580" height="45" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

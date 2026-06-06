@@ -4,7 +4,7 @@
     "slug": "Gamestudando",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/app-icon.png",
     "scheme": "gamestudando",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -19,9 +19,7 @@
       "googleServicesFile": "./app/google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/app-icon.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -31,7 +29,12 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/app-icon.png"
+    },
+    "splash": {
+      "image": "./assets/images/splash.gif",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
     },
     "plugins": [
       "expo-router",
@@ -45,12 +48,12 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/splash.gif",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#000000",
           "dark": {
-            "backgroundColor": "#ffffff"
+            "backgroundColor": "#000000"
           }
         }
       ]

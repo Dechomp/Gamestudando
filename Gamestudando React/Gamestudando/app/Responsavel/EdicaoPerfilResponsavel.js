@@ -15,13 +15,11 @@ import { styles } from '../styles';
 import {
     atualizarEmailConta,
     atualizarSenhaConta,
+    carregarPerfilUsuarioAtual
 } from '../utils/authUsuario';
-import {
-    atualizarDadosBasicos,
-    carregarPerfil,
-} from '../utils/perfilAluno';
+import { atualizarDadosBasicos } from '../utils/perfilAluno';
 
-const EdicaoPerfilProfessor = () => {
+const EdicaoPerfilResponsavel = () => {
   const scrollRef = useRef(null);
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
@@ -37,10 +35,11 @@ const EdicaoPerfilProfessor = () => {
   }, []);
 
   const carregar = useCallback(async () => {
-    const dados = await carregarPerfil();
-    setNome(dados.nome || '');
-    setEmail(dados.email || '');
-    setEmailOriginal(dados.email || '');
+    const dados = await carregarPerfilUsuarioAtual();
+
+    setNome(dados?.nome || '');
+    setEmail(dados?.email || '');
+    setEmailOriginal(dados?.email || '');
     resetarCamposSenha();
   }, [resetarCamposSenha]);
 
@@ -94,7 +93,7 @@ const EdicaoPerfilProfessor = () => {
 
       resetarCamposSenha();
       Alert.alert('Perfil', 'Dados atualizados.');
-      router.replace('/Professor/PerfilProfessor');
+      router.replace('/Responsavel/PerfilResponsavel');
     } catch (error) {
       console.log(error);
       Alert.alert('Perfil', mensagemErroAuth(error));
@@ -124,7 +123,7 @@ const EdicaoPerfilProfessor = () => {
           <Text style={styles.textoVoltarTarefa}>{"<-"} Voltar</Text>
         </TouchableOpacity>
 
-        <Text style={styles.editarTitulo}>Editar Professor</Text>
+        <Text style={styles.editarTitulo}>Editar Perfil</Text>
 
         <Text style={styles.label}>Nome</Text>
         <TextInput
@@ -210,4 +209,4 @@ function mensagemErroAuth(error) {
   return 'Nao foi possivel atualizar os dados agora.';
 }
 
-export default EdicaoPerfilProfessor;
+export default EdicaoPerfilResponsavel;

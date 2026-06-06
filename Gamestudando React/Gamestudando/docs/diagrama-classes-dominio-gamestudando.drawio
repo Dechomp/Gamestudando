@@ -1,0 +1,129 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="diagrama-classes-dominio-gamestudando" name="Diagrama de Classes">
+    <mxGraphModel dx="1096" dy="916" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1480" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="titulo" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#111827;" value="Diagrama de Classes - GAMESTUDANDO" vertex="1">
+          <mxGeometry height="40" width="720" x="440" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="fonte" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=13;fontColor=#475569;" value="Fonte: Os Autores (2026)." vertex="1">
+          <mxGeometry height="25" width="360" x="620" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="usuario" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#475569;fontColor=#111827;align=left;verticalAlign=top;spacing=10;fontSize=12;overflow=fill;" value="&lt;div style=&#39;text-align:center;font-weight:bold;font-size:13px;&#39;&gt;Usuario&lt;/div&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;&#39;&gt;- uid: String&lt;br&gt;- nome: String&lt;br&gt;- email: String&lt;br&gt;- tipo: String&lt;br&gt;- status: String&lt;br&gt;- isVerificado: Boolean&lt;br&gt;- criadoEm: Date&lt;br&gt;- atualizadoEm: Date&lt;/div&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;&#39;&gt;+ cadastrar()&lt;br&gt;+ realizarLogin()&lt;br&gt;+ realizarLoginGoogle()&lt;br&gt;+ recuperarSenha()&lt;br&gt;+ atualizarPerfil()&lt;br&gt;+ sairConta()&lt;/div&gt;" vertex="1">
+          <mxGeometry height="260" width="260" x="540" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="estudante" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#15803D;fontColor=#111827;align=left;verticalAlign=top;spacing=10;fontSize=12;overflow=fill;" value="&lt;div style=&#39;text-align:center;font-weight:bold;font-size:13px;&#39;&gt;Estudante&lt;/div&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;&#39;&gt;- codigoResponsavel: String&lt;br&gt;- leituraPerguntasAtiva: Boolean&lt;/div&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;&#39;&gt;+ realizarAvaliacaoInicial()&lt;br&gt;+ acessarMapa()&lt;br&gt;+ realizarAtividade()&lt;br&gt;+ jogarQuiz()&lt;br&gt;+ jogarCosmoletrando()&lt;br&gt;+ entrarTurma()&lt;br&gt;+ vincularResponsavel()&lt;br&gt;+ visualizarProgresso()&lt;/div&gt;" vertex="1">
+          <mxGeometry height="230" width="260" x="1030" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="professor" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#B45309;fontColor=#111827;align=left;verticalAlign=top;spacing=10;fontSize=12;overflow=fill;" value="&lt;div style=&#39;text-align:center;font-weight:bold;font-size:13px;&#39;&gt;Professor&lt;/div&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;&#39;&gt;+ criarTarefa()&lt;br&gt;+ editarTarefa()&lt;br&gt;+ excluirTarefa()&lt;br&gt;+ criarTurma()&lt;br&gt;+ editarTurma()&lt;/div&gt;" vertex="1">
+          <mxGeometry height="245" width="260" x="560" y="920" as="geometry" />
+        </mxCell>
+        <mxCell id="responsavel" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FCE7F3;strokeColor=#BE185D;fontColor=#111827;align=left;verticalAlign=top;spacing=10;fontSize=12;overflow=fill;" value="&lt;div style=&#39;text-align:center;font-weight:bold;font-size:13px;&#39;&gt;Responsavel&lt;/div&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;&#39;&gt;- codigoResponsavel: String&lt;/div&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;&#39;&gt;+ vincularEstudante()&lt;br&gt;+ visualizarEstudantes()&lt;br&gt;+ visualizarDesempenhoAluno()&lt;br&gt;+ visualizarRelatorioAluno()&lt;/div&gt;" vertex="1">
+          <mxGeometry height="170" width="260" x="10" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="turma" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#4338CA;fontColor=#111827;align=left;verticalAlign=top;spacing=10;fontSize=12;overflow=fill;" value="&lt;div style=&#39;text-align:center;font-weight:bold;font-size:13px;&#39;&gt;Turma&lt;/div&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;&#39;&gt;- id: String&lt;br&gt;- nome: String&lt;br&gt;- codigo: String&lt;br&gt;- professorId: String&lt;br&gt;- ativa: Boolean&lt;br&gt;- criadoEm: Date&lt;br&gt;- atualizadoEm: Date&lt;/div&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;&#39;&gt;+ cadastrar()&lt;br&gt;+ editar()&lt;br&gt;+ excluir()&lt;br&gt;+ adicionarEstudante()&lt;br&gt;+ removerEstudante()&lt;br&gt;+ listarEstudantes()&lt;/div&gt;" vertex="1">
+          <mxGeometry height="260" width="260" x="60" y="920" as="geometry" />
+        </mxCell>
+        <mxCell id="vinculoTurma" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EDE9FE;strokeColor=#6D28D9;fontColor=#111827;align=left;verticalAlign=top;spacing=10;fontSize=12;overflow=fill;" value="&lt;div style=&#39;text-align:center;font-weight:bold;font-size:13px;&#39;&gt;VinculoTurma&lt;/div&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;&#39;&gt;- alunoId: String&lt;br&gt;- turmaId: String&lt;br&gt;- entrouEm: Date&lt;br&gt;- atividadesConcluidas: Number&lt;br&gt;- ativa: Boolean&lt;/div&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;&#39;&gt;+ registrarEntrada()&lt;br&gt;+ atualizarResumo()&lt;br&gt;+ cancelarVinculo()&lt;/div&gt;" vertex="1">
+          <mxGeometry height="200" width="260" x="1030" y="910" as="geometry" />
+        </mxCell>
+        <mxCell id="UiFe8jASBh8pUMuQtff_-5" edge="1" parent="1" source="tarefa" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="estudante">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tarefa" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#C2410C;fontColor=#111827;align=left;verticalAlign=top;spacing=10;fontSize=12;overflow=fill;" value="&lt;div style=&#39;text-align:center;font-weight:bold;font-size:13px;&#39;&gt;Tarefa&lt;/div&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;&#39;&gt;- id: String&lt;br&gt;- materia: String&lt;br&gt;- formato: String&lt;br&gt;- tipoQuestao: String&lt;br&gt;- pergunta: String&lt;br&gt;- respostas: Array&lt;br&gt;- correta: Number&lt;br&gt;- nivel: Number&lt;br&gt;- ativa: Boolean&lt;br&gt;- statusRevisao: String&lt;br&gt;- criadaPor: String&lt;/div&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;&#39;&gt;+ criar()&lt;br&gt;+ editar()&lt;br&gt;+ excluir()&lt;br&gt;+ revisarConteudo()&lt;br&gt;+ disponibilizar()&lt;/div&gt;" vertex="1">
+          <mxGeometry height="300" width="260" x="1040" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="progresso" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F0FDFA;strokeColor=#0F766E;fontColor=#111827;align=left;verticalAlign=top;spacing=10;fontSize=12;overflow=fill;" value="&lt;div style=&#39;text-align:center;font-weight:bold;font-size:13px;&#39;&gt;Progresso&lt;/div&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;&#39;&gt;- faseLiberada: Number&lt;br&gt;- maiorFaseConcluida: Number&lt;br&gt;- avaliacaoInicialConcluida: Boolean&lt;br&gt;- materiasPorFase: Map&lt;/div&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;&#39;&gt;+ liberarFase()&lt;br&gt;+ salvarMateriaFase()&lt;br&gt;+ concluirAvaliacaoInicial()&lt;/div&gt;" vertex="1">
+          <mxGeometry height="190" width="260" x="1420" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="desempenho" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#16A34A;fontColor=#111827;align=left;verticalAlign=top;spacing=10;fontSize=12;overflow=fill;" value="&lt;div style=&quot;text-align:center;font-weight:bold;font-size:13px;&quot;&gt;Desempenho&lt;/div&gt;&lt;hr&gt;&lt;div style=&quot;text-align:left;&quot;&gt;- nivel: Number&lt;br&gt;- acertos: Number&lt;br&gt;- erros: Number&lt;br&gt;- ultimaPontuacao: Number&lt;br&gt;- atividadesConcluidas: Number&lt;br&gt;- tempoMedioRespostaMs: Number&lt;br&gt;- tiposQuestao: Map&lt;/div&gt;" vertex="1">
+          <mxGeometry height="260" width="260" x="1410" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="UiFe8jASBh8pUMuQtff_-3" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="responsavel">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="140" y="470" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="codigoAcesso" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F1F5F9;strokeColor=#64748B;fontColor=#111827;align=left;verticalAlign=top;spacing=10;fontSize=12;overflow=fill;" value="&lt;div style=&#39;text-align:center;font-weight:bold;font-size:13px;&#39;&gt;CodigoAcesso&lt;/div&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;&#39;&gt;- codigo: String&lt;br&gt;- donoId: String&lt;br&gt;- nome: String&lt;br&gt;- email: String&lt;br&gt;- tipoDono: String&lt;br&gt;- ativo: Boolean&lt;br&gt;- atualizadoEm: Date&lt;/div&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;&#39;&gt;+ gerarCodigo()&lt;br&gt;+ validarCodigo()&lt;br&gt;+ gerarQrCode()&lt;/div&gt;" vertex="1">
+          <mxGeometry height="220" width="260" x="20" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_u_e" edge="1" parent="1" source="estudante" style="endArrow=block;endFill=0;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#334155;fontSize=11;" target="usuario" value="herda">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_u_p" edge="1" parent="1" source="usuario" style="endArrow=block;endFill=0;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#334155;fontSize=11;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="professor" value="herda">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_u_r" edge="1" parent="1" source="responsavel" style="endArrow=block;endFill=0;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#334155;fontSize=11;" target="usuario" value="herda">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="470" y="410" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_prof_tarefa" edge="1" parent="1" source="professor" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#C2410C;fontSize=12;" target="tarefa" value="cria 1 : 0..*">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="880" y="850" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_prof_turma" edge="1" parent="1" source="professor" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#4338CA;fontSize=12;" target="turma" value="gerencia 1 : 0..*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_turma_vinc" edge="1" parent="1" source="turma" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#6D28D9;fontSize=12;" target="vinculoTurma" value="possui 1 : 0..*">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="730" y="1350" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_est_vinc" edge="1" parent="1" source="estudante" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#15803D;fontSize=12;" target="vinculoTurma" value="participa 1 : 0..*">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1360" y="470" />
+              <mxPoint x="1380" y="780" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_resp_vinc" edge="1" parent="1" source="responsavel" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#BE185D;fontSize=12;" target="vinculoResponsavel" value="acompanha 1 : 0..*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_est_resp" edge="1" parent="1" source="estudante" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#A21CAF;fontSize=12;" target="vinculoResponsavel" value="possui 1 : 0..*">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="930" y="230" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_est_progresso" edge="1" parent="1" source="estudante" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#0F766E;fontSize=12;" target="progresso" value="possui 1 : 1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1330" y="230" />
+              <mxPoint x="1380" y="390" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_est_desempenho" edge="1" parent="1" source="estudante" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#16A34A;fontSize=12;" target="desempenho" value="possui 1 : 1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1320" y="180" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_codigo_est" edge="1" parent="1" source="codigoAcesso" style="endArrow=block;html=1;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#64748B;fontSize=11;" target="turma" value="identifica vÃƒÂ­nculo">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="160" y="840" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vinculoResponsavel" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FAE8FF;strokeColor=#A21CAF;fontColor=#111827;align=left;verticalAlign=top;spacing=10;fontSize=12;overflow=fill;" value="&lt;div style=&#39;text-align:center;font-weight:bold;font-size:13px;&#39;&gt;VinculoResponsavel&lt;/div&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;&#39;&gt;- alunoId: String&lt;br&gt;- responsavelId: String&lt;br&gt;- vinculadoEm: Date&lt;br&gt;- ativo: Boolean&lt;/div&gt;&lt;hr&gt;&lt;div style=&#39;text-align:left;&#39;&gt;+ registrarVinculo()&lt;br&gt;+ validarCodigo()&lt;br&gt;+ cancelarVinculo()&lt;/div&gt;" vertex="1">
+          <mxGeometry height="190" width="260" x="530" y="100" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

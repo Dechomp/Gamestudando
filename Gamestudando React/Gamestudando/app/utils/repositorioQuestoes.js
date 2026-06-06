@@ -87,16 +87,25 @@ export async function carregarPalavraCosmoletrando(palavraFallback = "GATO") {
   const fallback = normalizarPalavraMissao(palavraFallback) || "GATO";
 
   try {
-    const consulta = query(
-      collection(db, "questoes"),
-      where("materia", "==", "rimas"),
-      where("formato", "==", "conectar_pares"),
-      where("ativa", "==", true),
-      where("statusRevisao", "==", "aprovada")
-    );
+    const snaps = await Promise.all([
+      getDocs(query(
+        collection(db, "questoes"),
+        where("materia", "==", "cosmoletrando"),
+        where("formato", "==", "palavra"),
+        where("ativa", "==", true),
+        where("statusRevisao", "==", "aprovada")
+      )),
+      getDocs(query(
+        collection(db, "questoes"),
+        where("materia", "==", "rimas"),
+        where("formato", "==", "conectar_pares"),
+        where("ativa", "==", true),
+        where("statusRevisao", "==", "aprovada")
+      ))
+    ]);
 
-    const snap = await getDocs(consulta);
-    const palavras = snap.docs
+    const palavras = snaps
+      .flatMap(snap => snap.docs)
       .flatMap(docSnap => extrairPalavrasCosmoletrando(docSnap.data()))
       .map(normalizarPalavraMissao)
       .filter(palavra => palavra.length >= 2 && palavra.length <= 10);
@@ -174,6 +183,7 @@ function normalizarParRima(id, dados) {
 
 function extrairPalavrasCosmoletrando(dados) {
   return [
+    dados?.palavra,
     dados?.palavraMissao,
     dados?.cosmoletrando?.palavra,
     dados?.esquerda?.texto,
@@ -212,13 +222,13 @@ function filtrarColunasRimasValidas(colunas) {
 
   const esquerda = colunas.esquerda.filter(item =>
     colunas.direita.some(direita =>
-      direita.par === item.par && parecemRimar(item.texto, direita.texto)
+      direita.grupo === item.grupo && parecemRimar(item.texto, direita.texto)
     )
   );
 
   const direita = colunas.direita.filter(item =>
     esquerda.some(esquerdaItem =>
-      esquerdaItem.par === item.par && parecemRimar(esquerdaItem.texto, item.texto)
+      esquerdaItem.grupo === item.grupo && parecemRimar(esquerdaItem.texto, item.texto)
     )
   );
 

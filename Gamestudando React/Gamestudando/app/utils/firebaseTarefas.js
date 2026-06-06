@@ -1,19 +1,19 @@
 import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  getDocs,
-  query,
-  serverTimestamp,
-  updateDoc,
-  where
+    addDoc,
+    collection,
+    deleteDoc,
+    doc,
+    getDocs,
+    query,
+    serverTimestamp,
+    updateDoc,
+    where
 } from "firebase/firestore";
 
 import { auth, db } from "./firebase";
 import {
-  moderarTarefaLocalmente,
-  revisarTarefaComIA
+    moderarTarefaLocalmente,
+    revisarTarefaComIA
 } from "./moderacaoTarefas";
 import { normalizarPalavra } from "./rimas";
 
@@ -97,6 +97,47 @@ export async function criarQuestaoRimaProfessor({
     palavraMissao: palavraCosmoletrando,
     cosmoletrando: {
       palavra: palavraCosmoletrando,
+    },
+    nivel: Number(nivel),
+  };
+
+  validarModeracaoLocal(dadosQuestao);
+
+  const docRef = await addDoc(collection(db, "questoes"), {
+    ...dadosQuestao,
+    ...dadosRevisaoPendente(),
+    criadaPor: usuario.uid,
+    origem: "professor",
+    criadoEm: serverTimestamp(),
+    atualizadoEm: serverTimestamp(),
+  });
+
+  solicitarRevisaoIA(docRef.id, dadosQuestao);
+
+  return docRef.id;
+}
+
+export async function criarQuestaoCosmoletrando({
+  palavra,
+  nivel
+}) {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error("Professor nao logado.");
+  }
+
+  const palavraNormalizada = palavra.trim().toUpperCase();
+
+  const dadosQuestao = {
+    materia: "cosmoletrando",
+    formato: "palavra",
+    tipoQuestao: "cosmoletrando",
+    instrucao: "Forme a palavra usando as letras.",
+    palavra: palavraNormalizada,
+    palavraMissao: palavraNormalizada,
+    cosmoletrando: {
+      palavra: palavraNormalizada,
     },
     nivel: Number(nivel),
   };

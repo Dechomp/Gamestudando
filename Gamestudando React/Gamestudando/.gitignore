@@ -49,3 +49,11 @@ app-example
 # generated native folders
 /ios
 /android
+
+# Ignore test scripts created for local checks
+/scripts/test_password_regex.js
+/scripts/check_rimas.mjs
+/scripts/testarModeracaoLocal.js
+lint_output.txt
+test_results.txt
+tsc_output.txt

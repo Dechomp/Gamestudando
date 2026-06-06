@@ -55,6 +55,10 @@ export function moderarTarefaLocalmente(tarefa) {
     return moderarRima(tarefa);
   }
 
+  if (tarefa.formato === "palavra") {
+    return moderarPalavraCosmoletrando(tarefa);
+  }
+
   return reprovar("Formato de tarefa nao reconhecido.");
 }
 
@@ -153,6 +157,30 @@ function moderarRima(tarefa) {
   return aprovarLocalmente();
 }
 
+function moderarPalavraCosmoletrando(tarefa) {
+  const palavra = String(
+    tarefa.palavra ||
+    tarefa.palavraMissao ||
+    tarefa.cosmoletrando?.palavra ||
+    ""
+  ).trim();
+  const palavraNormalizada = normalizarPalavra(palavra);
+
+  if (!palavraNormalizada) {
+    return reprovar("Preencha a palavra do Cosmoletrando.");
+  }
+
+  if (palavraNormalizada.length < 2) {
+    return reprovar("A palavra do Cosmoletrando precisa ter pelo menos duas letras.");
+  }
+
+  if (palavraNormalizada.length > 10) {
+    return reprovar("A palavra do Cosmoletrando deve ter no maximo dez letras.");
+  }
+
+  return aprovarLocalmente();
+}
+
 function extrairTextos(tarefa) {
   if (tarefa.formato === "conectar_pares") {
     return [
@@ -163,6 +191,15 @@ function extrairTextos(tarefa) {
       tarefa.direita?.texto,
       tarefa.palavraA,
       tarefa.palavraB,
+    ].filter(Boolean);
+  }
+
+  if (tarefa.formato === "palavra") {
+    return [
+      tarefa.instrucao,
+      tarefa.palavra,
+      tarefa.palavraMissao,
+      tarefa.cosmoletrando?.palavra,
     ].filter(Boolean);
   }
 

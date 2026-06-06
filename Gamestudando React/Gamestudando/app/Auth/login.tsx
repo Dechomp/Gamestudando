@@ -1,37 +1,39 @@
+import {
+    GoogleSignin,
+    isCancelledResponse,
+    isErrorWithCode,
+    statusCodes
+} from "@react-native-google-signin/google-signin";
+import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from "react-native";
-import { useFocusEffect, useRouter } from "expo-router";
-import {
-  GoogleSignin,
-  isCancelledResponse,
-  isErrorWithCode,
-  statusCodes
-} from "@react-native-google-signin/google-signin";
 
+import { useVideoTransition } from "../_components/VideoTransition";
+import { styles } from "../styles";
 import {
-  carregarPerfilUsuarioAtual,
-  entrarEmailSenha,
-  entrarComCredencialGoogle,
-  enviarEmailRecuperacaoSenha,
-  observarUsuarioLogado,
-  obterRotaInicialPorPerfil
+    carregarPerfilUsuarioAtual,
+    entrarComCredencialGoogle,
+    entrarEmailSenha,
+    enviarEmailRecuperacaoSenha,
+    observarUsuarioLogado,
+    obterRotaInicialPorPerfil
 } from "../utils/authUsuario";
 import {
-  obterGoogleWebClientId
+    obterGoogleWebClientId
 } from "../utils/googleAuthConfig";
-import { styles } from "../styles";
 
 export default function Login() {
   const router = useRouter();
+  const { showVideo, hideVideo } = useVideoTransition();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
@@ -78,10 +80,13 @@ export default function Login() {
 
     try {
       setCarregando(true);
+      showVideo();
       const { perfil } = await entrarEmailSenha(email, senha);
 
+      hideVideo();
       router.replace(obterRotaInicialPorPerfil(perfil));
     } catch (error) {
+      hideVideo();
       console.log("Erro no login:", error);
       Alert.alert("Login", mensagemErroAuth(error));
     } finally {
@@ -150,6 +155,7 @@ export default function Login() {
         return;
       }
 
+      showVideo();
       router.replace(obterRotaInicialPorPerfil(perfil));
     } catch (error) {
       console.log("Erro no Google Login:", error);
@@ -222,9 +228,7 @@ export default function Login() {
             disabled={carregando}
             onPress={entrar}
           >
-            <Text style={styles.textoBotao}>
-              {carregando ? "Entrando..." : "Entrar"}
-            </Text>
+            <Text style={styles.textoBotao}>Entrar</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -239,7 +243,7 @@ export default function Login() {
               <Text style={styles.googleIconeTexto}>G</Text>
             </View>
             <Text style={styles.authBotaoGoogleTexto}>
-              {carregandoGoogle ? "Entrando..." : "Entrar com Google"}
+              Entrar com Google
             </Text>
           </TouchableOpacity>
 

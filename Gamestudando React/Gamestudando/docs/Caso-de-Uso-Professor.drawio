@@ -1,0 +1,46 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Página-1" id="82V6rpzAHqsDjkWyzNZY">
+    <mxGraphModel dx="911" dy="602" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0" adaptiveColors="auto">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="prof" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;" value="Professor" vertex="1">
+          <mxGeometry height="110" width="60" x="40" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="sys" parent="1" style="swimlane;startSize=30;fillColor=#f5f5f5;strokeColor=#666666;html=1;whiteSpace=wrap;pointerEvents=0;fontStyle=1;" value="Gamestudando" vertex="1">
+          <mxGeometry height="480" width="280" x="200" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="uc1" parent="sys" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;" value="Criar Turma" vertex="1">
+          <mxGeometry height="60" width="180" x="50" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc2" parent="sys" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;" value="Gerenciar Turma" vertex="1">
+          <mxGeometry height="60" width="180" x="50" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="uc3" parent="sys" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;" value="Criar Atividade" vertex="1">
+          <mxGeometry height="60" width="180" x="50" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="uc4" parent="sys" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;" value="Gerenciar Atividades" vertex="1">
+          <mxGeometry height="60" width="180" x="50" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="uc5" parent="sys" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;" value="Visualizar Relatórios" vertex="1">
+          <mxGeometry height="60" width="180" x="50" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="prof" style="rounded=1;html=1;endArrow=none;strokeColor=#666666;" target="uc1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="prof" style="rounded=1;html=1;endArrow=none;strokeColor=#666666;" target="uc2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="prof" style="rounded=1;html=1;endArrow=none;strokeColor=#666666;" target="uc3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="prof" style="rounded=1;html=1;endArrow=none;strokeColor=#666666;" target="uc4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="prof" style="rounded=1;html=1;endArrow=none;strokeColor=#666666;" target="uc5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

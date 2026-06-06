@@ -1,19 +1,20 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
-import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
+import { SplashLoading, useVideoTransition } from "../_components/VideoTransition";
+import { styles } from "../styles";
+import {
+    carregarPerfilUsuarioAtual,
+    observarUsuarioLogado,
+    obterRotaInicialPorPerfil
+} from "../utils/authUsuario";
 import { escolherProximaAtividade } from "../utils/ia";
 import {
-  carregarPerfilUsuarioAtual,
-  observarUsuarioLogado,
-  obterRotaInicialPorPerfil
-} from "../utils/authUsuario";
-import {
-  carregarPerfil,
-  obterOuCriarMateriaDaFase
+    carregarPerfil,
+    obterOuCriarMateriaDaFase
 } from "../utils/perfilAluno";
-import { styles } from "../styles";
 
 const FASES_POR_MUNDO = 15;
 
@@ -27,6 +28,7 @@ export default function MapaFases() {
   const [materiasPorFase, setMateriasPorFase] = useState({});
   const [usuarioLogado, setUsuarioLogado] = useState(false);
   const [verificandoLogin, setVerificandoLogin] = useState(true);
+  const { showVideo, hideVideo } = useVideoTransition();
 
   const faseConcluida = Array.isArray(params.faseConcluida)
     ? params.faseConcluida[0]
@@ -50,10 +52,20 @@ export default function MapaFases() {
   }, [router]);
 
   const carregarMapa = useCallback(async () => {
-    const salvo = await AsyncStorage.getItem("faseLiberada");
-    const faseSalva = salvo ? parseInt(salvo) : 1;
+    showVideo();
+    try {
+      const perfil = await carregarPerfil();
+      const salvo = await AsyncStorage.getItem("faseLiberada");
+      const faseSalva = salvo ? parseInt(salvo) : 1;
+      const fasePerfil = parseInt(String(perfil?.progresso?.faseLiberada || 1));
+      const maiorConcluida = parseInt(String(perfil?.progresso?.maiorFaseConcluida || 0));
 
-    let novaFaseLiberada = isNaN(faseSalva) ? 1 : faseSalva;
+      let novaFaseLiberada = Math.max(
+        1,
+        isNaN(faseSalva) ? 1 : faseSalva,
+        isNaN(fasePerfil) ? 1 : fasePerfil,
+        isNaN(maiorConcluida) ? 1 : maiorConcluida + 1
+      );
 
     if (faseConcluida) {
       const concluida = parseInt(String(faseConcluida));
@@ -69,9 +81,15 @@ export default function MapaFases() {
     }
 
     setFaseLiberada(novaFaseLiberada);
+    await AsyncStorage.setItem("faseLiberada", String(novaFaseLiberada));
     setMundoVisualizado(Math.ceil(novaFaseLiberada / FASES_POR_MUNDO));
     await calcularIA();
-  }, [calcularIA, faseConcluida]);
+  } catch (error) {
+    console.log("Erro carregando mapa:", error);
+  } finally {
+    hideVideo();
+  }
+}, [calcularIA, faseConcluida, hideVideo, showVideo]);
 
   useFocusEffect(
     useCallback(() => {
@@ -144,17 +162,33 @@ export default function MapaFases() {
   const mundoMaximoLiberado = Math.ceil(faseLiberada / FASES_POR_MUNDO);
 
   function escolherMateriaPadrao(faseId) {
+    if (faseId % 5 === 0) return "cosmoletrando";
     if (faseId % 3 === 0) return "rimas";
     if (faseId % 2 === 0) return "matematica";
     return "portugues";
   }
 
-  function escolherTela(materia) {
-    if (materia === "matematica") return "/Aluno/jogoBatalhaMatematica";
-    if (materia === "portugues") return "/Aluno/jogoBatalhaMatematica";
-    if (materia === "rimas") return "/Aluno/telaQuizRimas";
+  function escolherTela(materia, faseId) {
+    const usarQuiz = faseId % 2 === 0;
 
-    return "/Aluno/telaQuiz4Portugues";
+    if (materia === "matematica") {
+      return usarQuiz
+        ? "/Aluno/telaQuiz4Matematica"
+        : "/Aluno/jogoBatalhaMatematica";
+    }
+
+    if (materia === "portugues") {
+      return usarQuiz
+        ? "/Aluno/telaQuiz4Portugues"
+        : "/Aluno/jogoBatalhaMatematica";
+    }
+
+    if (materia === "rimas") return "/Aluno/telaQuizRimas";
+    if (materia === "cosmoletrando") return "/Aluno/cosmoletrando";
+
+    return usarQuiz
+      ? "/Aluno/telaQuiz4Portugues"
+      : "/Aluno/jogoBatalhaMatematica";
   }
 
   async function abrirFase(fase) {
@@ -169,7 +203,7 @@ export default function MapaFases() {
     }));
 
     router.push({
-      pathname: escolherTela(materia),
+      pathname: escolherTela(materia, fase.id),
       params: { faseId: String(fase.id), materia }
     });
   }
@@ -209,13 +243,7 @@ export default function MapaFases() {
   }
 
   if (verificandoLogin) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>
-          Verificando login...
-        </Text>
-      </View>
-    );
+    return <SplashLoading />;
   }
 
   return (

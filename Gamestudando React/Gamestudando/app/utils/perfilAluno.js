@@ -199,8 +199,9 @@ export async function atualizarDadosBasicos({ nome, email }) {
 export async function atualizarPerfil(materia, acertos, erros, faseConcluida) {
   try {
     const perfil = await carregarPerfil();
+    const materiaPerfil = materia === "cosmoletrando" ? "portugues" : materia;
 
-    const dados = perfil[materia];
+    const dados = perfil[materiaPerfil];
 
     if (!dados) return;
 
@@ -224,7 +225,7 @@ export async function atualizarPerfil(materia, acertos, erros, faseConcluida) {
       dados.nivel -= 1;
     }
 
-    const maximo = NIVEL_MAXIMO[materia] || 6;
+    const maximo = NIVEL_MAXIMO[materiaPerfil] || 6;
     dados.nivel = Math.max(1, Math.min(dados.nivel, maximo));
 
     if (faseConcluida !== undefined && faseConcluida !== null) {
@@ -371,6 +372,7 @@ export async function concluirAvaliacaoInicial(resultado) {
 }
 
 function escolherMateriaPadrao(faseId) {
+  if (faseId % 5 === 0) return "cosmoletrando";
   if (faseId % 3 === 0) return "rimas";
   if (faseId % 2 === 0) return "matematica";
   return "portugues";
