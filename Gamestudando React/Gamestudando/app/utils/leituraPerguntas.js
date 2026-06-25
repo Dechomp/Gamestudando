@@ -4,6 +4,7 @@ import { carregarPerfil } from "./perfilAluno";
 const LETRA = "A-Za-z\\u00C0-\\u00FF";
 
 export function prepararTextoParaLeitura(texto) {
+  // Ajusta sinais e silabas para a voz falar de forma mais natural.
   let textoPreparado = String(texto);
   const silabaComHifen = new RegExp(`([${LETRA}])\\s*-\\s*([${LETRA}])`, "g");
 
@@ -24,6 +25,7 @@ export function prepararTextoParaLeitura(texto) {
 }
 
 export async function lerTextoSeAtivo(texto) {
+  // Le a pergunta ou alternativa apenas se o aluno deixou a leitura ligada.
   try {
     const perfil = await carregarPerfil();
     const leituraAtiva =
@@ -43,5 +45,6 @@ export async function lerTextoSeAtivo(texto) {
 }
 
 export function pararLeitura() {
+  // Interrompe a voz ao trocar de tela, pausar ou sair da atividade.
   Speech.stop();
 }

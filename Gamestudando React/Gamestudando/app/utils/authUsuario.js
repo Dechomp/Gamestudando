@@ -28,10 +28,12 @@ export function observarUsuarioLogado(callback) {
   return onAuthStateChanged(auth, callback);
 }
 
+// Pega o usuario que esta logado no Firebase Auth.
 export function obterUsuarioLogado() {
   return auth.currentUser;
 }
 
+// Decide a primeira tela de acordo com o tipo da conta.
 export function obterRotaInicialPorPerfil(perfil) {
   if (!perfil) return "/Auth/tipoContaGoogle";
   if (perfil?.tipo === "professor") return "/Professor/PerfilProfessor";
@@ -44,6 +46,7 @@ export function obterRotaInicialPorPerfil(perfil) {
 }
 
 export async function cadastrarAlunoEmail({ nome, email, senha, tipo = "aluno" }) {
+  // Cria a conta no Firebase Auth usando email e senha.
   const credencial = await createUserWithEmailAndPassword(
     auth,
     email.trim(),
@@ -58,6 +61,7 @@ export async function cadastrarAlunoEmail({ nome, email, senha, tipo = "aluno" }
 
   await sendEmailVerification(usuario);
 
+  // Monta o perfil inicial que sera salvo localmente e no Firestore.
   const perfilAtual = await carregarPerfil();
   const perfilAluno = {
     ...perfilAtual,
@@ -89,6 +93,7 @@ export async function carregarPerfilUsuarioAtual({ criarSeNaoExistir = true } = 
 
   if (!usuario) return null;
 
+  // Primeiro tenta buscar no Firestore, depois cria um perfil novo se precisar.
   const perfilFirebase = await carregarPerfilFirebase(usuario.uid);
   const perfilLocal = perfilFirebase
     ? converterPerfilFirebaseParaLocal(perfilFirebase)
@@ -104,6 +109,7 @@ export async function carregarPerfilUsuarioAtual({ criarSeNaoExistir = true } = 
 }
 
 export async function entrarEmailSenha(email, senha) {
+  // Valida o login no Firebase Auth.
   const credencial = await signInWithEmailAndPassword(
     auth,
     email.trim(),
@@ -121,6 +127,7 @@ export async function entrarEmailSenha(email, senha) {
 }
 
 export async function entrarComCredencialGoogle(idToken) {
+  // Usa o token do Google para criar uma credencial aceita pelo Firebase.
   const credencialGoogle = GoogleAuthProvider.credential(idToken);
   const credencial = await signInWithCredential(auth, credencialGoogle);
   const perfilLocal = await carregarPerfilUsuarioAtual({
@@ -142,6 +149,7 @@ export async function finalizarCadastroGoogle({ tipo }) {
     throw new Error("Usuario nao logado.");
   }
 
+  // Depois do primeiro login com Google, salva o tipo escolhido pelo usuario.
   const perfil = await criarPerfilParaUsuario(usuario, tipo);
   await salvarPerfil(perfil);
   sincronizarPerguntasIniciais().catch(() => {});
@@ -162,6 +170,7 @@ export async function enviarEmailRecuperacaoSenha(email) {
 export async function sairDaConta() {
   const googleSignin = obterGoogleSignin();
 
+  // Limpa Google, Firebase e perfil local para nao misturar contas.
   await googleSignin?.revokeAccess?.().catch(() => {});
   await googleSignin?.signOut?.().catch(() => {});
   await signOut(auth);
@@ -192,6 +201,7 @@ export async function atualizarSenhaConta(novaSenha) {
 }
 
 async function criarPerfilParaUsuario(usuario, tipo = "aluno") {
+  // Cria um perfil compativel com aluno, professor ou responsavel.
   const perfilAtual = await carregarPerfil();
   const perfilAluno = {
     ...perfilAtual,
@@ -214,6 +224,7 @@ async function criarPerfilParaUsuario(usuario, tipo = "aluno") {
 }
 
 function converterPerfilFirebaseParaLocal(perfilFirebase) {
+  // Converte a estrutura do Firestore para o formato usado nas telas.
   return {
     uid: perfilFirebase.uid,
     tipo: perfilFirebase.tipo || "aluno",
@@ -258,6 +269,7 @@ function converterPerfilFirebaseParaLocal(perfilFirebase) {
 }
 
 function obterGoogleSignin() {
+  // Evita quebrar o app caso a biblioteca do Google nao esteja carregada.
   try {
     return require("@react-native-google-signin/google-signin").GoogleSignin;
   } catch (_error) {

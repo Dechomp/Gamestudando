@@ -15,6 +15,7 @@ import {
 import { auth, db } from "./firebase";
 
 export async function criarTurmaProfessor({ nome }) {
+  // Cria uma turma para o professor logado e gera o codigo de entrada.
   const usuario = auth.currentUser;
 
   if (!usuario) {
@@ -48,6 +49,7 @@ export async function criarTurmaProfessor({ nome }) {
 }
 
 export async function listarTurmasProfessor() {
+  // Busca as turmas ativas do professor e ja traz os alunos de cada uma.
   const usuario = auth.currentUser;
 
   if (!usuario) {
@@ -85,6 +87,7 @@ export async function listarTurmasProfessor() {
 }
 
 export async function obterTurmaProfessor(turmaId) {
+  // Carrega uma turma e confirma se ela pertence ao professor atual.
   const usuario = auth.currentUser;
 
   if (!usuario) {
@@ -114,6 +117,7 @@ export async function obterTurmaProfessor(turmaId) {
 }
 
 export async function atualizarTurmaProfessor(turmaId, { nome }) {
+  // Altera somente o nome da turma, mantendo codigo e alunos.
   const turma = await obterTurmaProfessor(turmaId);
   const nomeLimpo = nome.trim();
 
@@ -128,6 +132,7 @@ export async function atualizarTurmaProfessor(turmaId, { nome }) {
 }
 
 export async function excluirTurmaProfessor(turmaId) {
+  // Marca a turma como inativa para manter o historico no banco.
   const turma = await obterTurmaProfessor(turmaId);
 
   await updateDoc(doc(db, "turmas", turma.id), {
@@ -137,6 +142,7 @@ export async function excluirTurmaProfessor(turmaId) {
 }
 
 export async function removerAlunoDaTurma(turmaId, alunoId) {
+  // Remove o vinculo nos dois lados: turma e perfil do aluno.
   await obterTurmaProfessor(turmaId);
 
   await deleteDoc(doc(db, "turmas", turmaId, "alunos", alunoId));
@@ -144,6 +150,7 @@ export async function removerAlunoDaTurma(turmaId, alunoId) {
 }
 
 export async function adicionarAlunoNaTurmaPorCodigo(turmaId, codigoAluno) {
+  // Permite ao professor adicionar o aluno lendo ou digitando o codigo dele.
   const turma = await obterTurmaProfessor(turmaId);
   const codigo = normalizarCodigoTurma(codigoAluno);
 
@@ -189,6 +196,7 @@ export async function adicionarAlunoNaTurmaPorCodigo(turmaId, codigoAluno) {
 }
 
 export async function listarAlunosDaTurma(turmaId) {
+  // Retorna os alunos em ordem alfabetica para facilitar o relatorio.
   const snap = await getDocs(collection(db, "turmas", turmaId, "alunos"));
 
   return snap.docs
@@ -200,6 +208,7 @@ export async function listarAlunosDaTurma(turmaId) {
 }
 
 export async function entrarEmTurmaPorCodigo(codigo) {
+  // Faz o aluno entrar em uma turma usando o codigo ou QR Code da turma.
   const usuario = auth.currentUser;
 
   if (!usuario) {
@@ -242,6 +251,7 @@ export async function entrarEmTurmaPorCodigo(codigo) {
 }
 
 export async function listarTurmasDoAluno() {
+  // Mostra no perfil do aluno as turmas em que ele participa.
   const usuario = auth.currentUser;
 
   if (!usuario) {
@@ -260,10 +270,12 @@ export async function listarTurmasDoAluno() {
 }
 
 export function montarValorQrTurma(codigo) {
+  // Valor gravado no QR Code da turma.
   return `gamestudando://turma/${codigo}`;
 }
 
 export function extrairCodigoTurma(valor) {
+  // Aceita tanto o link do QR Code quanto o codigo digitado manualmente.
   const texto = String(valor || "").trim();
   const match = texto.match(/turma\/([A-Z0-9]+)/i);
 
@@ -273,6 +285,7 @@ export function extrairCodigoTurma(valor) {
 }
 
 async function buscarTurmaPorCodigo(codigo) {
+  // Procura uma turma ativa pelo codigo publico.
   const consulta = query(
     collection(db, "turmas"),
     where("codigo", "==", normalizarCodigoTurma(codigo)),
@@ -292,6 +305,7 @@ async function buscarTurmaPorCodigo(codigo) {
 }
 
 async function gerarCodigoUnico() {
+  // Tenta gerar um codigo que ainda nao exista no Firestore.
   for (let tentativa = 0; tentativa < 8; tentativa += 1) {
     const codigo = gerarCodigoTurma();
     const consulta = query(
@@ -307,6 +321,7 @@ async function gerarCodigoUnico() {
 }
 
 function gerarCodigoTurma() {
+  // Usa letras e numeros faceis de ler, evitando caracteres confusos.
   const caracteres = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let codigo = "";
 
@@ -318,6 +333,7 @@ function gerarCodigoTurma() {
 }
 
 function normalizarCodigoTurma(codigo) {
+  // Padroniza o codigo para aceitar letras minusculas ou espacos digitados.
   return String(codigo)
     .trim()
     .toUpperCase()
@@ -325,6 +341,7 @@ function normalizarCodigoTurma(codigo) {
 }
 
 function montarResumoAluno(uid, usuario, aluno) {
+  // Guarda na turma somente os dados necessarios para relatorio.
   const matematica = aluno.matematica || aluno.materias?.matematica || {};
   const portugues = aluno.portugues || aluno.materias?.portugues || {};
   const rimas = aluno.rimas || aluno.materias?.rimas || {};

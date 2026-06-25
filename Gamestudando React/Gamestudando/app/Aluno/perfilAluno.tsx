@@ -134,11 +134,11 @@ export default function PerfilAluno() {
     <ScrollView contentContainerStyle={styles.perfilContainer}>
 
       <Text style={styles.perfilTitulo}>
-        📊 Relatório do Aluno
+         Relatório do Aluno
       </Text>
 
       <Text style={styles.perfilNome}>
-        👤 {perfil.nome || "Aluno"}
+         {perfil.nome || "Aluno"}
       </Text>
 
       <View style={styles.configuracaoCard}>
@@ -303,4 +303,4 @@ export default function PerfilAluno() {
 
     </ScrollView>
   );
-} 
+}

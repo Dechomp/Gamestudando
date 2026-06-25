@@ -99,20 +99,23 @@ const TUTORIAL_STEPS = [
 ];
 
 function normalizeWord(value: string | string[] | undefined) {
+  // Garante que a palavra da missao tenha apenas letras.
   const raw = Array.isArray(value) ? value[0] : value;
   const word = raw?.trim() || DEFAULT_WORD;
   return word
-    .replace(/[^a-zA-ZÁÀÂÃÉÊÍÓÔÕÚÇáàâãéêíóôõúç]/g, "")
+    .replace(/[^a-zA-Z????????????????????????]/g, "")
     .toUpperCase() || DEFAULT_WORD;
 }
 
 function distance(a: Vector2, b: Vector2) {
+  // Mede a distancia entre dois objetos do mapa.
   const dx = a.x - b.x;
   const dy = a.y - b.y;
   return Math.sqrt(dx * dx + dy * dy);
 }
 
 function forwardFromAngle(angle: number) {
+  // Calcula a frente da nave de acordo com a rotacao.
   return {
     x: Math.sin(angle),
     y: -Math.cos(angle)
@@ -120,6 +123,7 @@ function forwardFromAngle(angle: number) {
 }
 
 function rightFromAngle(angle: number) {
+  // Calcula o lado direito da nave, usado para virar e desenhar fogo lateral.
   return {
     x: Math.cos(angle),
     y: Math.sin(angle)
@@ -131,10 +135,12 @@ function clamp(value: number, min: number, max: number) {
 }
 
 function fuelForWord(word: string) {
+  // Palavras maiores recebem mais gasolina para a fase nao ficar injusta.
   return Math.max(MIN_WORD_FUEL, word.length * FUEL_PER_LETTER);
 }
 
 function createFlameShape(origin: Vector2, direction: Vector2, width: number, length: number) {
+  // Monta o desenho do fogo que sai da nave.
   const side = { x: -direction.y, y: direction.x };
   const baseLeft = {
     x: origin.x - side.x * width * 0.5,
@@ -196,6 +202,7 @@ function shortestAngleDelta(from: number, to: number) {
 }
 
 function createLetters(word: string): LetterObject[] {
+  // Cria letras certas e letras extras para espalhar nos meteoros.
   const basePositions = [
     { x: -170, y: -180 },
     { x: 80, y: -260 },
@@ -234,6 +241,7 @@ function createLetters(word: string): LetterObject[] {
 }
 
 function createAsteroids(letters: LetterObject[]): AsteroidObject[] {
+  // Cada meteoro guarda um conteudo e libera item depois de ser destruido.
   const letterAsteroids = letters.map((letter, index) => ({
     id: `asteroid-${letter.id}`,
     label: letter.value,
@@ -380,6 +388,7 @@ function createAsteroids(letters: LetterObject[]): AsteroidObject[] {
 }
 
 function keepAsteroidsAwayFromStart(asteroids: AsteroidObject[]) {
+  // Evita que a fase comece com meteoro em cima da nave ou da Terra.
   const safeZones = [INITIAL_SHIP_POSITION, INITIAL_EARTH_POSITION];
 
   return asteroids.map((asteroid, index) => {
@@ -402,6 +411,7 @@ function keepAsteroidsAwayFromStart(asteroids: AsteroidObject[]) {
 }
 
 function getAsteroidImage(asteroid: AsteroidObject) {
+  // Troca o sprite conforme o dano recebido pelo meteoro.
   const lostHealth = asteroid.maxHealth - asteroid.health;
   if (lostHealth >= Math.ceil(asteroid.maxHealth * 0.68)) return cosmoletrandoAssets.asteroideQuaseQuebrado;
   if (lostHealth >= Math.ceil(asteroid.maxHealth * 0.34)) return cosmoletrandoAssets.asteroideRachado;
@@ -409,6 +419,7 @@ function getAsteroidImage(asteroid: AsteroidObject) {
 }
 
 function getShipImage(lives: number) {
+  // Mostra a nave inteira, intermediaria ou danificada conforme as vidas.
   if (lives <= 1) return cosmoletrandoAssets.naveDanificada;
   if (lives === 2) return cosmoletrandoAssets.naveIntermediaria;
   return cosmoletrandoAssets.naveInteira;
@@ -497,6 +508,7 @@ export default function MissaoEspacial() {
   }
 
   useEffect(() => {
+    // Busca uma palavra do banco/cache quando a tela abre.
     let ativo = true;
 
     async function carregarPalavra() {
@@ -515,6 +527,7 @@ export default function MissaoEspacial() {
   }, [fallbackMissionWord]);
 
   const restartWithNewWord = useCallback(async () => {
+    // Jogar novamente busca outra palavra e recria a missao.
     const palavra = await carregarPalavraCosmoletrando(
       fallbackMissionWord,
       missionWordRef.current
@@ -543,6 +556,7 @@ export default function MissaoEspacial() {
   );
 
   const showMessage = useCallback((text: string, duration = 2300) => {
+    // Mostra falas curtas da nave sem acumular mensagens antigas.
     setMessage(text);
 
     if (messageTimerRef.current) {
@@ -555,6 +569,7 @@ export default function MissaoEspacial() {
   }, []);
 
   const resetMission = useCallback(() => {
+    // Recria todos os objetos da fase usando a palavra atual.
     const letters = createLetters(missionWord);
     const maxFuel = fuelForWord(missionWord);
     completionSavedRef.current = false;
@@ -629,6 +644,7 @@ export default function MissaoEspacial() {
   }, []);
 
   const startMission = useCallback(() => {
+    // Sai do tutorial e inicia a missao.
     gameRef.current.ship.lives = 3;
     phaseRef.current = "playing";
     setPhase("playing");
@@ -637,6 +653,7 @@ export default function MissaoEspacial() {
   }, [missionWord, showMessage]);
 
   const advanceTutorial = useCallback(() => {
+    // Avanca as telas de explicacao antes do jogo.
     if (tutorialStep >= TUTORIAL_STEPS.length - 1) {
       startMission();
       return;
@@ -656,6 +673,7 @@ export default function MissaoEspacial() {
   );
 
   const continueMission = useCallback(() => {
+    // Fecha o aviso de voltar sem completar a palavra.
     earthChoiceOpenRef.current = false;
     gameRef.current.touchingEarth = true;
     phaseRef.current = "playing";
@@ -663,11 +681,13 @@ export default function MissaoEspacial() {
   }, []);
 
   const finishWithoutFullReward = useCallback(() => {
+    // Desiste da fase e volta para o mapa.
     resetMission();
     router.replace("/Aluno");
   }, [resetMission, router]);
 
   const togglePause = useCallback(() => {
+    // Alterna entre pausado e jogando.
     if (phaseRef.current === "paused") {
       phaseRef.current = "playing";
       setPhase("playing");
@@ -721,6 +741,7 @@ export default function MissaoEspacial() {
   }, []);
 
   function updateGame(dt: number, now: number) {
+    // Loop principal: movimento, gasolina, tiros, colisoes e fim da fase.
     const game = gameRef.current;
     if (game.ended) return;
 
@@ -828,6 +849,7 @@ export default function MissaoEspacial() {
   }
 
   function updateAsteroids(dt: number) {
+    // Mantem os meteoros flutuando lentamente pelo mapa.
     const game = gameRef.current;
 
     for (const asteroid of game.asteroids) {
@@ -837,6 +859,7 @@ export default function MissaoEspacial() {
   }
 
   function updateHiddenLetters() {
+    // Revela letras depois do tempo de espera, quando necessario.
     const now = Date.now();
 
     for (const letter of gameRef.current.letters) {
@@ -848,6 +871,7 @@ export default function MissaoEspacial() {
   }
 
   function updateLasers(dt: number) {
+    // Move os tiros e aplica dano nos meteoros atingidos.
     const game = gameRef.current;
 
     game.lasers = game.lasers
@@ -916,6 +940,7 @@ export default function MissaoEspacial() {
   }
 
   function updateMagnet(dt: number) {
+    // O ima puxa somente a proxima letra correta.
     const game = gameRef.current;
     if (!game.magnet) return;
 
@@ -935,6 +960,7 @@ export default function MissaoEspacial() {
   }
 
   function applyUpgrade(upgrade: NonNullable<AsteroidObject["upgrade"]>) {
+    // Aplica efeitos como escudo, tiro em cone, tanque e vida extra.
     const game = gameRef.current;
 
     if (upgrade === "shield") {
@@ -979,6 +1005,7 @@ export default function MissaoEspacial() {
   }
 
   function handleLetterCollisions() {
+    // Confere se a nave pegou a proxima letra correta da palavra.
     const game = gameRef.current;
     const palavraAtual = missionWordRef.current;
     const nextLetter = palavraAtual[game.collectedIndex];
@@ -1017,6 +1044,7 @@ export default function MissaoEspacial() {
   }
 
   function handlePickupCollisions() {
+    // Coleta gasolina e upgrades que sairam dos meteoros destruidos.
     const game = gameRef.current;
     const pickupsToRemove = new Set<string>();
 
@@ -1042,6 +1070,7 @@ export default function MissaoEspacial() {
   }
 
   const registrarConclusaoDaFase = useCallback(() => {
+    // Salva o progresso do aluno quando a missao termina.
     if (completionSavedRef.current || !faseId) return;
 
     completionSavedRef.current = true;
@@ -1051,6 +1080,7 @@ export default function MissaoEspacial() {
   }, [faseId]);
 
   function handleEarthCollision() {
+    // A Terra finaliza a missao apenas depois que a palavra foi completada.
     const game = gameRef.current;
     const reachedEarth = distance(game.ship, game.earth) <= EARTH_RADIUS + SHIP_RADIUS;
 

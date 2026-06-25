@@ -11,10 +11,9 @@ const NIVEL_MAXIMO = {
   rimas: 4
 };
 
-// =========================
-// 🆕 PERFIL PADRÃO
-// =========================
+// Perfil padrao do aluno
 function criarPerfilInicial() {
+  // Valores usados quando ainda nao existe perfil salvo no celular.
   return {
     uid: null,
 
@@ -58,6 +57,7 @@ function criarPerfilInicial() {
 }
 
 function completarPerfil(perfil) {
+  // Garante que perfis antigos recebam campos novos sem quebrar as telas.
   const inicial = criarPerfilInicial();
 
   return {
@@ -86,9 +86,7 @@ function completarPerfil(perfil) {
   };
 }
 
-// =========================
-// 📥 CARREGAR PERFIL
-// =========================
+// Funcao para carregar o perfil salvo no celular.
 export async function carregarPerfil() {
   try {
     const json = await AsyncStorage.getItem(KEY);
@@ -108,9 +106,7 @@ export async function carregarPerfil() {
   }
 }
 
-// =========================
-// 💾 SALVAR
-// =========================
+// Funcao para salvar o perfil no celular.
 export async function salvarPerfil(perfil) {
   try {
     await AsyncStorage.setItem(KEY, JSON.stringify(perfil));
@@ -120,6 +116,7 @@ export async function salvarPerfil(perfil) {
 }
 
 export async function limparPerfilLocal() {
+  // Usada no logout para a proxima conta nao herdar dados locais.
   try {
     await AsyncStorage.removeItem(KEY);
     await AsyncStorage.removeItem("faseLiberada");
@@ -129,17 +126,16 @@ export async function limparPerfilLocal() {
 }
 
 function obterUidAluno() {
+  // Em teste local, usa um id fixo quando nao existe usuario logado.
   return auth.currentUser?.uid || ALUNO_TESTE_UID;
 }
 
-// =========================
-// 🔄 RESET CORRIGIDO
-// =========================
+// Funcao para resetar o progresso do aluno.
 export async function resetarPerfil() {
   try {
     await AsyncStorage.removeItem("perfilAluno");
 
-    // 🔥 ADICIONE ISSO
+    // Tambem limpa a fase liberada salva separadamente.
     await AsyncStorage.removeItem("faseLiberada");
 
     const perfilInicial = criarPerfilInicial();
@@ -168,9 +164,7 @@ export async function resetarPerfil() {
   }
 }
 
-// =========================
-// ✏️ ATUALIZAR DADOS
-// =========================
+// Funcao para atualizar nome e email do perfil.
 export async function atualizarDadosBasicos({ nome, email }) {
   try {
     const perfil = await carregarPerfil();
@@ -193,9 +187,7 @@ export async function atualizarDadosBasicos({ nome, email }) {
   }
 }
 
-// =========================
-// 🧠 ATUALIZAR MATÉRIA (VOLTOU)
-// =========================
+// Funcao chamada quando o aluno termina uma atividade.
 export async function atualizarPerfil(materia, acertos, erros, faseConcluida) {
   try {
     const perfil = await carregarPerfil();
@@ -211,6 +203,7 @@ export async function atualizarPerfil(materia, acertos, erros, faseConcluida) {
     const totalFase = acertos + erros;
 
     if (totalFase > 0) {
+      // Guarda a pontuacao da atividade atual.
       dados.ultimaPontuacao = acertos / totalFase;
       dados.atividadesConcluidas =
         (dados.atividadesConcluidas || 0) + 1;
@@ -220,8 +213,10 @@ export async function atualizarPerfil(materia, acertos, erros, faseConcluida) {
     const taxa = total > 0 ? dados.acertos / total : 0;
 
     if (taxa > 0.8) {
+      // Se o aluno vai bem, aumenta o nivel aos poucos.
       dados.nivel += 1;
     } else if (taxa < 0.4 && dados.nivel > 1) {
+      // Se o aluno erra muito, reduz o nivel para reforcar a base.
       dados.nivel -= 1;
     }
 
@@ -229,6 +224,7 @@ export async function atualizarPerfil(materia, acertos, erros, faseConcluida) {
     dados.nivel = Math.max(1, Math.min(dados.nivel, maximo));
 
     if (faseConcluida !== undefined && faseConcluida !== null) {
+      // Libera a proxima fase do mapa depois da tarefa concluida.
       const fase = parseInt(String(faseConcluida));
 
       if (!isNaN(fase)) {
@@ -269,6 +265,7 @@ export async function atualizarPerfil(materia, acertos, erros, faseConcluida) {
 }
 
 export async function atualizarConfiguracoes(novasConfiguracoes) {
+  // Salva preferencias do aluno, como a leitura das perguntas.
   try {
     const perfil = await carregarPerfil();
 
@@ -292,6 +289,7 @@ export async function atualizarConfiguracoes(novasConfiguracoes) {
 }
 
 export async function obterOuCriarMateriaDaFase(faseId, materiaSugerida) {
+  // Depois que a fase recebe uma materia, ela fica salva para nao mudar sozinha.
   const fase = String(faseId);
   const perfil = await carregarPerfil();
   const progresso = perfil.progresso || {};
@@ -321,6 +319,7 @@ export async function obterOuCriarMateriaDaFase(faseId, materiaSugerida) {
 }
 
 export async function concluirAvaliacaoInicial(resultado) {
+  // Usa a avaliacao inicial para ajustar o nivel de cada materia.
   try {
     const perfil = await carregarPerfil();
     const matematica = resultado?.matematica || {};
@@ -372,6 +371,7 @@ export async function concluirAvaliacaoInicial(resultado) {
 }
 
 function escolherMateriaPadrao(faseId) {
+  // Alterna as materias quando ainda nao existe uma sugestao salva.
   if (faseId % 5 === 0) return "cosmoletrando";
   if (faseId % 3 === 0) return "rimas";
   if (faseId % 2 === 0) return "matematica";

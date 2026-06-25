@@ -19,21 +19,21 @@ const CriarTarefa = () => {
   // Tipo de tarefa selecionado
   const [tipoTarefa, setTipoTarefa] = useState('multipla');
 
-  // === Múltipla Escolha ===
+  // Múltipla Escolha
   const [disciplina, setDisciplina] = useState('Matemática');
   const [pergunta, setPergunta] = useState('');
   const [alternativas, setAlternativas] = useState(['', '', '', '']);
   const [alternativaCorreta, setAlternativaCorreta] = useState(null);
   const [nivel, setNivel] = useState('1');
 
-  // === Rimas ===
+  // Rimas
   const [rimaPalavraEsquerda, setRimaPalavraEsquerda] = useState('');
   const [rimaPalavraDireita, setRimaPalavraDireita] = useState('');
   const [rimaGrupo, setRimaGrupo] = useState('1');
   const [rimaNivel, setRimaNivel] = useState('1');
   const [paresRimas, setParesRimas] = useState([]);
 
-  // === Cosmoletrando ===
+  // Cosmoletrando
   const [cosmoPalavra, setCosmoPalavra] = useState('');
   const [cosmoLetra, setCosmoletra] = useState('');
   const [cosmoNivel, setCosmoNivel] = useState('1');
@@ -47,8 +47,9 @@ const CriarTarefa = () => {
     setAlternativas(novasAlternativas);
   };
 
-  // === Funções para Múltipla Escolha ===
+  // Funções para Múltipla Escolha
   const salvarMultiplaEscolha = async () => {
+    // Confere os campos antes de montar a tarefa local.
     console.log('Iniciando validação de múltipla escolha...');
 
     // Validação da pergunta
@@ -128,8 +129,9 @@ const CriarTarefa = () => {
     }
   };
 
-  // === Funções para Rimas ===
+  // Funções para Rimas
   const adicionarRima = () => {
+    // Guarda o par na lista antes de salvar a tarefa completa.
     if (!rimaPalavraEsquerda.trim() || !rimaPalavraDireita.trim()) {
       window.alert('Por favor, preencha ambas as palavras da rima.');
       return;
@@ -149,6 +151,7 @@ const CriarTarefa = () => {
   };
 
   const salvarRimas = async () => {
+    // Salva todos os pares de rimas juntos no armazenamento local.
     if (paresRimas.length === 0) {
       window.alert('Por favor, adicione pelo menos um par de rimas.');
       return;
@@ -191,11 +194,13 @@ const CriarTarefa = () => {
   };
 
   const removerRima = (id) => {
+    // Remove um par que o professor adicionou por engano.
     setParesRimas(paresRimas.filter(rima => rima.id !== id));
   };
 
-  // === Funções para Cosmoletrando ===
+  // Funções para Cosmoletrando
   const adicionarCosmoPalavra = () => {
+    // Adiciona uma palavra que pode virar missao no jogo da nave.
     if (!cosmoPalavra.trim() || !cosmoLetra.trim()) {
       window.alert('Por favor, preencha a palavra e a letra inicial.');
       return;
@@ -219,6 +224,7 @@ const CriarTarefa = () => {
   };
 
   const salvarCosmoPalavras = async () => {
+    // Salva a lista de palavras do Cosmoletrando localmente.
     if (cosmoPalavras.length === 0) {
       window.alert('Por favor, adicione pelo menos uma palavra para Cosmoletrando.');
       return;
@@ -260,6 +266,7 @@ const CriarTarefa = () => {
   };
 
   const removerCosmoPalavra = (id) => {
+    // Remove uma palavra da lista antes de salvar.
     setCosmoPalavras(cosmoPalavras.filter(palavra => palavra.id !== id));
   };
 
@@ -280,11 +287,10 @@ const CriarTarefa = () => {
         </Picker>
       </View>
 
-      {/* === Formulário: Múltipla Escolha === */}
+      {/* Formulário: Múltipla Escolha */}
       {tipoTarefa === 'multipla' && (
         <>
-          {/* Disciplina */}
-          <Text style={styles.label}>Disciplina</Text>
+                    <Text style={styles.label}>Disciplina</Text>
           <View style={styles.pickerContainer}>
             <Picker
               selectedValue={disciplina}
@@ -295,8 +301,7 @@ const CriarTarefa = () => {
             </Picker>
           </View>
 
-          {/* Pergunta */}
-          <Text style={styles.label}>Pergunta</Text>
+                    <Text style={styles.label}>Pergunta</Text>
           <TextInput
             style={styles.inputPergunta}
             placeholder="Digite a pergunta"
@@ -305,8 +310,7 @@ const CriarTarefa = () => {
             multiline
           />
 
-          {/* Alternativas */}
-          <Text style={styles.label}>Respostas</Text>
+                    <Text style={styles.label}>Respostas</Text>
 
           {alternativas.map((alternativa, index) => (
             <View key={index} style={styles.linhaAlternativa}>
@@ -356,13 +360,12 @@ const CriarTarefa = () => {
         </>
       )}
 
-      {/* === Formulário: Rimas === */}
+      {/* Formulário: Rimas */}
       {tipoTarefa === 'rimas' && (
         <>
           <Text style={styles.label}>Adicionar Par de Rimas</Text>
 
-          {/* Palavra Esquerda */}
-          <Text style={styles.sublabel}>Palavra 1</Text>
+                    <Text style={styles.sublabel}>Palavra 1</Text>
           <TextInput
             style={styles.inputPergunta}
             placeholder="Digite a primeira palavra"
@@ -370,8 +373,7 @@ const CriarTarefa = () => {
             onChangeText={setRimaPalavraEsquerda}
           />
 
-          {/* Palavra Direita */}
-          <Text style={styles.sublabel}>Palavra 2</Text>
+                    <Text style={styles.sublabel}>Palavra 2</Text>
           <TextInput
             style={styles.inputPergunta}
             placeholder="Digite a segunda palavra"
@@ -379,8 +381,7 @@ const CriarTarefa = () => {
             onChangeText={setRimaPalavraDireita}
           />
 
-          {/* Grupo */}
-          <Text style={styles.label}>Grupo</Text>
+                    <Text style={styles.label}>Grupo</Text>
           <View style={styles.pickerContainer}>
             <Picker
               selectedValue={rimaGrupo}
@@ -416,8 +417,7 @@ const CriarTarefa = () => {
             <Text style={styles.textoBotao}>Adicionar Rima</Text>
           </TouchableOpacity>
 
-          {/* Lista de Rimas */}
-          {paresRimas.length > 0 && (
+                    {paresRimas.length > 0 && (
             <>
               <Text style={styles.label}>Rimas Adicionadas ({paresRimas.length})</Text>
               {paresRimas.map((rima) => (
@@ -443,13 +443,12 @@ const CriarTarefa = () => {
         </>
       )}
 
-      {/* === Formulário: Cosmoletrando === */}
+      {/* Formulário: Cosmoletrando */}
       {tipoTarefa === 'cosmoletrando' && (
         <>
           <Text style={styles.label}>Adicionar Palavra Cosmoletrando</Text>
 
-          {/* Palavra */}
-          <Text style={styles.sublabel}>Palavra</Text>
+                    <Text style={styles.sublabel}>Palavra</Text>
           <TextInput
             style={styles.inputPergunta}
             placeholder="Digite a palavra"
@@ -457,8 +456,7 @@ const CriarTarefa = () => {
             onChangeText={setCosmoPalavra}
           />
 
-          {/* Letra Inicial */}
-          <Text style={styles.sublabel}>Letra Inicial</Text>
+                    <Text style={styles.sublabel}>Letra Inicial</Text>
           <TextInput
             style={styles.inputPergunta}
             placeholder="Letra inicial (um caractere)"
@@ -489,8 +487,7 @@ const CriarTarefa = () => {
             <Text style={styles.textoBotao}>Adicionar Palavra</Text>
           </TouchableOpacity>
 
-          {/* Lista de Palavras */}
-          {cosmoPalavras.length > 0 && (
+                    {cosmoPalavras.length > 0 && (
             <>
               <Text style={styles.label}>Palavras Adicionadas ({cosmoPalavras.length})</Text>
               {cosmoPalavras.map((palavra) => (
@@ -516,8 +513,7 @@ const CriarTarefa = () => {
         </>
       )}
 
-      {/* Contador */}
-      <Text style={styles.contador}>
+            <Text style={styles.contador}>
         Tarefas salvas localmente: {tarefas.length}
       </Text>
     </ScrollView>

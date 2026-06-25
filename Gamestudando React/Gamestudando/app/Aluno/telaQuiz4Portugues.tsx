@@ -7,10 +7,12 @@ import { atualizarPerfil, carregarPerfil } from "../utils/perfilAluno";
 import { lerTextoSeAtivo, pararLeitura } from "../utils/leituraPerguntas";
 import { carregarQuestoesMultiplaEscolha } from "../utils/repositorioQuestoes";
 
+// Funcao para embaralhar perguntas e respostas.
 function embaralhar(lista) {
   return [...lista].sort(() => Math.random() - 0.5);
 }
 
+// Troca a ordem das respostas sem perder qual e a correta.
 function embaralharPergunta(pergunta) {
   const respostasComIndice = pergunta.respostas.map((resposta, indice) => ({
     resposta,
@@ -30,6 +32,7 @@ function embaralharPergunta(pergunta) {
   };
 }
 function selecionarPerguntasIA(lista, nivelAluno = 3, quantidade = 5) {
+  // Escolhe perguntas proximas ao nivel atual do aluno.
   const niveis = lista.map(p => p.nivel);
   const menorNivel = Math.min(...niveis);
   const maiorNivel = Math.max(...niveis);
@@ -107,6 +110,7 @@ export default function Index() {
       let ativo = true;
 
       const carregar = async () => {
+        // Carrega perguntas do Firebase/cache e monta o quiz.
         const perfil = await carregarPerfil();
         const nivel = perfil?.portugues?.nivel || 3;
         const perguntasBase = await carregarQuestoesMultiplaEscolha(
@@ -136,6 +140,7 @@ export default function Index() {
   );
 
   const animarClique = (index) => {
+    // Pequena animacao para mostrar que o botao foi tocado.
     Animated.sequence([
       Animated.timing(scaleAnims[index], {
         toValue: 0.94,
@@ -151,6 +156,7 @@ export default function Index() {
   };
 
   const selecionarResposta = (resposta) => {
+    // Permite selecionar e desmarcar uma alternativa.
     if (respostaConfirmada) return;
 
     setRespostaSelecionada(
@@ -159,6 +165,7 @@ export default function Index() {
   };
 
   const confirmarResposta = async () => {
+    // Primeiro clique confirma, segundo clique avanca.
     if (respostaSelecionada === null && !respostaConfirmada) return;
 
     if (!respostaConfirmada) {
@@ -202,6 +209,7 @@ export default function Index() {
   };
 
   const estiloBotao = (index) => {
+    // Depois de confirmar, mostra verde para certa e vermelho para errada.
     if (!respostaConfirmada) {
       return respostaSelecionada === index
         ? styles.botaoRespostaSelecionada

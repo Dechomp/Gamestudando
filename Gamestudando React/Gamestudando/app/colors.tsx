@@ -1,30 +1,22 @@
 export const colors = {
 
-  // =========================
-  // 🎯 BASE
-  // =========================
+  // BASE
   branco: "#FFFFFF",
   preto: "#000000",
   textoPrimario: "#333333",
   textoSecundario: "#555555",
   textoAuxiliar: "#666666",
 
-  // =========================
-  // 🌈 CORES PRINCIPAIS
-  // =========================
+  // CORES PRINCIPAIS
   primaria: "#3245F3",       // botões padrão (quiz)
   secundaria: "#2196F3",     // ações (editar perfil, etc)
 
-  // =========================
-  // ✅ STATUS
-  // =========================
+  // STATUS
   certa: "#4CAF50",          // acerto
   errada: "#F44336",         // erro
   selecionada: "#0D47A1",    // item selecionado
 
-  // =========================
-  // ⚪ NEUTROS
-  // =========================
+  // NEUTROS
   cinza: "#BDBDBD",          // desabilitado
   cinzaClaro: "#CCCCCC",     // linhas / detalhes
   cinzaMuitoClaro: "#F0F0F0",
@@ -34,20 +26,14 @@ export const colors = {
   laranja: "#F9A825",
   azulBorda: "#3498DB",
 
-  // =========================
-  // 🔘 BOTÃO CONFIRMAR
-  // =========================
+  // Botao de confirmar
   confirmarVazio: "#BDBDBD",       // sem seleção
   confirmarSelecionada: "#4CAF50", // pronto para confirmar
 
-  // =========================
-  // 📦 CARDS / BACKGROUNDS
-  // =========================
+  // CARDS / BACKGROUNDS
   card: "#FFFFFF",
 
-  // =========================
   // JOGO - MISSAO ESPACIAL
-  // =========================
   espacoFundo: "#090A22",
   espacoFundoProfundo: "#151342",
   espacoEstrela: "#F8FBFF",

@@ -1,7 +1,5 @@
 export const perguntasPortugues = [
-  // ==============================
-  // 🟢 NÍVEL 1: Primeira Letra
-  // ==============================
+  // NÍVEL 1: Primeira Letra
   {
     pergunta: "QUAL PALAVRA COMEÇA COM B?",
     respostas: ["GATO", "CASA", "BOLA", "PATO"],
@@ -33,9 +31,7 @@ export const perguntasPortugues = [
     nivel: 1
   },
 
-  // ==============================
-  // 🟡 NÍVEL 2: Sílaba Inicial e Final
-  // ==============================
+  // NÍVEL 2: Sílaba Inicial e Final
   {
     pergunta: "QUAL COMEÇA COM CA?",
     respostas: ["BOLA", "FOGO", "DADO", "CASA"],
@@ -73,9 +69,7 @@ export const perguntasPortugues = [
     nivel: 2
   },
 
-  // ==============================
-  // 🟠 NÍVEL 3: Rimas Simples e Finais
-  // ==============================
+  // NÍVEL 3: Rimas Simples e Finais
   {
     pergunta: "QUAL TERMINA COM SA?",
     respostas: ["GATO", "PATO", "MESA", "BOLA"],
@@ -113,9 +107,7 @@ export const perguntasPortugues = [
     nivel: 3
   },
 
-  // ==============================
-  // 🔴 NÍVEL 4: Rimas e Separação (2 Sílabas)
-  // ==============================
+  // NÍVEL 4: Rimas e Separação (2 Sílabas)
   {
     pergunta: "QUAL RIMA COM PATO?",
     respostas: ["MESA", "CASA", "GATO", "BOLA"],
@@ -153,9 +145,7 @@ export const perguntasPortugues = [
     nivel: 4
   },
 
-  // ==============================
-  // 🟣 NÍVEL 5: Separação (Palavras Maiores)
-  // ==============================
+  // NÍVEL 5: Separação (Palavras Maiores)
   {
     pergunta: "DA-DO TEM QUANTAS SÍLABAS?",
     respostas: ["1", "2", "3", "4"],
@@ -181,9 +171,7 @@ export const perguntasPortugues = [
     nivel: 5
   },
 
-  // ==============================
-  // 🟤 NÍVEL 6: O Intruso (Lógica)
-  // ==============================
+  // NÍVEL 6: O Intruso (Lógica)
   {
     pergunta: "QUAL PALAVRA NÃO RIMA COM AS OUTRAS?",
     respostas: ["GATO", "PATO", "RATO", "CASA"],

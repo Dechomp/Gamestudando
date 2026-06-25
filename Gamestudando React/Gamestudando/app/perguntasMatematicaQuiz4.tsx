@@ -1,7 +1,5 @@
 export const perguntasMatematica = [
-  // ==============================
-  // 🟢 NÍVEL 1: Operações Básicas
-  // ==============================
+  // NÍVEL 1: Operações Básicas
   {
     pergunta: "Quanto é 2 + 1?",
     respostas: ["3", "1", "4", "2"],
@@ -45,9 +43,7 @@ export const perguntasMatematica = [
     nivel: 1
   },
 
-  // ==============================
-  // 🟡 NÍVEL 2: Operações Intermediárias
-  // ==============================
+  // NÍVEL 2: Operações Intermediárias
   {
     pergunta: "Quanto é 10 + 5?",
     respostas: ["10", "20", "5", "15"],
@@ -115,9 +111,7 @@ export const perguntasMatematica = [
     nivel: 2
   },
 
-  // ==============================
-  // 🟠 NÍVEL 3: Lógica e Dezenas
-  // ==============================
+  // NÍVEL 3: Lógica e Dezenas
   {
     pergunta: "Qual número é MAIOR?",
     respostas: ["1", "3", "9", "2"],
@@ -161,9 +155,7 @@ export const perguntasMatematica = [
     nivel: 3
   },
 
-  // ==============================
-  // 🔴 NÍVEL 4: Desafios Finais
-  // ==============================
+  // NÍVEL 4: Desafios Finais
   {
     pergunta: "Qual número é MENOR?",
     respostas: ["8", "5", "9", "2"],

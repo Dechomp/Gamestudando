@@ -24,6 +24,7 @@ export async function criarQuestaoMultiplaEscolhaProfessor({
   correta,
   nivel
 }) {
+  // Cria uma pergunta comum, com quatro alternativas e uma resposta correta.
   const usuario = auth.currentUser;
 
   if (!usuario) {
@@ -42,6 +43,7 @@ export async function criarQuestaoMultiplaEscolhaProfessor({
 
   validarModeracaoLocal(dadosQuestao);
 
+  // A questao entra como pendente ate a revisao ser concluida.
   const docRef = await addDoc(collection(db, "questoes"), {
     ...dadosQuestao,
     ...dadosRevisaoPendente(),
@@ -62,6 +64,7 @@ export async function criarQuestaoRimaProfessor({
   palavraMissao,
   nivel
 }) {
+  // Cria um par de rimas e tambem salva uma palavra para o Cosmoletrando.
   const usuario = auth.currentUser;
 
   if (!usuario) {
@@ -74,6 +77,7 @@ export async function criarQuestaoRimaProfessor({
   const chavePar = montarChaveParRima(primeira, segunda);
   const jaExiste = await verificarParRimaExistente(chavePar, primeira, segunda);
 
+  // Evita cadastrar a mesma combinacao de palavras duas vezes.
   if (jaExiste) {
     throw new Error("RIMA_DUPLICADA");
   }
@@ -121,6 +125,7 @@ export async function criarQuestaoCosmoletrando({
   palavra,
   nivel
 }) {
+  // Cria uma palavra que pode aparecer no jogo da nave.
   const usuario = auth.currentUser;
 
   if (!usuario) {
@@ -159,6 +164,7 @@ export async function criarQuestaoCosmoletrando({
 }
 
 export async function atualizarQuestaoProfessor(id, dados) {
+  // Edita uma questao e volta o status para revisao.
   const usuario = auth.currentUser;
 
   if (!usuario) {
@@ -194,6 +200,7 @@ export async function atualizarQuestaoProfessor(id, dados) {
 }
 
 export async function excluirQuestaoProfessor(id) {
+  // Remove a questao criada pelo professor.
   const usuario = auth.currentUser;
 
   if (!usuario) {
@@ -204,6 +211,7 @@ export async function excluirQuestaoProfessor(id) {
 }
 
 export async function listarQuestoesDoProfessor() {
+  // Lista apenas as questoes criadas pelo professor logado.
   const usuario = auth.currentUser;
 
   if (!usuario) {
@@ -230,6 +238,7 @@ export async function listarQuestoesDoProfessor() {
 }
 
 async function verificarParRimaExistente(chavePar, palavraA, palavraB, ignorarId = null) {
+  // Procura rimas iguais pela chave e pelas palavras normalizadas.
   const porChave = query(
     collection(db, "questoes"),
     where("materia", "==", "rimas"),
@@ -263,6 +272,7 @@ async function verificarParRimaExistente(chavePar, palavraA, palavraB, ignorarId
 }
 
 function montarDadosAtualizacao(dados) {
+  // Monta o objeto certo dependendo do tipo de tarefa editada.
   if (dados.materia === "rimas") {
     const primeira = dados.palavraA.trim().toUpperCase();
     const segunda = dados.palavraB.trim().toUpperCase();
@@ -304,6 +314,7 @@ function montarDadosAtualizacao(dados) {
 }
 
 function validarModeracaoLocal(dadosQuestao) {
+  // Bloqueia tarefas claramente inadequadas antes de gravar no Firebase.
   const resultado = moderarTarefaLocalmente(dadosQuestao);
 
   if (!resultado.aprovada) {
@@ -314,6 +325,7 @@ function validarModeracaoLocal(dadosQuestao) {
 }
 
 function dadosRevisaoPendente() {
+  // A tarefa ja fica disponivel pela revisao local e aguarda IA em paralelo.
   return {
     ativa: true,
     statusRevisao: "aprovada",
@@ -328,18 +340,21 @@ function dadosRevisaoPendente() {
 }
 
 function solicitarRevisaoIA(id, dadosQuestao) {
+  // A revisao externa nao pode travar o cadastro se a funcao estiver indisponivel.
   revisarTarefaComIA(id, dadosQuestao).catch(error => {
     console.log("Revisao por IA indisponivel:", error);
   });
 }
 
 function montarChaveParRima(palavraA, palavraB) {
+  // Ordena as palavras para PATO/GATO e GATO/PATO virarem a mesma chave.
   return [normalizarPalavra(palavraA), normalizarPalavra(palavraB)]
     .sort()
     .join("_");
 }
 
 function inferirTipoQuestao(texto, materia) {
+  // Classifica a tarefa para ajudar os relatorios e a IA de recomendacao.
   const normalizado = String(texto).toLowerCase();
 
   if (materia === "matematica") {

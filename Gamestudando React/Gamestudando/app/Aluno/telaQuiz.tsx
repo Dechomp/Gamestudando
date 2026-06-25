@@ -26,7 +26,7 @@ export default function Index() {
 
   // Define qual é a resposta correta da pergunta atual
   // Pega essa informação do array de perguntas
-  const respostaCorreta = perguntas[perguntaAtual].correta;  
+  const respostaCorreta = perguntas[perguntaAtual].correta;
 
 
   // Função chamada quando o usuário toca em uma resposta
@@ -38,12 +38,12 @@ export default function Index() {
     // Se clicar novamente na mesma resposta, ela é desmarcada
     if (respostaSelecionada === resposta) {
       setRespostaSelecionada(null);
-    } 
+    }
     // Caso contrário, salva a nova resposta escolhida
     else {
       setRespostaSelecionada(resposta);
     }
-    
+
   };
 
 
@@ -56,8 +56,8 @@ export default function Index() {
     // Primeiro clique: confirmar resposta
     if (!respostaConfirmada) {
       setRespostaConfirmada(true);
-    } 
-    
+    }
+
     // Segundo clique: ir para a próxima pergunta
     else {
 
@@ -73,7 +73,7 @@ export default function Index() {
         // Avança para a próxima pergunta
         setPerguntaAtual(perguntaAtual + 1);
 
-      } 
+      }
       else {
 
         // Se chegou na última pergunta, volta para a primeira
@@ -120,17 +120,14 @@ export default function Index() {
 
     <View style={styles.quizLegacyContainer}>
 
-      {/* Texto da pergunta atual */}
-      <Text style={styles.textoPergunta}>
+            <Text style={styles.textoPergunta}>
         Pergunta {perguntaAtual + 1}: {perguntas[perguntaAtual].pergunta}
       </Text>
 
 
-      {/* Primeira linha de respostas */}
-      <View style={styles.quizRespostasLinhaEspacada}>
+            <View style={styles.quizRespostasLinhaEspacada}>
 
-        {/* Resposta 1 */}
-        <View style={estiloBotao(0)}>
+                <View style={estiloBotao(0)}>
           <TouchableOpacity onPress={() => selecionarResposta(0)}>
             <Text style={styles.textoBotao}>
               {perguntas[perguntaAtual].respostas[0]}
@@ -138,8 +135,7 @@ export default function Index() {
           </TouchableOpacity>
         </View>
 
-        {/* Resposta 2 */}
-        <View style={estiloBotao(1)}>
+                <View style={estiloBotao(1)}>
           <TouchableOpacity onPress={() => selecionarResposta(1)}>
             <Text style={styles.textoBotao}>
               {perguntas[perguntaAtual].respostas[1]}
@@ -150,11 +146,9 @@ export default function Index() {
       </View>
 
 
-      {/* Segunda linha de respostas */}
-      <View style={styles.quizRespostasLinha}>
+            <View style={styles.quizRespostasLinha}>
 
-        {/* Resposta 3 */}
-        <View style={estiloBotao(2)}>
+                <View style={estiloBotao(2)}>
           <TouchableOpacity onPress={() => selecionarResposta(2)}>
             <Text style={styles.textoBotao}>
               {perguntas[perguntaAtual].respostas[2]}
@@ -162,8 +156,7 @@ export default function Index() {
           </TouchableOpacity>
         </View>
 
-        {/* Resposta 4 */}
-        <View style={estiloBotao(3)}>
+                <View style={estiloBotao(3)}>
           <TouchableOpacity onPress={() => selecionarResposta(3)}>
             <Text style={styles.textoBotao}>
               {perguntas[perguntaAtual].respostas[3]}
@@ -193,8 +186,7 @@ export default function Index() {
 
         <TouchableOpacity onPress={confirmarResposta}>
 
-          {/* Texto muda dependendo do estado */}
-          <Text style={styles.textoBotao}>
+                    <Text style={styles.textoBotao}>
             {respostaConfirmada ? "Próxima pergunta" : "Confirmar resposta"}
           </Text>
 

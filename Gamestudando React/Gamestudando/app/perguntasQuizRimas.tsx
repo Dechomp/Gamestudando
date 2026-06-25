@@ -1,7 +1,5 @@
 export const palavrasEsquerda = [
-  // ==============================
-  // 🟢 NÍVEL 1
-  // ==============================
+  // NÍVEL 1
   { id: "E01", texto: "GATO", grupo: "ATO", par: "01", nivel: 1 },
   { id: "E02", texto: "BOLA", grupo: "OLA", par: "02", nivel: 1 },
   { id: "E03", texto: "SAPO", grupo: "APO", par: "03", nivel: 1 },
@@ -12,9 +10,7 @@ export const palavrasEsquerda = [
   { id: "E28", texto: "LUVA", grupo: "UVA", par: "28", nivel: 1 },
   { id: "E29", texto: "DENTE", grupo: "ENTE", par: "29", nivel: 1 },
 
-  // ==============================
-  // 🟡 NÍVEL 2
-  // ==============================
+  // NÍVEL 2
   { id: "E04", texto: "MÃO", grupo: "ÃO", par: "04", nivel: 2 },
   { id: "E06", texto: "FACA", grupo: "ACA", par: "06", nivel: 2 },
   { id: "E07", texto: "DADO", grupo: "ADO", par: "07", nivel: 2 },
@@ -30,9 +26,7 @@ export const palavrasEsquerda = [
   { id: "E31", texto: "JANELA", grupo: "ELA", par: "31", nivel: 2 },
   { id: "E32", texto: "LIMÃO", grupo: "ÃO", par: "32", nivel: 2 },
 
-  // ==============================
-  // 🟠 NÍVEL 3
-  // ==============================
+  // NÍVEL 3
   { id: "E12", texto: "FITA", grupo: "ITA", par: "12", nivel: 3 },
   { id: "E14", texto: "BICO", grupo: "ICO", par: "14", nivel: 3 },
   { id: "E15", texto: "PIPO", grupo: "IPO", par: "15", nivel: 3 },
@@ -45,9 +39,7 @@ export const palavrasEsquerda = [
   { id: "E34", texto: "TAMBOR", grupo: "OR", par: "34", nivel: 3 },
   { id: "E35", texto: "NINHO", grupo: "INHO", par: "35", nivel: 3 },
 
-  // ==============================
-  // 🔴 NÍVEL 4
-  // ==============================
+  // NÍVEL 4
   { id: "E25", texto: "PÉ", grupo: "É", par: "25", nivel: 4 },
   { id: "E36", texto: "FELIZ", grupo: "IZ", par: "36", nivel: 4 },
   { id: "E37", texto: "LUZ", grupo: "UZ", par: "37", nivel: 4 },
@@ -57,9 +49,7 @@ export const palavrasEsquerda = [
 ];
 
 export const palavrasDireita = [
-  // ==============================
-  // 🟢 NÍVEL 1
-  // ==============================
+  // NÍVEL 1
   { id: "D01", texto: "PATO", grupo: "ATO", par: "01", nivel: 1 },
   { id: "D02", texto: "ESCOLA", grupo: "OLA", par: "02", nivel: 1 },
   { id: "D03", texto: "PAPO", grupo: "APO", par: "03", nivel: 1 },
@@ -70,9 +60,7 @@ export const palavrasDireita = [
   { id: "D28", texto: "UVA", grupo: "UVA", par: "28", nivel: 1 },
   { id: "D29", texto: "PENTE", grupo: "ENTE", par: "29", nivel: 1 },
 
-  // ==============================
-  // 🟡 NÍVEL 2
-  // ==============================
+  // NÍVEL 2
   { id: "D04", texto: "PÃO", grupo: "ÃO", par: "04", nivel: 2 },
   { id: "D06", texto: "MACA", grupo: "ACA", par: "06", nivel: 2 },
   { id: "D07", texto: "LADO", grupo: "ADO", par: "07", nivel: 2 },
@@ -88,9 +76,7 @@ export const palavrasDireita = [
   { id: "D31", texto: "PANELA", grupo: "ELA", par: "31", nivel: 2 },
   { id: "D32", texto: "MAMÃO", grupo: "ÃO", par: "32", nivel: 2 },
 
-  // ==============================
-  // 🟠 NÍVEL 3
-  // ==============================
+  // NÍVEL 3
   { id: "D12", texto: "PITA", grupo: "ITA", par: "12", nivel: 3 },
   { id: "D14", texto: "TICO", grupo: "ICO", par: "14", nivel: 3 },
   { id: "D15", texto: "TIPO", grupo: "IPO", par: "15", nivel: 3 },
@@ -103,9 +89,7 @@ export const palavrasDireita = [
   { id: "D34", texto: "MOTOR", grupo: "OR", par: "34", nivel: 3 },
   { id: "D35", texto: "PASSARINHO", grupo: "INHO", par: "35", nivel: 3 },
 
-  // ==============================
-  // 🔴 NÍVEL 4
-  // ==============================
+  // NÍVEL 4
   { id: "D25", texto: "CHULÉ", grupo: "É", par: "25", nivel: 4 },
   { id: "D36", texto: "NARIZ", grupo: "IZ", par: "36", nivel: 4 },
   { id: "D37", texto: "CAPUZ", grupo: "UZ", par: "37", nivel: 4 },

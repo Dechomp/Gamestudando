@@ -86,6 +86,7 @@ const INTRO_STEPS = [
 ];
 
 function shuffle<T>(items: T[]) {
+  // Embaralha uma lista para as respostas nao ficarem sempre no mesmo lugar.
   const array = [...items];
 
   for (let i = array.length - 1; i > 0; i--) {
@@ -98,6 +99,7 @@ function shuffle<T>(items: T[]) {
 }
 
 function uppercaseQuestion(question: Question): Question {
+  // Padroniza as perguntas de portugues e matematica em letras maiusculas.
   return {
     ...question,
     pergunta: String(question.pergunta || "").toUpperCase(),
@@ -107,34 +109,14 @@ function uppercaseQuestion(question: Question): Question {
   };
 }
 
-function embaralharPergunta(question: Question): Question {
-  const respostas = question.respostas.map((texto, indice) => ({
-    texto,
-    original: indice,
-  }));
-
-  const respostasEmbaralhadas = [...respostas].sort(
-    () => Math.random() - 0.5
-  );
-
-  const novaCorreta = respostasEmbaralhadas.findIndex(
-    (item) => item.original === question.correta
-  );
-
-  return {
-    ...question,
-    respostas: respostasEmbaralhadas.map((item) => item.texto),
-    correta: novaCorreta,
-  };
-}
-
 function embaralharAlternativas(question: Question): Question {
+  // Troca a ordem das alternativas sem perder qual delas e a correta.
   const respostasOriginais = [...question.respostas];
   const indiceCorretoOriginal = question.correta;
 
   let indices = [0, 1, 2, 3];
 
-  // Garante que a correta não fique na mesma posição
+  // Garante que a resposta correta mude de posicao.
   do {
     indices = [...indices].sort(() => Math.random() - 0.5);
   } while (indices[indiceCorretoOriginal] === indiceCorretoOriginal);
@@ -153,6 +135,7 @@ function embaralharAlternativas(question: Question): Question {
 }
 
 function selectQuestions(list: Question[], level = 3, amount = TOTAL_MONSTERS) {
+  // Escolhe cinco perguntas proximas ao nivel atual do aluno.
   const normalizedList = list.map(uppercaseQuestion);
   const levels = normalizedList.map((item) => item.nivel || 1);
   const minLevel = Math.min(...levels);
@@ -258,6 +241,7 @@ export default function JogoBatalhaMatematica() {
   }, [paused]);
 
   useEffect(() => {
+    // Le a pergunta em voz alta quando a batalha esta em andamento.
     if (status === "playing" && currentQuestion) {
       lerTextoSeAtivo(currentQuestion.pergunta);
     }
@@ -276,6 +260,7 @@ export default function JogoBatalhaMatematica() {
   }, []);
 
   const prepararNovaPartida = useCallback(async (active = true) => {
+    // Carrega perguntas do Firebase/cache e reinicia todos os dados da batalha.
     if (active) {
       showVideo();
     }
@@ -335,6 +320,7 @@ export default function JogoBatalhaMatematica() {
 
   const finishGame = useCallback(
     async (completed: boolean, finalLives = livesRef.current) => {
+      // Finaliza a partida e envia o desempenho para o perfil do aluno.
       setStatus("finished");
       const timePlayed = Math.round((Date.now() - startedAt) / 1000);
       const phaseId = Array.isArray(params.faseId) ? params.faseId[0] : params.faseId || "1";
@@ -357,6 +343,7 @@ export default function JogoBatalhaMatematica() {
   );
 
   const goToNextEnemy = useCallback(() => {
+    // Avanca para o proximo monstro ou encerra se todos foram derrotados.
     const nextIndex = currentIndexRef.current + 1;
 
     if (nextIndex >= TOTAL_MONSTERS || nextIndex >= questions.length) {
@@ -373,6 +360,7 @@ export default function JogoBatalhaMatematica() {
   }, [finishGame, questions.length, spawnX]);
 
   const handleEnemyReachedPlayer = useCallback(() => {
+    // Quando o monstro encosta no jogador, perde uma vida e muda o desafio.
     if (statusRef.current !== "playing") return;
 
     statusRef.current = "between";
@@ -395,6 +383,7 @@ export default function JogoBatalhaMatematica() {
   }, [finishGame, goToNextEnemy]);
 
   useEffect(() => {
+    // Loop simples que move o monstro em direcao ao jogador.
     function loop(timestamp: number) {
       if (lastFrameRef.current === null) {
         lastFrameRef.current = timestamp;
@@ -433,6 +422,7 @@ export default function JogoBatalhaMatematica() {
   }, [contactX, handleEnemyReachedPlayer, questions.length]);
 
   const handleAnswer = (answerIndex: number) => {
+    // Decide se a resposta acertou, dispara o ataque ou remove a alternativa errada.
     if (!currentQuestion || status !== "playing" || paused || disabledAnswers.includes(answerIndex)) return;
 
     lerTextoSeAtivo(currentQuestion.respostas[answerIndex]);
@@ -469,11 +459,13 @@ export default function JogoBatalhaMatematica() {
   };
 
   const restart = async () => {
+    // Comeca uma partida nova com novas perguntas e novo cenario.
     setQuestions([]);
     await prepararNovaPartida();
   };
 
   const startBattle = () => {
+    // Sai do tutorial e libera os comandos da batalha.
     setPaused(false);
     setStatus("playing");
     statusRef.current = "playing";
@@ -482,6 +474,7 @@ export default function JogoBatalhaMatematica() {
   };
 
   const advanceIntro = () => {
+    // Avanca os cards de explicacao antes da partida.
     if (introStep >= INTRO_STEPS.length - 1) {
       startBattle();
       return;
@@ -491,11 +484,13 @@ export default function JogoBatalhaMatematica() {
   };
 
   const pauseBattle = () => {
+    // Pausa a batalha e interrompe a leitura da pergunta.
     setPaused(true);
     pararLeitura();
   };
 
   const continueBattle = () => {
+    // Retoma a batalha de onde parou.
     setPaused(false);
   };
 
@@ -713,6 +708,7 @@ function PixelWarriorView({
   status: GameStatus;
   animationTick: number;
 }) {
+  // Mostra cavaleiro ou mago no estado certo: parado, atacando, ferido ou vitoria.
   const offset = attackPulse ? 14 : 0;
   const frameIndex = animationTick;
   const assetGroup = batalhaAssets.herois[heroType];
@@ -758,6 +754,7 @@ function PixelEnemyView({
   hitPulse: number;
   animationTick: number;
 }) {
+  // Escolhe o inimigo da rodada e troca seus frames durante a animacao.
   const frames = batalhaAssets.inimigos[type];
   const source = frames[animationTick % frames.length];
 
@@ -796,6 +793,7 @@ function ElementalAttackView({
   y: number;
   progress: number;
 }) {
+  // Desenha o golpe elemental que sai do heroi quando a resposta esta correta.
   const frames = batalhaAssets.ataques[heroType][element];
   const source = frames[Math.max(0, Math.min(frame, frames.length - 1))];
   const left = fromX + (toX - fromX) * Math.max(0, Math.min(progress, 1));
@@ -821,6 +819,7 @@ function ElementalAttackView({
 }
 
 function getAttackSize(heroType: HeroType, element: BattleElement) {
+  // Ajusta cada sprite de ataque para nao ficar gigante ou pequeno demais.
   if (heroType === "mage") {
     if (element === "agua") return 142;
     if (element === "ar") return 136;

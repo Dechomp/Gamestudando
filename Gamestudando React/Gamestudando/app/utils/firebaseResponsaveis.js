@@ -11,6 +11,7 @@ import {
 import { auth, db } from "./firebase";
 
 export async function obterOuCriarCodigoAlunoResponsavel() {
+  // Gera ou reaproveita o codigo que permite vincular o aluno ao responsavel.
   const usuario = auth.currentUser;
 
   if (!usuario) {
@@ -39,6 +40,7 @@ export async function obterOuCriarCodigoAlunoResponsavel() {
 }
 
 export async function obterOuCriarCodigoResponsavel() {
+  // Gera ou reaproveita o codigo que permite o aluno encontrar o responsavel.
   const responsavel = auth.currentUser;
 
   if (!responsavel) {
@@ -72,6 +74,7 @@ export async function obterOuCriarCodigoResponsavel() {
 }
 
 export async function vincularAlunoPorCodigoResponsavel(codigo) {
+  // Responsavel digita ou le o QR Code do aluno para criar o vinculo.
   const responsavel = auth.currentUser;
 
   if (!responsavel) {
@@ -127,6 +130,7 @@ export async function vincularAlunoPorCodigoResponsavel(codigo) {
 }
 
 export async function alunoVincularResponsavelPorCodigo(codigo) {
+  // Aluno digita ou le o QR Code do responsavel para criar o vinculo.
   const alunoUsuario = auth.currentUser;
 
   if (!alunoUsuario) {
@@ -192,6 +196,7 @@ export async function alunoVincularResponsavelPorCodigo(codigo) {
 }
 
 export async function listarResponsaveisDoAluno() {
+  // Mostra no perfil do aluno quais responsaveis estao vinculados.
   const aluno = auth.currentUser;
 
   if (!aluno) {
@@ -207,6 +212,7 @@ export async function listarResponsaveisDoAluno() {
 }
 
 export async function listarAlunosResponsavel() {
+  // Lista os alunos acompanhados pelo responsavel e atualiza os dados de cada um.
   const responsavel = auth.currentUser;
 
   if (!responsavel) {
@@ -241,6 +247,7 @@ export async function listarAlunosResponsavel() {
 }
 
 export async function removerAlunoResponsavel(alunoId) {
+  // Remove o vinculo nos dois documentos para nao sobrar relacao fantasma.
   const responsavel = auth.currentUser;
 
   if (!responsavel) {
@@ -252,14 +259,17 @@ export async function removerAlunoResponsavel(alunoId) {
 }
 
 export function montarValorQrAlunoResponsavel(codigo) {
+  // QR Code usado quando o responsavel quer encontrar o aluno.
   return `gamestudando://responsavel/aluno/${codigo}`;
 }
 
 export function montarValorQrResponsavel(codigo) {
+  // QR Code usado quando o aluno quer encontrar o responsavel.
   return `gamestudando://aluno/responsavel/${codigo}`;
 }
 
 export function extrairCodigoAlunoResponsavel(valor) {
+  // Aceita tanto QR Code completo quanto codigo digitado.
   const texto = String(valor || "").trim();
   const partes = texto.split(/[/:?#]+/).filter(Boolean);
   const ultimoSegmento = partes[partes.length - 1];
@@ -272,6 +282,7 @@ export function extrairCodigoAlunoResponsavel(valor) {
 export const extrairCodigoResponsavel = extrairCodigoAlunoResponsavel;
 
 async function salvarCodigoAluno(codigo, alunoId, usuario, aluno) {
+  // Salva um indice publico do codigo apontando para o aluno.
   await setDoc(doc(db, "codigosAlunosResponsavel", codigo), {
     codigo,
     alunoId,
@@ -283,6 +294,7 @@ async function salvarCodigoAluno(codigo, alunoId, usuario, aluno) {
 }
 
 async function salvarCodigoResponsavel(codigo, responsavelId, usuario, responsavel) {
+  // Salva um indice publico do codigo apontando para o responsavel.
   await setDoc(doc(db, "codigosResponsaveis", codigo), {
     codigo,
     responsavelId,
@@ -294,6 +306,7 @@ async function salvarCodigoResponsavel(codigo, responsavelId, usuario, responsav
 }
 
 async function gerarCodigoAlunoUnico() {
+  // Evita conflito com codigos de alunos ja existentes.
   for (let tentativa = 0; tentativa < 8; tentativa += 1) {
     const codigo = gerarCodigoAluno();
     const snap = await getDoc(doc(db, "codigosAlunosResponsavel", codigo));
@@ -305,6 +318,7 @@ async function gerarCodigoAlunoUnico() {
 }
 
 async function gerarCodigoResponsavelUnico() {
+  // Evita conflito com codigos de responsaveis ja existentes.
   for (let tentativa = 0; tentativa < 8; tentativa += 1) {
     const codigo = gerarCodigoAluno();
     const snap = await getDoc(doc(db, "codigosResponsaveis", codigo));
@@ -316,6 +330,7 @@ async function gerarCodigoResponsavelUnico() {
 }
 
 function gerarCodigoAluno() {
+  // Mantem o codigo curto, legivel e em letras maiusculas.
   const caracteres = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let codigo = "";
 
@@ -327,6 +342,7 @@ function gerarCodigoAluno() {
 }
 
 function normalizarCodigoAluno(codigo) {
+  // Limpa espacos e simbolos quando o usuario digita o codigo.
   return String(codigo)
     .trim()
     .toUpperCase()
@@ -334,6 +350,7 @@ function normalizarCodigoAluno(codigo) {
 }
 
 function montarResumoAluno(alunoId, aluno) {
+  // Resume progresso e estatisticas para os relatorios do responsavel.
   const matematica = aluno.materias?.matematica || aluno.matematica || {};
   const portugues = aluno.materias?.portugues || aluno.portugues || {};
   const rimas = aluno.materias?.rimas || aluno.rimas || {};

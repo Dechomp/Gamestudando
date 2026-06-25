@@ -7,6 +7,7 @@ try {
 }
 
 export function obterGoogleWebClientId() {
+  // Pega o client_id web do google-services para usar no login Google.
   const oauthClients = googleServices?.client?.[0]?.oauth_client || [];
   const webClient = oauthClients.find(client => client.client_type === 3);
 

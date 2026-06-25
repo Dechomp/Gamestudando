@@ -32,6 +32,7 @@ const PALAVRAS_BLOQUEADAS = [
 ];
 
 export function moderarTarefaLocalmente(tarefa) {
+  // Primeira barreira de seguranca antes de salvar tarefa criada pelo professor.
   const textos = extrairTextos(tarefa);
   const textoCompleto = normalizarTexto(textos.join(" "));
 
@@ -63,6 +64,7 @@ export function moderarTarefaLocalmente(tarefa) {
 }
 
 export async function revisarTarefaComIA(questaoId, tarefa) {
+  // Chama a funcao do Firebase quando a revisao por IA estiver disponivel.
   const revisarQuestao = httpsCallable(cloudFunctions, "revisarQuestaoProfessor");
   const resposta = await revisarQuestao({
     questaoId,
@@ -73,6 +75,7 @@ export async function revisarTarefaComIA(questaoId, tarefa) {
 }
 
 function moderarMultiplaEscolha(tarefa) {
+  // Valida se a pergunta tem conteudo, quatro alternativas e resposta correta.
   const pergunta = String(tarefa.pergunta || "").trim();
   const respostas = tarefa.respostas || [];
   const perguntaNormalizada = normalizarPalavra(pergunta);
@@ -109,6 +112,7 @@ function moderarMultiplaEscolha(tarefa) {
 }
 
 function parecePerguntaMatematica(texto) {
+  // Procura sinais simples de que a pergunta realmente e de matematica.
   return (
     /\d/.test(texto) ||
     texto.includes("quant") ||
@@ -124,6 +128,7 @@ function parecePerguntaMatematica(texto) {
 }
 
 function parecePerguntaPortugues(texto) {
+  // Procura sinais simples de que a pergunta realmente e de portugues.
   return (
     texto.includes("letra") ||
     texto.includes("silaba") ||
@@ -139,6 +144,7 @@ function parecePerguntaPortugues(texto) {
 }
 
 function moderarRima(tarefa) {
+  // Confere se as duas palavras existem, sao diferentes e parecem rimar.
   const esquerda = tarefa.esquerda?.texto || tarefa.palavraA || "";
   const direita = tarefa.direita?.texto || tarefa.palavraB || "";
 
@@ -158,6 +164,7 @@ function moderarRima(tarefa) {
 }
 
 function moderarPalavraCosmoletrando(tarefa) {
+  // Valida a palavra que vai virar missao no jogo da nave.
   const palavra = String(
     tarefa.palavra ||
     tarefa.palavraMissao ||
@@ -182,6 +189,7 @@ function moderarPalavraCosmoletrando(tarefa) {
 }
 
 function extrairTextos(tarefa) {
+  // Junta todos os textos da tarefa para checar conteudo inadequado.
   if (tarefa.formato === "conectar_pares") {
     return [
       tarefa.instrucao,
@@ -210,6 +218,7 @@ function extrairTextos(tarefa) {
 }
 
 function normalizarTexto(texto) {
+  // Remove acentos e simbolos para facilitar a comparacao.
   return ` ${String(texto)
     .trim()
     .toLowerCase()
@@ -221,6 +230,7 @@ function normalizarTexto(texto) {
 }
 
 function aprovarLocalmente() {
+  // Mantem o app funcionando mesmo sem a IA externa aprovar na hora.
   return {
     aprovada: true,
     statusRevisao: "pendente_ia",
@@ -230,6 +240,7 @@ function aprovarLocalmente() {
 }
 
 function reprovar(motivo) {
+  // Padrao de retorno quando alguma regra local bloqueia a tarefa.
   return {
     aprovada: false,
     statusRevisao: "rejeitada",

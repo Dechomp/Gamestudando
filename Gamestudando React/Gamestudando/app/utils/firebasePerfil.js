@@ -2,6 +2,7 @@ import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
 export async function salvarPerfilFirebase(uid, perfil) {
+  // Salva alteracoes do perfil no documento do usuario.
   if (!uid) {
     throw new Error("UID obrigatorio para salvar perfil no Firebase.");
   }
@@ -18,6 +19,7 @@ export async function salvarPerfilFirebase(uid, perfil) {
 }
 
 export async function carregarPerfilFirebase(uid) {
+  // Busca o perfil completo do usuario no Firestore.
   if (!uid) {
     throw new Error("UID obrigatorio para carregar perfil do Firebase.");
   }
@@ -38,6 +40,7 @@ export async function criarOuAtualizarAlunoFirebase(
   perfil,
   opcoes = { merge: true }
 ) {
+  // Garante que o aluno exista no Firebase com a estrutura atual do app.
   const agora = serverTimestamp();
   const perfilFirebase = montarPerfilAlunoFirebase(uid, perfil);
 
@@ -53,6 +56,7 @@ export async function criarOuAtualizarAlunoFirebase(
 }
 
 export function montarPerfilAlunoFirebase(uid, perfil) {
+  // Converte o perfil local para o formato usado no banco.
   const matematica = montarMateria(perfil?.matematica);
   const portugues = montarMateria(perfil?.portugues);
   const rimas = montarMateria(perfil?.rimas);
@@ -108,6 +112,7 @@ export function montarPerfilAlunoFirebase(uid, perfil) {
 }
 
 function montarMateria(materia) {
+  // Padrao de progresso salvo para cada materia.
   return {
     nivel: materia?.nivel || 3,
     acertos: materia?.acertos || 0,
@@ -123,6 +128,7 @@ function montarMateria(materia) {
 }
 
 function calcularMateriaMaisFraca(materias) {
+  // Calcula a materia com menor taxa de acerto.
   let menorMateria = null;
   let menorTaxa = Infinity;
 

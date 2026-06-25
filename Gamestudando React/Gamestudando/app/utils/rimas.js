@@ -1,4 +1,5 @@
 export function parecemRimar(palavraA, palavraB) {
+  // Compara o final sonoro das palavras para validar pares de rima.
   const a = normalizarPalavra(palavraA);
   const b = normalizarPalavra(palavraB);
 
@@ -11,6 +12,7 @@ export function parecemRimar(palavraA, palavraB) {
 }
 
 export function normalizarPalavra(texto) {
+  // Remove acentos e simbolos antes de comparar palavras.
   return String(texto)
     .trim()
     .toLowerCase()
@@ -20,6 +22,7 @@ export function normalizarPalavra(texto) {
 }
 
 function obterFinalRima(palavra) {
+  // Usa a ultima vogal relevante para tentar achar o trecho que rima.
   const finalComTres = palavra.slice(-3);
   const indiceVogal = finalComTres.search(/[aeiou]/);
 

@@ -36,9 +36,7 @@ import {
     pararLeitura
 } from "../utils/leituraPerguntas";
 
-// =========================
-// 🎲 embaralhar
-// =========================
+// embaralhar
 function embaralhar(lista) {
 
   return [...lista].sort(
@@ -46,9 +44,7 @@ function embaralhar(lista) {
   );
 }
 
-// =========================
-// 🧠 geração IA
-// =========================
+// geração IA
 function gerarRodadaIA(nivelAluno = 3, esquerdaBase = palavrasEsquerda, direitaBase = palavrasDireita) {
 
   let tentativas = 0;
@@ -132,9 +128,7 @@ function gerarRodadaIA(nivelAluno = 3, esquerdaBase = palavrasEsquerda, direitaB
   };
 }
 
-// =========================
-// 🎮 componente
-// =========================
+// componente
 export default function Index() {
 
   const router = useRouter();
@@ -184,9 +178,7 @@ export default function Index() {
   const progresso =
     acertos.length / 5;
 
-  // =========================
-  // 🔄 recarregar tela
-  // =========================
+  // recarregar tela
   useFocusEffect(
 
     useCallback(() => {
@@ -262,9 +254,7 @@ export default function Index() {
 
   );
 
-  // =========================
   // ⏳ loading
-  // =========================
   const carregando =
 
     !rodada?.esquerda?.length ||
@@ -281,9 +271,7 @@ export default function Index() {
     };
   }, [carregando]);
 
-  // =========================
-  // 🖱️ seleção esquerda
-  // =========================
+  // seleção esquerda
   const selecionarEsquerda =
     (item) => {
 
@@ -304,9 +292,7 @@ export default function Index() {
       );
     };
 
-  // =========================
-  // 🖱️ seleção direita
-  // =========================
+  // seleção direita
   const selecionarDireita =
     (item) => {
 
@@ -327,9 +313,7 @@ export default function Index() {
       );
     };
 
-  // =========================
-  // 🧠 verificar
-  // =========================
+  // verificar
   const verificar = useCallback(() => {
 
     if (
@@ -344,7 +328,7 @@ export default function Index() {
 
     setBloqueado(true);
 
-    // ✅ acertou
+    // acertou
     if (
 
       selecionadoEsquerda.grupo ===
@@ -379,7 +363,7 @@ export default function Index() {
 
     } else {
 
-      // ❌ errou
+      // errou
       setErro(true);
 
       setErrosFase(
@@ -404,9 +388,7 @@ export default function Index() {
     bloqueado
   ]);
 
-  // =========================
-  // 🔄 auto verificar
-  // =========================
+  // auto verificar
   useEffect(() => {
 
     if (
@@ -437,9 +419,7 @@ export default function Index() {
 
   ]);
 
-  // =========================
-  // 🎯 final da fase
-  // =========================
+  // final da fase
   useEffect(() => {
 
     if (
@@ -487,9 +467,7 @@ export default function Index() {
     router
   ]);
 
-  // =========================
   // ⏳ loading
-  // =========================
   if (carregando) {
 
     return (
@@ -504,9 +482,7 @@ export default function Index() {
     );
   }
 
-  // =========================
-  // 🎨 estilos esquerda
-  // =========================
+  // estilos esquerda
   const estiloEsquerda =
     (item) => {
 
@@ -532,9 +508,7 @@ export default function Index() {
       return styles.itemNormal;
     };
 
-  // =========================
-  // 🎨 estilos direita
-  // =========================
+  // estilos direita
   const estiloDireita =
     (item) => {
 
@@ -560,9 +534,7 @@ export default function Index() {
       return styles.itemNormal;
     };
 
-  // =========================
-  // 🖥️ UI
-  // =========================
+  // UI
   return (
 
     <View style={styles.rimasContainer}>

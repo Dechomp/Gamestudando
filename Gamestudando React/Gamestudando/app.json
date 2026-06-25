@@ -18,7 +18,7 @@
       "package": "com.falcoesperegrinosdaprogramacao.gamestudando",
       "googleServicesFile": "./app/google-services.json",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/images/app-icon.png"
       },
       "edgeToEdgeEnabled": true,

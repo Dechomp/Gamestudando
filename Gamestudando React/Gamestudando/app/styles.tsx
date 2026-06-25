@@ -3,9 +3,7 @@ import { colors } from "./colors";
 
 export const styles = StyleSheet.create({
 
-  // =========================
-  // 📦 BASE
-  // =========================
+  // BASE
   container: {
     flex: 1,
     padding: 20,
@@ -33,7 +31,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  // 🔥 NOVO (QUIZ)
+  // NOVO (QUIZ)
   quizContainer: {
     flex: 1,
     justifyContent: "center",
@@ -41,9 +39,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
 
-  // =========================
-  // 🔤 TEXTOS
-  // =========================
+  // TEXTOS
   titulo: {
     fontSize: 26,
     fontWeight: "bold",
@@ -101,9 +97,7 @@ export const styles = StyleSheet.create({
     fontSize: 14,
   },
 
-  // =========================
-  // 🔘 BOTÕES (GERAL)
-  // =========================
+  // BOTÕES (GERAL)
   botaoBase: {
     padding: 12,
     borderRadius: 10,
@@ -201,9 +195,7 @@ export const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
-  // =========================
-  // ❓ QUIZ - RESPOSTAS
-  // =========================
+  // QUIZ - RESPOSTAS
   botaoResposta: {
     flex: 1,
     height: 65,
@@ -213,9 +205,9 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: colors.primaria,
 
-    minWidth: 140, // 🔥 CONTROLE DE LARGURA
+    minWidth: 140, //  CONTROLE DE LARGURA
 
-    // 🌑 sombra
+    // sombra
     elevation: 4, // Android
     shadowColor: colors.preto, // iOS
     shadowOpacity: 0.15,
@@ -259,9 +251,7 @@ export const styles = StyleSheet.create({
     elevation: 4,
   },
 
-  // =========================
-  // ✅ BOTÃO CONFIRMAR
-  // =========================
+  // Botao de confirmar
   botaoConfirmarBase: {
     width: "90%",
     padding: 15,
@@ -329,9 +319,7 @@ export const styles = StyleSheet.create({
     marginTop: 28,
   },
 
-  // =========================
-  // 📊 BARRA DE PROGRESSO
-  // =========================
+  // BARRA DE PROGRESSO
   barraContainer: {
     width: "90%",
     height: 20,
@@ -346,9 +334,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.certa,
   },
 
-  // =========================
-  // 🔤 RIMAS
-  // =========================
+  // RIMAS
   rimasContainer: {
     flex: 1,
     padding: 20,
@@ -451,9 +437,7 @@ export const styles = StyleSheet.create({
     maxWidth: 220,
   },
 
-  // =========================
-  // 🗺️ MAPA
-  // =========================
+  // MAPA
   mapaContainer: {
     padding: 20,
     paddingTop: 56,
@@ -598,9 +582,7 @@ export const styles = StyleSheet.create({
     borderRadius: 2,
   },
 
-  // =========================
-  // 👤 PERFIL
-  // =========================
+  // PERFIL
   perfilContainer: {
     padding: 20,
     paddingTop: 56,

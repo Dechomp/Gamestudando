@@ -39,9 +39,7 @@ export default function PerfilEditar() {
     carregar();
   }, []);
 
-  // =========================
-  // 💾 SALVAR
-  // =========================
+  // SALVAR
   const salvar = async () => {
     if (novaSenha || confirmarNovaSenha) {
       if (novaSenha !== confirmarNovaSenha) {
@@ -85,9 +83,7 @@ export default function PerfilEditar() {
     }
   };
 
-  // =========================
-  // 🔄 RESET
-  // =========================
+  // RESET
   const resetar = () => {
     Alert.alert(
       "Atenção",

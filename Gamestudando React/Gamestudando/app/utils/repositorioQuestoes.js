@@ -10,6 +10,7 @@ export async function carregarQuestoesMultiplaEscolha(
   materia,
   perguntasFallback = []
 ) {
+  // Busca perguntas aprovadas no Firestore e usa cache/local se estiver offline.
   const cacheKey = `${CACHE_PREFIXO}${materia}_multipla_escolha`;
 
   const perguntasCache = await carregarCache(cacheKey);
@@ -43,6 +44,7 @@ export async function carregarQuestoesRimas(
   esquerdaFallback = [],
   direitaFallback = []
 ) {
+  // Busca pares de rimas aprovados e separa em duas colunas para o quiz.
   const cacheKey = `${CACHE_PREFIXO}rimas_conectar_pares`;
   const cache = await carregarCache(cacheKey);
 
@@ -82,6 +84,7 @@ export async function carregarQuestoesRimas(
 }
 
 export async function carregarPalavraCosmoletrando(palavraFallback = "GATO", palavraAtual = "") {
+  // Sorteia uma palavra para o Cosmoletrando, evitando repetir a palavra atual.
   const cacheKey = `${CACHE_PREFIXO}cosmoletrando_palavra`;
   const cache = await carregarCache(cacheKey);
   const fallback = normalizarPalavraMissao(palavraFallback) || "GATO";
@@ -126,6 +129,7 @@ export async function carregarPalavraCosmoletrando(palavraFallback = "GATO", pal
 }
 
 export async function sincronizarPerguntasIniciais() {
+  // Carrega perguntas em segundo plano depois do login.
   await Promise.allSettled([
     carregarQuestoesMultiplaEscolha("matematica"),
     carregarQuestoesMultiplaEscolha("portugues"),
@@ -134,6 +138,7 @@ export async function sincronizarPerguntasIniciais() {
 }
 
 async function carregarCache(cacheKey) {
+  // O cache reduz atraso quando o aluno troca de tela ou fica sem internet.
   try {
     const json = await AsyncStorage.getItem(cacheKey);
     return json ? JSON.parse(json) : [];
@@ -152,6 +157,7 @@ async function salvarCache(cacheKey, valor) {
 }
 
 function normalizarMultiplaEscolha(id, dados) {
+  // Deixa a pergunta do professor no mesmo formato das perguntas locais.
   if (!dados?.pergunta || !Array.isArray(dados?.respostas)) return null;
 
   return {
@@ -171,6 +177,7 @@ function normalizarTextoQuestao(valor) {
 }
 
 function normalizarParRima(id, dados) {
+  // Confere se o par realmente rima antes de aparecer para o aluno.
   if (!dados?.esquerda?.texto || !dados?.direita?.texto) return null;
   if (!parecemRimar(dados.esquerda.texto, dados.direita.texto)) return null;
 
@@ -185,6 +192,7 @@ function normalizarParRima(id, dados) {
 }
 
 function extrairPalavrasCosmoletrando(dados) {
+  // O jogo pode usar palavras criadas para Cosmoletrando ou vindas das rimas.
   return [
     dados?.palavra,
     dados?.palavraMissao,
@@ -195,13 +203,15 @@ function extrairPalavrasCosmoletrando(dados) {
 }
 
 function normalizarPalavraMissao(valor) {
+  // Remove caracteres que nao devem virar letras no jogo.
   return String(valor || "")
     .trim()
     .toUpperCase()
-    .replace(/[^A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]/g, "");
+    .replace(/[^A-Z????????????]/g, "");
 }
 
 function converterParesParaColunas(pares) {
+  // Transforma os pares do Firebase no formato usado pela tela de rimas.
   return {
     esquerda: pares.map(par => ({
       id: `E_${par.id}`,
@@ -221,6 +231,7 @@ function converterParesParaColunas(pares) {
 }
 
 function filtrarColunasRimasValidas(colunas) {
+  // Remove dados antigos ou quebrados que possam ter ficado no cache.
   if (!colunas?.esquerda?.length || !colunas?.direita?.length) return null;
 
   const esquerda = colunas.esquerda.filter(item =>

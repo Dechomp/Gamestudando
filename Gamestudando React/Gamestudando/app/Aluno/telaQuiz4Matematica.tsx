@@ -10,6 +10,7 @@ import { lerTextoSeAtivo, pararLeitura } from "../utils/leituraPerguntas";
 import { carregarQuestoesMultiplaEscolha } from "../utils/repositorioQuestoes";
 
 
+// Funcao para trocar a ordem das respostas e manter a alternativa correta certa.
 function embaralharPergunta(pergunta) {
   const respostasComIndice = pergunta.respostas.map((resposta, indice) => ({
     resposta,
@@ -29,16 +30,12 @@ function embaralharPergunta(pergunta) {
   };
 }
 
-// =========================
-// 🔀 EMBARALHAR
-// =========================
+// Funcao para embaralhar uma lista.
 function embaralhar(lista) {
   return [...lista].sort(() => Math.random() - 0.5);
 }
 
-// =========================
-// 🧠 IA (AGORA SOBE DIFICULDADE)
-// =========================
+// Funcao para escolher perguntas proximas ao nivel do aluno.
 function selecionarPerguntasIA(lista, nivelAluno = 3, quantidade = 5) {
   const niveis = lista.map(p => p.nivel);
   const menorNivel = Math.min(...niveis);
@@ -82,7 +79,7 @@ export default function Index() {
 
   const fadeAnim = useState(new Animated.Value(1))[0];
 
-  // 🔥 animação individual
+  // animação individual
   const scaleAnims = useRef([
     new Animated.Value(1),
     new Animated.Value(1),
@@ -118,14 +115,7 @@ export default function Index() {
     };
   }, [perguntaAtualObj]);
 
-  // =========================
-  // 📥 CARREGAR PERFIL
-  // =========================
-  // As perguntas sao carregadas pelo focus abaixo para manter cache/web atualizados.
-
-  // =========================
-  // 🔄 RESET
-  // =========================
+  // Carrega perfil e sorteia perguntas sempre que a tela abrir.
   useFocusEffect(
     useCallback(() => {
 
@@ -166,9 +156,7 @@ export default function Index() {
     }, [fadeAnim, nivelAluno])
   );
 
-  // =========================
-  // 🎯 ANIMAÇÕES
-  // =========================
+  // ANIMAÇÕES
   const animarClique = (index) => {
     Animated.sequence([
       Animated.timing(scaleAnims[index], {
@@ -200,9 +188,7 @@ export default function Index() {
     ]).start();
   };
 
-  // =========================
-  // 👆 SELEÇÃO
-  // =========================
+  // Selecao da resposta
   const selecionarResposta = (resposta) => {
     if (respostaConfirmada) return;
 
@@ -211,9 +197,7 @@ export default function Index() {
     );
   };
 
-  // =========================
-  // 🧠 CONFIRMAR
-  // =========================
+  // Funcao para confirmar a resposta e avancar a pergunta.
   const confirmarResposta = () => {
 
     if (respostaSelecionada === null && !respostaConfirmada) return;
@@ -271,9 +255,7 @@ export default function Index() {
     }
   };
 
-  // =========================
-  // 🎨 ESTILO
-  // =========================
+  // Funcao para definir a cor de cada resposta.
   const estiloBotao = (index) => {
 
     if (!respostaConfirmada) {
@@ -310,7 +292,7 @@ export default function Index() {
 
       <View style={styles.matematicaContent}>
 
-        {/* 📊 BARRA */}
+        {/*  BARRA */}
         <View style={styles.barraContainer}>
           <View style={[
             styles.barraProgresso,
@@ -326,8 +308,7 @@ export default function Index() {
           Pergunta {perguntaAtual + 1}: {perguntaAtualObj.pergunta}
         </Text>
 
-        {/* LINHAS DE RESPOSTA */}
-        {[0,1,2,3].map((i) => (
+                {[0,1,2,3].map((i) => (
           i % 2 === 0 && (
             <View
               key={i}
@@ -365,7 +346,7 @@ export default function Index() {
           )
         ))}
 
-        {/* BOTÃO */}
+        {/* Botao de confirmar */}
         <TouchableOpacity
           onPress={confirmarResposta}
           style={[
@@ -389,7 +370,7 @@ export default function Index() {
             {!respostaConfirmada
               ? "Confirmar resposta"
               : ultimaPergunta
-                ? "Finalizar tarefa 🎉"
+                ? "Finalizar tarefa"
                 : "Próxima pergunta"}
           </Text>
         </TouchableOpacity>

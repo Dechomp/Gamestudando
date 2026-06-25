@@ -1,4 +1,5 @@
 export function escolherProximaAtividade(perfil) {
+  // Calcula a proxima materia com base nos erros, acertos e ultima pontuacao.
 
   if (!perfil) return { materia: "portugues" };
 
@@ -11,6 +12,7 @@ export function escolherProximaAtividade(perfil) {
   const pesoRimas = calcularPeso(rimas);
   const pesoCosmoletrando = pesoPort * 0.65;
 
+  // Sorteio ponderado: materias com mais dificuldade aparecem mais, mas nao sempre.
   const soma = pesoMat + pesoPort + pesoRimas + pesoCosmoletrando;
 
   const rand = Math.random() * soma;
@@ -22,6 +24,7 @@ export function escolherProximaAtividade(perfil) {
 }
 
 function calcularPeso(dados) {
+  // Quanto menor o desempenho, maior o peso daquela materia.
   const total = dados.acertos + dados.erros;
   const taxaGeral = total > 0 ? dados.acertos / total : 0.5;
   const ultimaPontuacao =

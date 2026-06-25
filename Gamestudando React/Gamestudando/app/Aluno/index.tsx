@@ -35,6 +35,7 @@ export default function MapaFases() {
     : params.faseConcluida;
 
   const calcularIA = useCallback(async () => {
+    // A recomendacao usa o desempenho salvo no perfil do aluno.
     try {
       const perfil = await carregarPerfil();
 
@@ -52,6 +53,7 @@ export default function MapaFases() {
   }, [router]);
 
   const carregarMapa = useCallback(async () => {
+    // Junta progresso local e Firebase para nao perder fase liberada.
     showVideo();
     try {
       const perfil = await carregarPerfil();
@@ -100,6 +102,7 @@ export default function MapaFases() {
   );
 
   useEffect(() => {
+    // Confere login e tipo de conta antes de mostrar o mapa.
     const parar = observarUsuarioLogado(async (usuario) => {
       if (!usuario) {
         setUsuarioLogado(false);
@@ -134,6 +137,7 @@ export default function MapaFases() {
   }, [faseConcluida, router]);
 
   const escolherMateriaDaFase = useCallback((faseId) => {
+    // Primeiro usa a materia salva; se nao existir, usa a recomendacao atual.
     const materiaSalva = materiasPorFase[String(faseId)];
 
     if (materiaSalva) return materiaSalva;
@@ -162,6 +166,7 @@ export default function MapaFases() {
   const mundoMaximoLiberado = Math.ceil(faseLiberada / FASES_POR_MUNDO);
 
   function escolherMateriaPadrao(faseId) {
+    // Distribui as materias quando a IA ainda nao salvou a fase.
     if (faseId % 5 === 0) return "cosmoletrando";
     if (faseId % 3 === 0) return "rimas";
     if (faseId % 2 === 0) return "matematica";
@@ -169,6 +174,7 @@ export default function MapaFases() {
   }
 
   function escolherTela(materia, faseId) {
+    // Decide se a fase abre quiz, batalha, rimas ou Cosmoletrando.
     const usarQuiz = faseId % 2 === 0;
 
     if (materia === "matematica") {
@@ -192,6 +198,7 @@ export default function MapaFases() {
   }
 
   async function abrirFase(fase) {
+    // Salva a materia da fase antes de navegar para a atividade.
     const materia = await obterOuCriarMateriaDaFase(
       fase.id,
       fase.materia
