@@ -1,14 +1,11 @@
 import React, { useState } from "react";
 import {
   Alert,
-  Platform,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
 } from "react-native";
-import { CameraView, useCameraPermissions } from "expo-camera";
 import { router } from "expo-router";
 
 import { styles } from "../styles";
@@ -19,16 +16,13 @@ import {
 
 export default function VincularResponsavel() {
   const [codigo, setCodigo] = useState("");
-  const [lendoQr, setLendoQr] = useState(false);
   const [salvando, setSalvando] = useState(false);
-  const [permission, requestPermission] = useCameraPermissions();
 
   const vincular = async (valorCodigo = codigo) => {
     if (salvando) return;
 
     try {
       setSalvando(true);
-      setLendoQr(false);
       const responsavel = await alunoVincularResponsavelPorCodigo(
         extrairCodigoResponsavel(valorCodigo)
       );
@@ -42,29 +36,6 @@ export default function VincularResponsavel() {
     } finally {
       setSalvando(false);
     }
-  };
-
-  const alternarLeitorQr = async () => {
-    if (lendoQr) {
-      setLendoQr(false);
-      return;
-    }
-
-    if (Platform.OS === "web") {
-      Alert.alert("QR Code", "A leitura por camera deve ser testada no celular.");
-      return;
-    }
-
-    if (!permission?.granted) {
-      const resposta = await requestPermission();
-
-      if (!resposta.granted) {
-        Alert.alert("Camera", "Permita o uso da camera para ler o QR Code.");
-        return;
-      }
-    }
-
-    setLendoQr(true);
   };
 
   return (
@@ -100,26 +71,13 @@ export default function VincularResponsavel() {
 
       <TouchableOpacity
         style={[styles.botaoEditar, styles.botaoPerfilEspacado]}
-        onPress={alternarLeitorQr}
+        onPress={() => router.push({ pathname: "/Aluno/LeitorQr", params: { tipo: "responsavel" } })}
       >
         <Text style={styles.textoBotao}>
-          {lendoQr ? "Fechar QR Code" : "Ler QR Code"}
+          Ler QR Code
         </Text>
       </TouchableOpacity>
 
-      {lendoQr && (
-        <View style={styles.qrScannerContainer}>
-          <CameraView
-            style={styles.qrScanner}
-            facing="back"
-            barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
-            onBarcodeScanned={salvando ? undefined : ({ data }) => vincular(data)}
-          />
-          <Text style={styles.legendaTexto}>
-            Aponte a camera para o QR Code do responsavel.
-          </Text>
-        </View>
-      )}
     </ScrollView>
   );
 }

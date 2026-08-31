@@ -7,7 +7,6 @@ import {
   initializeAuth
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { getFunctions } from "firebase/functions";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCfOK9KqhO80KeHkb_-Lcsj0woptMCUg3o",
@@ -41,5 +40,4 @@ function criarAuthPersistente() {
 
 export const auth = criarAuthPersistente();
 export const db = getFirestore(app);
-export const cloudFunctions = getFunctions(app);
 export { app };

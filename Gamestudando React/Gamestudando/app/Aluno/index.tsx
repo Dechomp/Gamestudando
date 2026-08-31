@@ -1,20 +1,23 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 import { SplashLoading, useVideoTransition } from "../_components/VideoTransition";
 import { styles } from "../styles";
 import {
     carregarPerfilUsuarioAtual,
     observarUsuarioLogado,
-    obterRotaInicialPorPerfil
+    obterRotaInicialPorPerfil,
+    sairDaConta,
+    sessaoDeAlunoExpirou
 } from "../utils/authUsuario";
-import { escolherProximaAtividade } from "../utils/ia";
 import {
     carregarPerfil,
     obterOuCriarMateriaDaFase
 } from "../utils/perfilAluno";
+import { listarTurmasDoAluno } from "../utils/firebaseTurmas";
+import { escolherProximaAtividade } from "../utils/ia";
 
 const FASES_POR_MUNDO = 15;
 
@@ -23,9 +26,12 @@ export default function MapaFases() {
   const params = useLocalSearchParams();
 
   const [faseLiberada, setFaseLiberada] = useState(1);
+  const [faseMakerLiberada, setFaseMakerLiberada] = useState(1);
   const [recomendacao, setRecomendacao] = useState(null);
-  const [mundoVisualizado, setMundoVisualizado] = useState(1);
   const [materiasPorFase, setMateriasPorFase] = useState({});
+  const [mundoVisualizado, setMundoVisualizado] = useState(1);
+  const [trilhaSelecionada, setTrilhaSelecionada] = useState("escolar");
+  const [trilhaInicializada, setTrilhaInicializada] = useState(false);
   const [usuarioLogado, setUsuarioLogado] = useState(false);
   const [verificandoLogin, setVerificandoLogin] = useState(true);
   const { showVideo, hideVideo } = useVideoTransition();
@@ -33,24 +39,29 @@ export default function MapaFases() {
   const faseConcluida = Array.isArray(params.faseConcluida)
     ? params.faseConcluida[0]
     : params.faseConcluida;
+  const materiaConcluida = Array.isArray(params.materia)
+    ? params.materia[0]
+    : params.materia;
 
   const calcularIA = useCallback(async () => {
-    // A recomendacao usa o desempenho salvo no perfil do aluno.
     try {
       const perfil = await carregarPerfil();
+      if (!trilhaInicializada) {
+        setTrilhaSelecionada(perfil?.tipo === "aluno_maker" ? "maker" : "escolar");
+        setTrilhaInicializada(true);
+      }
 
       if (!perfil?.progresso?.avaliacaoInicialConcluida) {
         router.replace("/Aluno/avaliacaoInicial");
         return;
       }
-
-      const resultado = escolherProximaAtividade(perfil);
-      setRecomendacao(resultado);
+      setRecomendacao(escolherProximaAtividade(perfil, ["matematica", "portugues"]));
       setMateriasPorFase(perfil?.progresso?.materiasPorFase || {});
+
     } catch (error) {
       console.log("Erro calculando IA:", error);
     }
-  }, [router]);
+  }, [router, trilhaInicializada]);
 
   const carregarMapa = useCallback(async () => {
     // Junta progresso local e Firebase para nao perder fase liberada.
@@ -58,9 +69,12 @@ export default function MapaFases() {
     try {
       const perfil = await carregarPerfil();
       const salvo = await AsyncStorage.getItem("faseLiberada");
+      const salvoMaker = await AsyncStorage.getItem("faseLiberadaMaker");
       const faseSalva = salvo ? parseInt(salvo) : 1;
       const fasePerfil = parseInt(String(perfil?.progresso?.faseLiberada || 1));
       const maiorConcluida = parseInt(String(perfil?.progresso?.maiorFaseConcluida || 0));
+      const faseMakerPerfil = parseInt(String(perfil?.progresso?.faseLiberadaMaker || 1));
+      const maiorMakerConcluida = parseInt(String(perfil?.progresso?.maiorFaseMakerConcluida || 0));
 
       let novaFaseLiberada = Math.max(
         1,
@@ -68,22 +82,26 @@ export default function MapaFases() {
         isNaN(fasePerfil) ? 1 : fasePerfil,
         isNaN(maiorConcluida) ? 1 : maiorConcluida + 1
       );
+      let novaFaseMakerLiberada = Math.max(1, isNaN(parseInt(String(salvoMaker))) ? 1 : parseInt(String(salvoMaker)), isNaN(faseMakerPerfil) ? 1 : faseMakerPerfil, isNaN(maiorMakerConcluida) ? 1 : maiorMakerConcluida + 1);
 
     if (faseConcluida) {
       const concluida = parseInt(String(faseConcluida));
 
       if (!isNaN(concluida)) {
-        novaFaseLiberada = Math.max(novaFaseLiberada, concluida + 1);
-
-        await AsyncStorage.setItem(
-          "faseLiberada",
-          String(novaFaseLiberada)
-        );
+        if (materiaConcluida === "maker") {
+          novaFaseMakerLiberada = Math.max(novaFaseMakerLiberada, concluida + 1);
+          await AsyncStorage.setItem("faseLiberadaMaker", String(novaFaseMakerLiberada));
+        } else {
+          novaFaseLiberada = Math.max(novaFaseLiberada, concluida + 1);
+          await AsyncStorage.setItem("faseLiberada", String(novaFaseLiberada));
+        }
       }
     }
 
     setFaseLiberada(novaFaseLiberada);
+    setFaseMakerLiberada(novaFaseMakerLiberada);
     await AsyncStorage.setItem("faseLiberada", String(novaFaseLiberada));
+    await AsyncStorage.setItem("faseLiberadaMaker", String(novaFaseMakerLiberada));
     setMundoVisualizado(Math.ceil(novaFaseLiberada / FASES_POR_MUNDO));
     await calcularIA();
   } catch (error) {
@@ -91,7 +109,7 @@ export default function MapaFases() {
   } finally {
     hideVideo();
   }
-}, [calcularIA, faseConcluida, hideVideo, showVideo]);
+}, [calcularIA, faseConcluida, hideVideo, materiaConcluida, showVideo]);
 
   useFocusEffect(
     useCallback(() => {
@@ -114,6 +132,29 @@ export default function MapaFases() {
       }
 
       const perfil = await carregarPerfilUsuarioAtual();
+
+      if (await sessaoDeAlunoExpirou(usuario.uid, perfil?.tipo)) {
+        await sairDaConta();
+        setUsuarioLogado(false);
+        setVerificandoLogin(false);
+        Alert.alert("Sessão encerrada", "Por segurança, a sessão do aluno foi encerrada após 12 horas. Entre novamente.");
+        router.replace("/Auth/login");
+        return;
+      }
+
+      // Aluno Maker só acessa o app após o professor ler seu QR e vinculá-lo à turma.
+      if (perfil?.tipo === "aluno_maker") {
+        const turmasMaker = await listarTurmasDoAluno().catch(() => []);
+        if (turmasMaker.length === 0) {
+          setUsuarioLogado(true);
+          setVerificandoLogin(false);
+          router.replace("/Aluno/aguardandoTurmaMaker");
+          return;
+        }
+        setUsuarioLogado(true);
+        setVerificandoLogin(false);
+        return;
+      }
       const rotaInicial = obterRotaInicialPorPerfil(perfil);
 
       if (rotaInicial !== "/Aluno") {
@@ -136,20 +177,24 @@ export default function MapaFases() {
     }
   }, [faseConcluida, router]);
 
-  const escolherMateriaDaFase = useCallback((faseId) => {
-    // Primeiro usa a materia salva; se nao existir, usa a recomendacao atual.
-    const materiaSalva = materiasPorFase[String(faseId)];
-
-    if (materiaSalva) return materiaSalva;
-
-    const materiaIA = recomendacao?.materia;
-
-    return materiaIA || escolherMateriaPadrao(faseId);
-  }, [materiasPorFase, recomendacao]);
+  useEffect(() => {
+    const faseDaTrilha = trilhaSelecionada === "maker" ? faseMakerLiberada : faseLiberada;
+    setMundoVisualizado(Math.ceil(faseDaTrilha / FASES_POR_MUNDO));
+  }, [faseLiberada, faseMakerLiberada, trilhaSelecionada]);
 
   const mundoAtual = mundoVisualizado;
   const primeiraFaseDoMundo =
     (mundoAtual - 1) * FASES_POR_MUNDO + 1;
+
+  const escolherMateriaDaFase = useCallback((faseId) => {
+    const materiaSalva = materiasPorFase[String(faseId)];
+    if (materiaSalva) return materiaSalva;
+
+    // A cada três fases, intercala a outra matéria; nas demais, reforça a maior dificuldade.
+    const prioridade = recomendacao?.materia || "portugues";
+    if (faseId % 3 === 0) return prioridade === "matematica" ? "portugues" : "matematica";
+    return prioridade;
+  }, [materiasPorFase, recomendacao]);
 
   const fases = useMemo(() => {
     return Array.from({ length: FASES_POR_MUNDO }, (_, i) => {
@@ -158,20 +203,14 @@ export default function MapaFases() {
       return {
         id,
         numeroNoMundo: i + 1,
-        materia: escolherMateriaDaFase(id)
+        trilha: trilhaSelecionada,
+        materia: trilhaSelecionada === "maker" ? "maker" : escolherMateriaDaFase(id),
       };
     });
-  }, [escolherMateriaDaFase, primeiraFaseDoMundo]);
+  }, [escolherMateriaDaFase, primeiraFaseDoMundo, trilhaSelecionada]);
 
-  const mundoMaximoLiberado = Math.ceil(faseLiberada / FASES_POR_MUNDO);
-
-  function escolherMateriaPadrao(faseId) {
-    // Distribui as materias quando a IA ainda nao salvou a fase.
-    if (faseId % 5 === 0) return "cosmoletrando";
-    if (faseId % 3 === 0) return "rimas";
-    if (faseId % 2 === 0) return "matematica";
-    return "portugues";
-  }
+  const faseLiberadaDaTrilha = trilhaSelecionada === "maker" ? faseMakerLiberada : faseLiberada;
+  const mundoMaximoLiberado = Math.ceil(faseLiberadaDaTrilha / FASES_POR_MUNDO);
 
   function escolherTela(materia, faseId) {
     // Decide se a fase abre quiz, batalha, rimas ou Cosmoletrando.
@@ -189,6 +228,8 @@ export default function MapaFases() {
         : "/Aluno/jogoBatalhaMatematica";
     }
 
+    if (materia === "maker") return "/Aluno/telaQuiz4Portugues";
+
     if (materia === "rimas") return "/Aluno/telaQuizRimas";
     if (materia === "cosmoletrando") return "/Aluno/cosmoletrando";
 
@@ -198,16 +239,12 @@ export default function MapaFases() {
   }
 
   async function abrirFase(fase) {
-    // Salva a materia da fase antes de navegar para a atividade.
-    const materia = await obterOuCriarMateriaDaFase(
-      fase.id,
-      fase.materia
-    );
-
-    setMateriasPorFase(prev => ({
-      ...prev,
-      [String(fase.id)]: materia
-    }));
+    if (fase.trilha === "maker") {
+      router.push({ pathname: escolherTela("maker", fase.id), params: { faseId: String(fase.id), materia: "maker" } });
+      return;
+    }
+    const materia = await obterOuCriarMateriaDaFase(fase.id, fase.materia);
+    setMateriasPorFase((anteriores) => ({ ...anteriores, [String(fase.id)]: materia }));
 
     router.push({
       pathname: escolherTela(materia, fase.id),
@@ -260,6 +297,17 @@ export default function MapaFases() {
         MAPA DE FASES
       </Text>
 
+      <View style={styles.mapaTrilhas}>
+        {[{ id: "escolar", nome: "Português e Matemática" }, { id: "maker", nome: "Maker" }].map((trilha) => (
+          <TouchableOpacity key={trilha.id} onPress={() => setTrilhaSelecionada(trilha.id)} style={[styles.mapaTrilhaBotao, trilhaSelecionada === trilha.id && styles.mapaTrilhaBotaoAtivo]}>
+            <Text style={[styles.mapaTrilhaTexto, trilhaSelecionada === trilha.id && styles.mapaTrilhaTextoAtivo]}>{trilha.nome}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      <Text style={styles.mapaMundoSubtitulo}>
+        {trilhaSelecionada === "maker" ? "Trilha Maker: robótica, Arduino, sensores e projetos práticos." : "Trilha escolar: Português e Matemática no mesmo caminho de tarefas."}
+      </Text>
+
       <View style={styles.mapaMundoHeader}>
         <TouchableOpacity
           disabled={mundoVisualizado <= 1}
@@ -304,7 +352,7 @@ export default function MapaFases() {
 
       {fases.map((fase, index) => {
 
-        const liberada = fase.id <= faseLiberada;
+        const liberada = fase.id <= faseLiberadaDaTrilha;
 
         return (
           <View key={fase.id} style={styles.faseContainer}>
@@ -319,16 +367,9 @@ export default function MapaFases() {
               <TouchableOpacity
                 disabled={!liberada}
                 onPress={() => abrirFase(fase)}
-                style={[
-                  styles.botaoFase,
-                  liberada
-                    ? styles.faseLiberada
-                    : styles.faseBloqueada
-                ]}
+                style={[styles.botaoFase, liberada ? styles.faseLiberada : styles.faseBloqueada]}
               >
-                <Text style={styles.textoFase}>
-                  {fase.numeroNoMundo}
-                </Text>
+                <Text style={styles.textoFase}>{fase.trilha === "maker" ? "⚙" : fase.numeroNoMundo}</Text>
               </TouchableOpacity>
 
             </View>

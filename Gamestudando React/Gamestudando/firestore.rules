@@ -1,0 +1,165 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function logado() { return request.auth != null; }
+    function donoDoDocumento(uid) { return logado() && request.auth.uid == uid; }
+    function professorDaTurma(turmaId) {
+      return logado() && get(/databases/$(database)/documents/turmas/$(turmaId)).data.professorId == request.auth.uid;
+    }
+    function professorAutorizadoMaker(perfil) {
+      return logado()
+        && perfil.keys().hasAll(['professorIds'])
+        && request.auth.uid in perfil.professorIds;
+    }
+    function professorDaUltimaTurmaMaker(perfil) {
+      return logado()
+        && perfil.keys().hasAll(['ultimaTurmaId', 'alunoId'])
+        && exists(/databases/$(database)/documents/turmas/$(perfil.ultimaTurmaId)/alunos/$(perfil.alunoId))
+        && professorDaTurma(perfil.ultimaTurmaId);
+    }
+
+    match /usuarios/{uid} {
+      allow read: if donoDoDocumento(uid);
+      allow create: if donoDoDocumento(uid);
+      allow update: if donoDoDocumento(uid)
+        && request.resource.data.tipo == resource.data.tipo
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'nome', 'email', 'usuario', 'cpf', 'telefone', 'dataNascimento', 'status',
+          'isVerificado', 'responsavelId', 'configuracoes', 'progresso',
+          'materias', 'estatisticas', 'uid', 'tipo', 'criadoEm', 'atualizadoEm'
+        ]);
+
+      match /turmas/{turmaId} {
+        allow read: if donoDoDocumento(uid) || professorDaTurma(turmaId);
+        allow create, update: if donoDoDocumento(uid) || professorDaTurma(turmaId);
+        allow delete: if donoDoDocumento(uid) || professorDaTurma(turmaId);
+      }
+      match /responsaveis/{responsavelId} {
+        allow read, write: if donoDoDocumento(uid) || donoDoDocumento(responsavelId);
+      }
+      match /aulasMaker/{aulaId} {
+        allow read: if donoDoDocumento(uid);
+        allow write: if false;
+      }
+    }
+
+    match /turmas/{turmaId} {
+      allow read: if logado() && (resource.data.professorId == request.auth.uid || resource.data.ativa == true);
+      allow create: if logado() && request.resource.data.professorId == request.auth.uid;
+      allow update, delete: if professorDaTurma(turmaId);
+      match /alunos/{alunoId} {
+        allow read: if donoDoDocumento(alunoId) || professorDaTurma(turmaId);
+        allow create, update: if donoDoDocumento(alunoId) || professorDaTurma(turmaId);
+        allow delete: if donoDoDocumento(alunoId) || professorDaTurma(turmaId);
+      }
+      match /chamadasMaker/{data}/presencas/{alunoId} {
+        allow read: if donoDoDocumento(alunoId) || professorDaTurma(turmaId);
+        allow create: if professorDaTurma(turmaId);
+        allow update, delete: if false;
+      }
+      match /chamadasMaker/{data} {
+        allow read: if professorDaTurma(turmaId);
+        allow create, update: if professorDaTurma(turmaId);
+        allow delete: if false;
+      }
+      match /justificativasMaker/{justificativaId} {
+        allow read: if professorDaTurma(turmaId) || donoDoDocumento(resource.data.alunoId);
+        allow create: if logado()
+          && request.resource.data.alunoId == request.auth.uid
+          && exists(/databases/$(database)/documents/turmas/$(turmaId)/alunos/$(request.auth.uid));
+        allow update: if professorDaTurma(turmaId)
+          && resource.data.status == 'pendente'
+          && request.resource.data.alunoId == resource.data.alunoId
+          && request.resource.data.status in ['aprovada', 'recusada'];
+        allow delete: if false;
+      }
+      match /ajudantesMaker/{data} {
+        allow read: if professorDaTurma(turmaId);
+        allow create, update: if professorDaTurma(turmaId);
+        allow delete: if false;
+      }
+      match /configMaker/{configuracaoId} {
+        allow read: if professorDaTurma(turmaId) || (logado()
+          && exists(/databases/$(database)/documents/turmas/$(turmaId)/alunos/$(request.auth.uid)));
+        allow create, update: if professorDaTurma(turmaId);
+        allow delete: if false;
+      }
+      match /observacoesMaker/{observacaoId} {
+        allow read, create: if professorDaTurma(turmaId);
+        allow update, delete: if false;
+      }
+      match /conteudoMaker/{conteudoId} {
+        allow read: if professorDaTurma(turmaId) || (logado()
+          && exists(/databases/$(database)/documents/turmas/$(turmaId)/alunos/$(request.auth.uid)));
+        allow create, update: if professorDaTurma(turmaId);
+        allow delete: if false;
+      }
+      match /roletasMaker/{roletaId} {
+        allow read, create, update, delete: if professorDaTurma(turmaId);
+      }
+    }
+
+    match /makerPerfis/{uid} {
+      allow read: if donoDoDocumento(uid)
+        || professorAutorizadoMaker(resource.data)
+        || professorDaUltimaTurmaMaker(resource.data);
+      allow create: if (donoDoDocumento(uid) && request.resource.data.alunoId == uid)
+        || (logado() && request.resource.data.alunoId == uid
+          && get(/databases/$(database)/documents/turmas/$(request.resource.data.ultimaTurmaId)).data.professorId == request.auth.uid);
+      allow update: if (donoDoDocumento(uid)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['codigo', 'alunoId', 'ultimaTurmaId', 'turmaIds', 'professorIds', 'atualizadoEm']))
+        || professorAutorizadoMaker(resource.data)
+        || professorDaUltimaTurmaMaker(request.resource.data);
+      match /movimentos/{movimentoId} {
+        allow read: if donoDoDocumento(uid) || (logado()
+          && get(/databases/$(database)/documents/turmas/$(resource.data.turmaId)).data.professorId == request.auth.uid);
+        allow create: if logado() && get(/databases/$(database)/documents/turmas/$(request.resource.data.turmaId)).data.professorId == request.auth.uid;
+        allow update, delete: if false;
+      }
+      match /ocorrencias/{ocorrenciaId} {
+        allow read: if donoDoDocumento(uid) || (logado()
+          && get(/databases/$(database)/documents/turmas/$(resource.data.turmaId)).data.professorId == request.auth.uid);
+        allow create: if logado()
+          && get(/databases/$(database)/documents/turmas/$(request.resource.data.turmaId)).data.professorId == request.auth.uid;
+        allow update, delete: if false;
+      }
+      match /compras/{compraId} {
+        allow read: if donoDoDocumento(uid);
+        allow create: if donoDoDocumento(uid) && request.resource.data.status == 'pendente';
+        allow update: if false;
+        allow delete: if false;
+      }
+    }
+    match /turmas/{turmaId}/produtosMaker/{produtoId} {
+      allow read: if logado();
+      allow create, update, delete: if professorDaTurma(turmaId);
+    }
+    match /turmas/{turmaId}/pedidosMaker/{pedidoId} {
+      allow read: if professorDaTurma(turmaId);
+      allow create: if logado() && request.resource.data.alunoId == request.auth.uid && request.resource.data.status == 'pendente';
+      allow update: if professorDaTurma(turmaId);
+      allow delete: if false;
+    }
+    match /codigosMaker/{codigo} {
+      allow read: if logado();
+      allow create, update: if logado() && request.resource.data.alunoId == request.auth.uid;
+      allow delete: if false;
+    }
+    match /codigosAlunosResponsavel/{codigo} {
+      allow read: if logado();
+      allow create, update: if logado() && request.resource.data.alunoId == request.auth.uid;
+      allow delete: if false;
+    }
+    match /codigosResponsaveis/{codigo} {
+      allow read: if logado();
+      allow create, update: if logado() && request.resource.data.responsavelId == request.auth.uid;
+      allow delete: if false;
+    }
+    match /questoes/{questaoId} {
+      allow read: if logado() && resource.data.ativa == true;
+      allow create: if logado() && request.resource.data.criadaPor == request.auth.uid;
+      allow update, delete: if logado() && resource.data.criadaPor == request.auth.uid;
+    }
+  }
+}

@@ -1,14 +1,12 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   Alert,
-  Platform,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Picker } from '@react-native-picker/picker';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { PieChart } from 'react-native-gifted-charts';
@@ -25,17 +23,18 @@ import {
 
 const DetalhesTurma = () => {
   const params = useLocalSearchParams();
-  const turmaId = valorParam(params.id);
+  // Aceita tanto a rota antiga (?id=) quanto os atalhos novos (?turmaId=).
+  const turmaId = valorParam(params.id || params.turmaId);
   const [turma, setTurma] = useState(null);
   const [nomeEditado, setNomeEditado] = useState('');
   const [editando, setEditando] = useState(false);
   const [alunoSelecionado, setAlunoSelecionado] = useState(null);
   const [codigoAluno, setCodigoAluno] = useState('');
-  const [lendoQrAluno, setLendoQrAluno] = useState(false);
+  const [nivelMakerInicial, setNivelMakerInicial] = useState('1');
+  const [makerCoinsIniciais, setMakerCoinsIniciais] = useState('0');
   const [vinculandoAluno, setVinculandoAluno] = useState(false);
   const [ordenarPor, setOrdenarPor] = useState('nome');
   const [ordem, setOrdem] = useState('asc');
-  const [permission, requestPermission] = useCameraPermissions();
 
   const resumoTurma = useMemo(
     () => turma ? calcularResumoTurma(turma) : null,
@@ -141,9 +140,13 @@ const DetalhesTurma = () => {
 
     try {
       setVinculandoAluno(true);
-      setLendoQrAluno(false);
-      await adicionarAlunoNaTurmaPorCodigo(turmaId, valorCodigo);
+      await adicionarAlunoNaTurmaPorCodigo(turmaId, valorCodigo, {
+        nivelAtual: nivelMakerInicial,
+        moedasAtuais: makerCoinsIniciais,
+      });
       setCodigoAluno('');
+      setNivelMakerInicial('1');
+      setMakerCoinsIniciais('0');
       await carregar();
       Alert.alert('Turma', 'Aluno adicionado a turma.');
     } catch (error) {
@@ -154,29 +157,6 @@ const DetalhesTurma = () => {
     }
   };
 
-  const alternarLeitorQrAluno = async () => {
-    if (lendoQrAluno) {
-      setLendoQrAluno(false);
-      return;
-    }
-
-    if (Platform.OS === 'web') {
-      Alert.alert('QR Code', 'A leitura por camera deve ser testada no celular.');
-      return;
-    }
-
-    if (!permission?.granted) {
-      const resposta = await requestPermission();
-
-      if (!resposta.granted) {
-        Alert.alert('Camera', 'Permita o uso da camera para ler o QR Code.');
-        return;
-      }
-    }
-
-    setLendoQrAluno(true);
-  };
-
   if (!turma) {
     return (
       <View style={styles.loadingContainer}>
@@ -184,6 +164,9 @@ const DetalhesTurma = () => {
       </View>
     );
   }
+
+  const temMaker = turma.tipo !== 'regular';
+  const materiasDoGrafico = materiasDaTurma(turma.tipo);
 
   return (
     <ScrollView
@@ -217,6 +200,7 @@ const DetalhesTurma = () => {
         <>
           <Text style={styles.portalTituloMenor}>{turma.nome}</Text>
           <Text style={styles.portalValor}>Codigo: {turma.codigo}</Text>
+          <Text style={styles.legendaTexto}>Turma {nomeTipoTurma(turma.tipo)}</Text>
         </>
       )}
 
@@ -236,12 +220,33 @@ const DetalhesTurma = () => {
         </TouchableOpacity>
       </View>
 
+      {temMaker && <View style={styles.portalQuadroRelatorio}>
+        <Text style={styles.portalSubtitulo}>Ferramentas da Sala Maker</Text>
+        <Text style={styles.legendaTexto}>
+          Escolha o que deseja fazer nesta turma.
+        </Text>
+        <View style={styles.turmaMakerAcoes}>
+          <TouchableOpacity style={[styles.turmaMakerAcao, styles.turmaMakerAcaoPresenca]} onPress={() => router.push({ pathname: '/Professor/ChamadaMaker', params: { turmaId } })}>
+            <Text style={styles.turmaMakerAcaoTitulo}>✓ Fazer chamada</Text>
+            <Text style={styles.turmaMakerAcaoDescricao}>Registrar presença, ajudante e recompensas da aula.</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.turmaMakerAcao, styles.turmaMakerAcaoGestao]} onPress={() => router.push({ pathname: '/Professor/GestaoMaker', params: { turmaId } })}>
+            <Text style={styles.turmaMakerAcaoTitulo}>⚙ Administrar Sala Maker</Text>
+            <Text style={styles.turmaMakerAcaoDescricao}>Loja, regras, observações, multas e pedidos.</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.turmaMakerAcao, styles.turmaMakerAcaoDinamicas]} onPress={() => router.push({ pathname: '/Professor/DinamicasMaker', params: { turmaId } })}>
+            <Text style={styles.turmaMakerAcaoTitulo}>🎲 Roletas e curiosidades</Text>
+            <Text style={styles.turmaMakerAcaoDescricao}>Sortear quem traz a curiosidade e criar outras roletas.</Text>
+          </TouchableOpacity>
+        </View>
+      </View>}
+
       {resumoTurma && (
         <View style={styles.portalQuadroRelatorio}>
           <Text style={styles.portalSubtitulo}>Desempenho da turma</Text>
 
           <View style={styles.portalSecao}>
-            {['matematica', 'portugues'].map((materia) => (
+            {materiasDoGrafico.map((materia) => (
               <View key={materia} style={styles.relatorioMateriaLinha}>
                 <Text style={styles.configuracaoTexto}>{nomeMateria(materia)}</Text>
                 <View style={styles.graficoContainer}>
@@ -298,6 +303,23 @@ const DetalhesTurma = () => {
           placeholder="Codigo do aluno"
           autoCapitalize="characters"
         />
+        {temMaker && <><Text style={styles.legendaTexto}>
+          Para Aluno Maker: informe o saldo atual trazido do formulário externo.
+        </Text>
+        <TextInput
+          style={styles.input}
+          value={nivelMakerInicial}
+          onChangeText={setNivelMakerInicial}
+          keyboardType="numeric"
+          placeholder="Nível atual (mínimo 1)"
+        />
+        <TextInput
+          style={styles.input}
+          value={makerCoinsIniciais}
+          onChangeText={setMakerCoinsIniciais}
+          keyboardType="numeric"
+          placeholder="Maker Coins atuais"
+        /></>}
 
         <TouchableOpacity
           style={[styles.botaoSalvar, vinculandoAluno && styles.botaoDesabilitado]}
@@ -309,30 +331,15 @@ const DetalhesTurma = () => {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
+        {temMaker && <TouchableOpacity
           style={[styles.botaoEditar, styles.botaoPerfilEspacado]}
-          onPress={alternarLeitorQrAluno}
+          onPress={() => router.push({ pathname: '/Professor/LeitorQrAlunoTurma', params: { turmaId, nivel: nivelMakerInicial, moedas: makerCoinsIniciais } })}
         >
           <Text style={styles.textoBotao}>
-            {lendoQrAluno ? 'Fechar QR Code' : 'Ler QR Code do aluno'}
+            Ler QR Code do aluno
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity>}
 
-        {lendoQrAluno && (
-          <View style={styles.qrScannerContainer}>
-            <CameraView
-              style={styles.qrScanner}
-              facing="back"
-              barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-              onBarcodeScanned={
-                vinculandoAluno ? undefined : ({ data }) => adicionarAlunoPorCodigo(data)
-              }
-            />
-            <Text style={styles.legendaTexto}>
-              Aponte a camera para o QR Code do aluno.
-            </Text>
-          </View>
-        )}
       </View>
 
       <Text style={styles.label}>Alunos</Text>
@@ -367,14 +374,14 @@ const DetalhesTurma = () => {
           </Text>
 
           <Text style={styles.portalValor}>
-            Dificuldade principal: {calcularDificuldade(alunoSelecionado)}
+            Dificuldade principal: {calcularDificuldade(alunoSelecionado, materiasDoGrafico)}
           </Text>
           <Text style={styles.portalValor}>
-            Recomendacao de tarefa: {recomendarTema(alunoSelecionado)}
+            Recomendacao de tarefa: {recomendarTema(alunoSelecionado, materiasDoGrafico)}
           </Text>
 
           <View style={styles.portalSecao}>
-            {['matematica', 'portugues'].map((materia) => (
+            {materiasDoGrafico.map((materia) => (
               <View key={materia} style={styles.relatorioMateriaLinha}>
                 <Text style={styles.configuracaoTexto}>{nomeMateria(materia)}</Text>
                 <View style={styles.graficoContainer}>
@@ -435,19 +442,19 @@ function gerarDadosPizzaResumo(dados) {
 }
 
 function calcularResumoTurma(turma) {
-  const matematica = somarMateria(turma.alunos || [], 'matematica');
-  const portugues = somarMateria(turma.alunos || [], 'portugues');
-  const dificuldade = matematica.percentual <= portugues.percentual
-    ? 'Matematica'
-    : 'Portugues';
+  const materias = materiasDaTurma(turma.tipo);
+  const resumo = materias.reduce((acc, materia) => ({
+    ...acc,
+    [materia]: somarMateria(turma.alunos || [], materia),
+  }), {});
+  const piorMateria = materias
+    .map((materia) => ({ materia, percentual: resumo[materia].percentual }))
+    .sort((a, b) => a.percentual - b.percentual)[0]?.materia || materias[0];
 
   return {
-    matematica,
-    portugues,
-    dificuldade,
-    recomendacao: dificuldade === 'Portugues'
-      ? 'silabas, leitura de palavras e rimas'
-      : 'contas simples e comparacao de numeros',
+    ...resumo,
+    dificuldade: nomeMateria(piorMateria),
+    recomendacao: recomendacaoParaMateria(piorMateria),
   };
 }
 
@@ -480,8 +487,7 @@ function calcularPercentual(aluno, materia) {
   return Math.round((acertos / total) * 100);
 }
 
-function calcularDificuldade(aluno) {
-  const materias = ['matematica', 'portugues'];
+function calcularDificuldade(aluno, materias = ['matematica', 'portugues']) {
   const pior = materias
     .map((materia) => ({
       materia,
@@ -492,11 +498,9 @@ function calcularDificuldade(aluno) {
   return nomeMateria(pior?.materia || 'matematica');
 }
 
-function recomendarTema(aluno) {
-  const dificuldade = calcularDificuldade(aluno);
-
-  if (dificuldade === 'Portugues') return 'silabas e letras iniciais';
-  return 'contas simples e comparacao de numeros';
+function recomendarTema(aluno, materias) {
+  const dificuldade = calcularDificuldade(aluno, materias);
+  return recomendacaoParaMateria(dificuldade.toLowerCase());
 }
 
 function obterDadosMateria(aluno, materia) {
@@ -520,7 +524,26 @@ function nomeMateria(materia) {
   if (materia === 'matematica') return 'Matematica';
   if (materia === 'portugues') return 'Portugues';
   if (materia === 'rimas') return 'Rimas';
+  if (materia === 'maker') return 'Maker';
   return materia;
+}
+
+function materiasDaTurma(tipo) {
+  if (tipo === 'maker') return ['maker'];
+  if (tipo === 'mista') return ['matematica', 'portugues', 'maker'];
+  return ['matematica', 'portugues'];
+}
+
+function recomendacaoParaMateria(materia) {
+  if (materia === 'portugues') return 'silabas, leitura de palavras e rimas';
+  if (materia === 'maker') return 'robótica, sensores, Arduino e projetos práticos';
+  return 'contas simples e comparacao de numeros';
+}
+
+function nomeTipoTurma(tipo) {
+  if (tipo === 'maker') return 'Maker';
+  if (tipo === 'mista') return 'Mista';
+  return 'Regular';
 }
 
 function mensagemErroAdicionarAluno(error) {
@@ -530,6 +553,18 @@ function mensagemErroAdicionarAluno(error) {
 
   if (error?.message === 'ALUNO_NAO_ENCONTRADO') {
     return 'Nao encontramos um aluno ativo com esse codigo.';
+  }
+
+  if (error?.message === 'SALDO_MAKER_INVALIDO') {
+    return 'Informe nível a partir de 1 e Maker Coins iguais ou maiores que zero.';
+  }
+
+  if (error?.message === 'TURMA_APENAS_MAKER') {
+    return 'Esta é uma turma Maker e aceita apenas Alunos Maker.';
+  }
+
+  if (error?.message === 'TURMA_APENAS_REGULAR') {
+    return 'Esta é uma turma Regular e aceita apenas alunos regulares.';
   }
 
   return 'Nao foi possivel adicionar o aluno agora.';

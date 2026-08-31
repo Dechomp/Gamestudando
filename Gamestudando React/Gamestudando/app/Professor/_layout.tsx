@@ -46,6 +46,21 @@ export default function ProfessorLayout() {
       />
 
       <Tabs.Screen
+        name="ChamadaMaker"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="GestaoMaker"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="DinamicasMaker"
+        options={{ href: null }}
+      />
+      <Tabs.Screen name="LeitorQrMaker" options={{ href: null }} />
+      <Tabs.Screen name="LeitorQrAlunoTurma" options={{ href: null }} />
+
+      <Tabs.Screen
         name="CriarAtividade"
         options={{
           href: null,

@@ -3,6 +3,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { styles } from "../styles";
 import { perguntasPortugues } from "../perguntasPortuguesQuiz4";
+import { perguntasMaker } from "../perguntasMaker";
 import { atualizarPerfil, carregarPerfil } from "../utils/perfilAluno";
 import { lerTextoSeAtivo, pararLeitura } from "../utils/leituraPerguntas";
 import { carregarQuestoesMultiplaEscolha } from "../utils/repositorioQuestoes";
@@ -69,6 +70,8 @@ function selecionarPerguntasIA(lista, nivelAluno = 3, quantidade = 5) {
 export default function Index() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const materiaParam = Array.isArray(params.materia) ? params.materia[0] : params.materia;
+  const materiaAtual = materiaParam === "maker" ? "maker" : "portugues";
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const scaleAnims = useRef([
@@ -112,10 +115,10 @@ export default function Index() {
       const carregar = async () => {
         // Carrega perguntas do Firebase/cache e monta o quiz.
         const perfil = await carregarPerfil();
-        const nivel = perfil?.portugues?.nivel || 3;
+        const nivel = perfil?.[materiaAtual]?.nivel || 3;
         const perguntasBase = await carregarQuestoesMultiplaEscolha(
-          "portugues",
-          perguntasPortugues
+          materiaAtual,
+          materiaAtual === "maker" ? perguntasMaker : perguntasPortugues
         );
         const perguntas = selecionarPerguntasIA(perguntasBase, nivel, 5);
 
@@ -136,7 +139,7 @@ export default function Index() {
       return () => {
         ativo = false;
       };
-    }, [fadeAnim])
+    }, [fadeAnim, materiaAtual])
   );
 
   const animarClique = (index) => {
@@ -197,14 +200,14 @@ export default function Index() {
     const totalErros = erros + (acertouUltima ? 0 : 0);
 
     try {
-      await atualizarPerfil("portugues", totalAcertos, totalErros, faseAtual);
+      await atualizarPerfil(materiaAtual, totalAcertos, totalErros, faseAtual);
     } catch (error) {
-      console.log("Erro salvando portugues:", error);
+      console.log("Erro salvando tarefa:", error);
     }
 
     router.replace({
       pathname: "/Aluno",
-      params: { faseConcluida: String(faseAtual) },
+      params: { faseConcluida: String(faseAtual), materia: materiaAtual },
     });
   };
 
@@ -224,7 +227,7 @@ export default function Index() {
   if (!perguntaAtualObj) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>Carregando portugues...</Text>
+        <Text>Carregando tarefa...</Text>
       </View>
     );
   }
@@ -307,9 +310,6 @@ export default function Index() {
             </Text>
           </TouchableOpacity>
 
-          <Text style={styles.textoRodape}>
-            Jesus e o melhor professor de todos os tempos!
-          </Text>
         </View>
       </ScrollView>
     </Animated.View>

@@ -5,6 +5,10 @@ import { db } from "./firebase";
 import { parecemRimar } from "./rimas";
 
 const CACHE_PREFIXO = "questoes_cache_";
+const PALAVRAS_MAKER_FALLBACK = [
+  "ARDUINO", "BATERIA", "CIRCUITO", "CODIGO", "ENGRENAGEM", "FIO",
+  "JUMPER", "LED", "MOTOR", "PLACA", "PROJETO", "RESISTOR", "ROBO", "SENSOR"
+];
 
 export async function carregarQuestoesMultiplaEscolha(
   materia,
@@ -83,12 +87,15 @@ export async function carregarQuestoesRimas(
   };
 }
 
-export async function carregarPalavraCosmoletrando(palavraFallback = "GATO", palavraAtual = "") {
-  // Sorteia uma palavra para o Cosmoletrando, evitando repetir a palavra atual.
-  const cacheKey = `${CACHE_PREFIXO}cosmoletrando_palavra`;
+export async function carregarPalavraCosmoletrando(palavraFallback = "GATO", palavraAtual = "", tema = "normal") {
+  // Cada modo usa cache e banco próprios: Maker nunca mistura palavras comuns.
+  const temaSelecionado = tema === "maker" ? "maker" : "normal";
+  const cacheKey = `${CACHE_PREFIXO}cosmoletrando_palavra_${temaSelecionado}`;
   const cache = await carregarCache(cacheKey);
-  const fallback = normalizarPalavraMissao(palavraFallback) || "GATO";
   const atual = normalizarPalavraMissao(palavraAtual);
+  const fallback = temaSelecionado === "maker"
+    ? escolherPalavra(PALAVRAS_MAKER_FALLBACK, atual)
+    : normalizarPalavraMissao(palavraFallback) || "GATO";
 
   try {
     const snaps = await Promise.all([
@@ -109,15 +116,16 @@ export async function carregarPalavraCosmoletrando(palavraFallback = "GATO", pal
     ]);
 
     const palavras = snaps
-      .flatMap(snap => snap.docs)
-      .flatMap(docSnap => extrairPalavrasCosmoletrando(docSnap.data()))
+      .flatMap((snap, indice) => snap.docs.map(docSnap => ({ dados: docSnap.data(), origemRimas: indice === 1 })))
+      // Palavras antigas, sem tema salvo, continuam no modo Normal para manter
+      // compatibilidade com as atividades que já foram publicadas.
+      .filter(({ dados, origemRimas }) => pertenceAoTemaCosmoletrando(dados, temaSelecionado, origemRimas))
+      .flatMap(({ dados }) => extrairPalavrasCosmoletrando(dados))
       .map(normalizarPalavraMissao)
       .filter(palavra => palavra.length >= 2 && palavra.length <= 10);
 
     if (palavras.length) {
-      const candidatas = palavras.filter(palavra => palavra !== atual);
-      const baseSorteio = candidatas.length ? candidatas : palavras;
-      const escolhida = baseSorteio[Math.floor(Math.random() * baseSorteio.length)];
+      const escolhida = escolherPalavra(palavras, atual);
       await salvarCache(cacheKey, escolhida);
       return escolhida;
     }
@@ -125,7 +133,10 @@ export async function carregarPalavraCosmoletrando(palavraFallback = "GATO", pal
     console.log("Erro buscando palavra do Cosmoletrando:", error);
   }
 
-  return normalizarPalavraMissao(cache) || fallback;
+  const cacheValido = normalizarPalavraMissao(cache);
+  return temaSelecionado === "maker" && !PALAVRAS_MAKER_FALLBACK.includes(cacheValido)
+    ? fallback
+    : cacheValido || fallback;
 }
 
 export async function sincronizarPerguntasIniciais() {
@@ -133,6 +144,7 @@ export async function sincronizarPerguntasIniciais() {
   await Promise.allSettled([
     carregarQuestoesMultiplaEscolha("matematica"),
     carregarQuestoesMultiplaEscolha("portugues"),
+    carregarQuestoesMultiplaEscolha("maker"),
     carregarQuestoesRimas()
   ]);
 }
@@ -202,12 +214,28 @@ function extrairPalavrasCosmoletrando(dados) {
   ].filter(Boolean);
 }
 
+function pertenceAoTemaCosmoletrando(dados, tema, origemRimas) {
+  // Rimas sempre pertencem ao banco normal; o Maker só lê itens explicitamente marcados.
+  if (origemRimas) return tema === "normal";
+  const temaDaPalavra = dados?.cosmoletrando?.tema || dados?.temaCosmoletrando || "normal";
+  return temaDaPalavra === tema;
+}
+
+function escolherPalavra(palavras, palavraAtual) {
+  // Evita repetir a palavra recém-jogada quando houver outra opção disponível.
+  const candidatas = palavras.filter(palavra => palavra !== palavraAtual);
+  const baseSorteio = candidatas.length ? candidatas : palavras;
+  return baseSorteio[Math.floor(Math.random() * baseSorteio.length)];
+}
+
 function normalizarPalavraMissao(valor) {
   // Remove caracteres que nao devem virar letras no jogo.
   return String(valor || "")
     .trim()
     .toUpperCase()
-    .replace(/[^A-Z????????????]/g, "");
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Z]/g, "");
 }
 
 function converterParesParaColunas(pares) {

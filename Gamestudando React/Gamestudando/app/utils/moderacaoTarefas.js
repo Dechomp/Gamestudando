@@ -1,6 +1,3 @@
-import { httpsCallable } from "firebase/functions";
-
-import { cloudFunctions } from "./firebase";
 import { parecemRimar, normalizarPalavra } from "./rimas";
 
 const PALAVRAS_BLOQUEADAS = [
@@ -64,14 +61,12 @@ export function moderarTarefaLocalmente(tarefa) {
 }
 
 export async function revisarTarefaComIA(questaoId, tarefa) {
-  // Chama a funcao do Firebase quando a revisao por IA estiver disponivel.
-  const revisarQuestao = httpsCallable(cloudFunctions, "revisarQuestaoProfessor");
-  const resposta = await revisarQuestao({
+  // Sem Cloud Functions, a revisao usa somente as regras locais.
+  // A funcao e mantida para nao quebrar o fluxo de criacao de tarefas.
+  return {
     questaoId,
-    tarefa,
-  });
-
-  return resposta.data;
+    ...moderarTarefaLocalmente(tarefa),
+  };
 }
 
 function moderarMultiplaEscolha(tarefa) {

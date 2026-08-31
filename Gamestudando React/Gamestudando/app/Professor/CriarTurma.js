@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
+import { Picker } from '@react-native-picker/picker';
 
 import { styles } from '../styles';
 import {
@@ -16,6 +17,7 @@ import {
 
 const CriarTurma = () => {
   const [nome, setNome] = useState('');
+  const [tipo, setTipo] = useState('regular');
   const [salvando, setSalvando] = useState(false);
   const [turmaCriada, setTurmaCriada] = useState(null);
 
@@ -24,7 +26,7 @@ const CriarTurma = () => {
 
     try {
       setSalvando(true);
-      const turma = await criarTurmaProfessor({ nome });
+      const turma = await criarTurmaProfessor({ nome, tipo });
       setTurmaCriada(turma);
       setNome('');
 
@@ -52,6 +54,15 @@ const CriarTurma = () => {
         placeholder="Ex: 1 Ano A"
       />
 
+      <Text style={styles.label}>Tipo de turma</Text>
+      <View style={styles.pickerContainer}>
+        <Picker selectedValue={tipo} onValueChange={setTipo}>
+          <Picker.Item label="Regular — Português e Matemática" value="regular" />
+          <Picker.Item label="Maker — ferramentas e trilha Maker" value="maker" />
+          <Picker.Item label="Mista — Regular e Maker" value="mista" />
+        </Picker>
+      </View>
+
       <TouchableOpacity
         style={[
           styles.botaoSalvar,
@@ -68,6 +79,7 @@ const CriarTurma = () => {
       {turmaCriada && (
         <View style={styles.turmaQrCard}>
           <Text style={styles.portalSubtitulo}>{turmaCriada.nome}</Text>
+          <Text style={styles.legendaTexto}>Turma {nomeTipoTurma(turmaCriada.tipo)}</Text>
           <Text style={styles.turmaCodigo}>{turmaCriada.codigo}</Text>
 
           <View style={styles.turmaQrBox}>
@@ -95,7 +107,21 @@ function mensagemErro(error) {
     return 'Nao foi possivel gerar um codigo agora. Tente novamente.';
   }
 
+  if (error?.message === 'TIPO_TURMA_INVALIDO') {
+    return 'Escolha um tipo de turma válido.';
+  }
+
+  if (error?.code === 'permission-denied') {
+    return 'Sem permissão para criar a turma. Entre novamente na conta de professor e tente de novo.';
+  }
+
   return 'Nao foi possivel criar a turma agora.';
+}
+
+function nomeTipoTurma(tipo) {
+  if (tipo === 'maker') return 'Maker';
+  if (tipo === 'mista') return 'Mista';
+  return 'Regular';
 }
 
 export default CriarTurma;

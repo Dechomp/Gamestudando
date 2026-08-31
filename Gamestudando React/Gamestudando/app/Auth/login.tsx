@@ -103,6 +103,14 @@ export default function Login() {
       return;
     }
 
+    if (!email.includes("@")) {
+      Alert.alert(
+        "Recuperar senha Maker",
+        "Como a conta Maker não usa e-mail visível, peça ao professor da sua Sala Maker para iniciar a recuperação da senha."
+      );
+      return;
+    }
+
     try {
       await enviarEmailRecuperacaoSenha(email);
 
@@ -181,14 +189,13 @@ export default function Login() {
             Acesse sua conta para continuar estudando.
           </Text>
 
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>Email ou nome de usuário</Text>
           <TextInput
             value={email}
             onChangeText={setEmail}
             style={styles.input}
             autoCapitalize="none"
-            keyboardType="email-address"
-            placeholder="email@exemplo.com"
+            placeholder="email@exemplo.com ou ana.maker"
           />
 
           <Text style={styles.label}>Senha</Text>

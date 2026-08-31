@@ -69,6 +69,31 @@ export const batalhaAssets = {
         require("../../assets/images/batalha/mago/mago_defeat_3.png"),
       ],
     },
+    maker: {
+      idle: [
+        require("../../assets/images/maker/sprites/idle_front.png"),
+        require("../../assets/images/maker/sprites/idle_front_alt.png"),
+        require("../../assets/images/maker/sprites/idle_front_tool.png"),
+      ],
+      attack: [
+        require("../../assets/images/maker/sprites/attack_screwdriver.png"),
+        require("../../assets/images/maker/sprites/attack_gadget.png"),
+        require("../../assets/images/maker/sprites/attack_screwdriver.png"),
+        require("../../assets/images/maker/sprites/attack_gadget.png"),
+      ],
+      hurt: [
+        require("../../assets/images/maker/sprites/crouch.png"),
+        require("../../assets/images/maker/sprites/idle_front_tool.png"),
+      ],
+      victory: [
+        require("../../assets/images/maker/sprites/victory.png"),
+        require("../../assets/images/maker/sprites/celebrate_happy.png"),
+        require("../../assets/images/maker/sprites/celebrate_tool.png"),
+      ],
+      defeated: [
+        require("../../assets/images/maker/sprites/crouch.png"),
+      ],
+    },
   },
   inimigos: {
     slime: [
@@ -177,6 +202,36 @@ export const batalhaAssets = {
         require("../../assets/images/batalha/ataques/mago/mago_ar_2.png"),
         require("../../assets/images/batalha/ataques/mago/mago_ar_3.png"),
         require("../../assets/images/batalha/ataques/mago/mago_ar_4.png"),
+      ],
+    },
+    maker: {
+      agua: [
+        require("../../assets/images/maker/attacks/gear_water_1.png"),
+        require("../../assets/images/maker/attacks/gear_water_2.png"),
+        require("../../assets/images/maker/attacks/gear_water_3.png"),
+        require("../../assets/images/maker/attacks/gear_water_4.png"),
+        require("../../assets/images/maker/attacks/gear_water_5.png"),
+      ],
+      fogo: [
+        require("../../assets/images/maker/attacks/gear_fire_1.png"),
+        require("../../assets/images/maker/attacks/gear_fire_2.png"),
+        require("../../assets/images/maker/attacks/gear_fire_3.png"),
+        require("../../assets/images/maker/attacks/gear_fire_4.png"),
+        require("../../assets/images/maker/attacks/gear_fire_5.png"),
+      ],
+      terra: [
+        require("../../assets/images/maker/attacks/gear_earth_1.png"),
+        require("../../assets/images/maker/attacks/gear_earth_2.png"),
+        require("../../assets/images/maker/attacks/gear_earth_3.png"),
+        require("../../assets/images/maker/attacks/gear_earth_4.png"),
+        require("../../assets/images/maker/attacks/gear_earth_5.png"),
+      ],
+      ar: [
+        require("../../assets/images/maker/attacks/gear_air_1.png"),
+        require("../../assets/images/maker/attacks/gear_air_2.png"),
+        require("../../assets/images/maker/attacks/gear_air_3.png"),
+        require("../../assets/images/maker/attacks/gear_air_4.png"),
+        require("../../assets/images/maker/attacks/gear_air_5.png"),
       ],
     },
   },

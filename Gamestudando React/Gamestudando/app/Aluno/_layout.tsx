@@ -1,10 +1,18 @@
-import { Tabs } from "expo-router";
+import { Tabs, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useCallback, useState } from "react";
 import { colors } from "../colors";
+import { carregarPerfil } from "../utils/perfilAluno";
 
 const rotasSemAbas = new Set(["jogoBatalhaMatematica", "cosmoletrando"]);
 
 export default function AlunoLayout() {
+  const [alunoMaker, setAlunoMaker] = useState(false);
+
+  useFocusEffect(useCallback(() => {
+    carregarPerfil().then((perfil) => setAlunoMaker(perfil?.tipo === "aluno_maker"));
+  }, []));
+
   return (
     <Tabs
       screenOptions={({ route }) => ({
@@ -44,6 +52,17 @@ export default function AlunoLayout() {
       />
 
       <Tabs.Screen
+        name="maker"
+        options={{
+          href: alunoMaker ? undefined : null,
+          title: "Maker",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="construct" color={color} size={size} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
         name="avaliacaoInicial"
         options={{
           href: null,
@@ -52,6 +71,8 @@ export default function AlunoLayout() {
       />
       <Tabs.Screen name="edicaoPerfilAluno" options={{ href: null }} />
       <Tabs.Screen name="entrarTurma" options={{ href: null }} />
+      <Tabs.Screen name="aguardandoTurmaMaker" options={{ href: null, tabBarStyle: { display: "none" } }} />
+      <Tabs.Screen name="LeitorQr" options={{ href: null, tabBarStyle: { display: "none" } }} />
       <Tabs.Screen name="vincularResponsavel" options={{ href: null }} />
       <Tabs.Screen name="telaMapa" options={{ href: null }} />
       <Tabs.Screen name="telaQuiz" options={{ href: null }} />

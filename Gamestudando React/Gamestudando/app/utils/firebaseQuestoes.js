@@ -1,6 +1,7 @@
 import { doc, serverTimestamp, writeBatch } from "firebase/firestore";
 import { perguntasMatematica } from "../perguntasMatematicaQuiz4";
 import { perguntasPortugues } from "../perguntasPortuguesQuiz4";
+import { perguntasMaker } from "../perguntasMaker";
 import {
     palavrasDireita,
     palavrasEsquerda
@@ -11,6 +12,7 @@ export async function semearPerguntasIniciaisFirebase() {
   const questoes = [
     ...montarQuestoesMultiplaEscolha("matematica", perguntasMatematica),
     ...montarQuestoesMultiplaEscolha("portugues", perguntasPortugues),
+    ...montarQuestoesMultiplaEscolha("maker", perguntasMaker),
     ...montarQuestoesRimas()
   ];
 

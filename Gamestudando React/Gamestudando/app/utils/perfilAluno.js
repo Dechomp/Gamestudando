@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { criarOuAtualizarAlunoFirebase } from "./firebasePerfil";
 import { auth } from "./firebase";
+import { sincronizarResumoAlunoNasTurmas } from "./firebaseTurmas";
 
 const KEY = "perfilAluno";
 const ALUNO_TESTE_UID = "aluno-teste-local";
@@ -8,7 +9,8 @@ const ALUNO_TESTE_UID = "aluno-teste-local";
 const NIVEL_MAXIMO = {
   matematica: 4,
   portugues: 6,
-  rimas: 4
+  rimas: 4,
+  maker: 5
 };
 
 // Perfil padrao do aluno
@@ -24,6 +26,8 @@ function criarPerfilInicial() {
     progresso: {
       faseLiberada: 1,
       maiorFaseConcluida: 0,
+      faseLiberadaMaker: 1,
+      maiorFaseMakerConcluida: 0,
       avaliacaoInicialConcluida: false,
       avaliacaoInicialConcluidaEm: null,
       materiasPorFase: {}
@@ -45,6 +49,13 @@ function criarPerfilInicial() {
 
     rimas: {
       nivel: 3,
+      acertos: 0,
+      erros: 0,
+      ultimaPontuacao: 0.5
+    },
+
+    maker: {
+      nivel: 1,
       acertos: 0,
       erros: 0,
       ultimaPontuacao: 0.5
@@ -78,6 +89,10 @@ function completarPerfil(perfil) {
     rimas: {
       ...inicial.rimas,
       ...(perfil?.rimas || {})
+    },
+    maker: {
+      ...inicial.maker,
+      ...(perfil?.maker || {})
     },
     configuracoes: {
       ...inicial.configuracoes,
@@ -120,6 +135,7 @@ export async function limparPerfilLocal() {
   try {
     await AsyncStorage.removeItem(KEY);
     await AsyncStorage.removeItem("faseLiberada");
+    await AsyncStorage.removeItem("faseLiberadaMaker");
   } catch (e) {
     console.error("Erro ao limpar perfil local:", e);
   }
@@ -137,6 +153,7 @@ export async function resetarPerfil() {
 
     // Tambem limpa a fase liberada salva separadamente.
     await AsyncStorage.removeItem("faseLiberada");
+    await AsyncStorage.removeItem("faseLiberadaMaker");
 
     const perfilInicial = criarPerfilInicial();
     const uidAtual = obterUidAluno();
@@ -230,22 +247,21 @@ export async function atualizarPerfil(materia, acertos, erros, faseConcluida) {
       if (!isNaN(fase)) {
         const proximaFase = fase + 1;
 
-        perfil.progresso = {
-          ...(perfil.progresso || {}),
-          faseLiberada: Math.max(
-            perfil.progresso?.faseLiberada || 1,
-            proximaFase
-          ),
-          maiorFaseConcluida: Math.max(
-            perfil.progresso?.maiorFaseConcluida || 0,
-            fase
-          )
-        };
-
-        await AsyncStorage.setItem(
-          "faseLiberada",
-          String(perfil.progresso.faseLiberada)
-        );
+        if (materia === "maker") {
+          perfil.progresso = {
+            ...(perfil.progresso || {}),
+            faseLiberadaMaker: Math.max(perfil.progresso?.faseLiberadaMaker || 1, proximaFase),
+            maiorFaseMakerConcluida: Math.max(perfil.progresso?.maiorFaseMakerConcluida || 0, fase),
+          };
+          await AsyncStorage.setItem("faseLiberadaMaker", String(perfil.progresso.faseLiberadaMaker));
+        } else {
+          perfil.progresso = {
+            ...(perfil.progresso || {}),
+            faseLiberada: Math.max(perfil.progresso?.faseLiberada || 1, proximaFase),
+            maiorFaseConcluida: Math.max(perfil.progresso?.maiorFaseConcluida || 0, fase),
+          };
+          await AsyncStorage.setItem("faseLiberada", String(perfil.progresso.faseLiberada));
+        }
       }
     }
 
@@ -253,6 +269,7 @@ export async function atualizarPerfil(materia, acertos, erros, faseConcluida) {
 
     try {
       await criarOuAtualizarAlunoFirebase(obterUidAluno(), perfil);
+      await sincronizarResumoAlunoNasTurmas(obterUidAluno(), perfil);
     } catch (e) {
       console.error("Erro ao sincronizar perfil no Firebase:", e);
     }

@@ -375,9 +375,9 @@ export default function Index() {
           </Text>
         </TouchableOpacity>
 
-        <Text style={styles.textoRodape}>
+        {/*<Text style={styles.textoRodape}>
           Jesus é o melhor professor de todos os tempos!
-        </Text>
+        </Text>*/}
 
       </View>
       </ScrollView>

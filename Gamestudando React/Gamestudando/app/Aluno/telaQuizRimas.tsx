@@ -666,14 +666,6 @@ export default function Index() {
 
         </View>
 
-        <Text
-          style={
-            styles.textoRodape
-          }
-        >
-          Jesus é o melhor professor de todos os tempos!
-        </Text>
-
       </View>
 
     </View>

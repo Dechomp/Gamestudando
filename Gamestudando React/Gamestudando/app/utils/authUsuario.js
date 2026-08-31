@@ -11,6 +11,7 @@ import {
   updatePassword,
   updateProfile
 } from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { auth } from "./firebase";
 import {
@@ -24,6 +25,9 @@ import {
 } from "./firebasePerfil";
 import { sincronizarPerguntasIniciais } from "./repositorioQuestoes";
 
+const CHAVE_SESSAO_ALUNO = "sessaoAlunoIniciadaEm";
+const DURACAO_SESSAO_ALUNO_MS = 12 * 60 * 60 * 1000;
+
 export function observarUsuarioLogado(callback) {
   return onAuthStateChanged(auth, callback);
 }
@@ -36,8 +40,9 @@ export function obterUsuarioLogado() {
 // Decide a primeira tela de acordo com o tipo da conta.
 export function obterRotaInicialPorPerfil(perfil) {
   if (!perfil) return "/Auth/tipoContaGoogle";
-  if (perfil?.tipo === "professor") return "/Professor/PerfilProfessor";
+  if (perfil?.tipo === "professor") return "/Professor/RelatorioProfessor";
   if (perfil?.tipo === "responsavel") return "/Responsavel/PerfilResponsavel";
+  if (perfil?.tipo === "aluno_maker") return "/Aluno/aguardandoTurmaMaker";
   if (!perfil?.progresso?.avaliacaoInicialConcluida) {
     return "/Aluno/avaliacaoInicial";
   }
@@ -45,30 +50,31 @@ export function obterRotaInicialPorPerfil(perfil) {
   return "/Aluno";
 }
 
-export async function cadastrarAlunoEmail({ nome, email, senha, tipo = "aluno" }) {
+export async function cadastrarAlunoEmail({ nome, email, senha, tipo = "aluno", usuario = "" }) {
   // Cria a conta no Firebase Auth usando email e senha.
   const credencial = await createUserWithEmailAndPassword(
     auth,
-    email.trim(),
+    criarEmailAutenticacao(email, usuario, tipo),
     senha
   );
 
-  const usuario = credencial.user;
+  const usuarioFirebase = credencial.user;
 
-  await updateProfile(usuario, {
+  await updateProfile(usuarioFirebase, {
     displayName: nome.trim()
   });
 
-  await sendEmailVerification(usuario);
+  if (tipo !== "aluno_maker") await sendEmailVerification(usuarioFirebase);
 
   // Monta o perfil inicial que sera salvo localmente e no Firestore.
   const perfilAtual = await carregarPerfil();
   const perfilAluno = {
     ...perfilAtual,
-    uid: usuario.uid,
+    uid: usuarioFirebase.uid,
     tipo,
     nome: nome.trim(),
-    email: usuario.email,
+    email: tipo === "aluno_maker" ? null : usuarioFirebase.email,
+    usuario: tipo === "aluno_maker" ? normalizarUsuario(usuario) : null,
     progresso: {
       ...(perfilAtual.progresso || {}),
       avaliacaoInicialConcluida: tipo === "aluno" ? false : true,
@@ -77,13 +83,14 @@ export async function cadastrarAlunoEmail({ nome, email, senha, tipo = "aluno" }
   };
 
   await salvarPerfil(perfilAluno);
-  await criarOuAtualizarAlunoFirebase(usuario.uid, perfilAluno, {
+  await criarOuAtualizarAlunoFirebase(usuarioFirebase.uid, perfilAluno, {
     merge: false
   });
   sincronizarPerguntasIniciais().catch(() => {});
+  await registrarInicioSessaoAluno(usuarioFirebase.uid, tipo);
 
   return {
-    usuario,
+    usuario: usuarioFirebase,
     perfil: perfilAluno
   };
 }
@@ -112,12 +119,13 @@ export async function entrarEmailSenha(email, senha) {
   // Valida o login no Firebase Auth.
   const credencial = await signInWithEmailAndPassword(
     auth,
-    email.trim(),
+    email.includes("@") ? email.trim() : criarEmailAutenticacao("", email, "aluno_maker"),
     senha
   );
 
   const usuario = credencial.user;
   const perfilLocal = await carregarPerfilUsuarioAtual();
+  await registrarInicioSessaoAluno(usuario.uid, perfilLocal?.tipo);
   sincronizarPerguntasIniciais().catch(() => {});
 
   return {
@@ -134,6 +142,7 @@ export async function entrarComCredencialGoogle(idToken) {
     criarSeNaoExistir: false
   });
   sincronizarPerguntasIniciais().catch(() => {});
+  await registrarInicioSessaoAluno(credencial.user.uid, perfilLocal?.tipo);
 
   return {
     usuario: credencial.user,
@@ -174,7 +183,23 @@ export async function sairDaConta() {
   await googleSignin?.revokeAccess?.().catch(() => {});
   await googleSignin?.signOut?.().catch(() => {});
   await signOut(auth);
+  await AsyncStorage.removeItem(CHAVE_SESSAO_ALUNO);
   await limparPerfilLocal();
+}
+
+async function registrarInicioSessaoAluno(uid, tipo) {
+  if (tipo !== "aluno" && tipo !== "aluno_maker") return;
+  await AsyncStorage.setItem(CHAVE_SESSAO_ALUNO, JSON.stringify({ uid, iniciadoEm: Date.now() }));
+}
+
+export async function sessaoDeAlunoExpirou(uid, tipo) {
+  if (tipo !== "aluno" && tipo !== "aluno_maker") return false;
+  const valor = await AsyncStorage.getItem(CHAVE_SESSAO_ALUNO);
+  if (!valor) return false;
+  try {
+    const sessao = JSON.parse(valor);
+    return sessao.uid === uid && Date.now() - Number(sessao.iniciadoEm) >= DURACAO_SESSAO_ALUNO_MS;
+  } catch { return false; }
 }
 
 export async function atualizarEmailConta(novoEmail) {
@@ -208,7 +233,7 @@ async function criarPerfilParaUsuario(usuario, tipo = "aluno") {
     uid: usuario.uid,
     tipo,
     nome: usuario.displayName || "Aluno",
-    email: usuario.email || null,
+    email: tipo === "aluno_maker" ? null : usuario.email || null,
     progresso: {
       ...(perfilAtual.progresso || {}),
       avaliacaoInicialConcluida: tipo === "aluno" ? false : true,
@@ -230,6 +255,7 @@ function converterPerfilFirebaseParaLocal(perfilFirebase) {
     tipo: perfilFirebase.tipo || "aluno",
     nome: perfilFirebase.nome || "Aluno",
     email: perfilFirebase.email || null,
+    usuario: perfilFirebase.usuario || null,
     cpf: perfilFirebase.cpf || null,
     telefone: perfilFirebase.telefone || null,
     dataNascimento: perfilFirebase.dataNascimento || null,
@@ -242,6 +268,8 @@ function converterPerfilFirebaseParaLocal(perfilFirebase) {
     progresso: perfilFirebase.progresso || {
       faseLiberada: 1,
       maiorFaseConcluida: 0,
+      faseLiberadaMaker: 1,
+      maiorFaseMakerConcluida: 0,
       avaliacaoInicialConcluida: false,
       avaliacaoInicialConcluidaEm: null,
       materiasPorFase: {}
@@ -264,8 +292,25 @@ function converterPerfilFirebaseParaLocal(perfilFirebase) {
       erros: 0,
       ultimaPontuacao: 0.5
     },
+    maker: perfilFirebase.materias?.maker || {
+      nivel: 1,
+      acertos: 0,
+      erros: 0,
+      ultimaPontuacao: 0.5
+    },
     estatisticas: perfilFirebase.estatisticas || {}
   };
+}
+
+function normalizarUsuario(usuario) {
+  return String(usuario || "").trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
+}
+
+function criarEmailAutenticacao(email, usuario, tipo) {
+  if (tipo !== "aluno_maker") return String(email || "").trim();
+  const usuarioNormalizado = normalizarUsuario(usuario);
+  if (usuarioNormalizado.length < 3) throw new Error("USUARIO_INVALIDO");
+  return `${usuarioNormalizado}@maker.gamestudando.app`;
 }
 
 function obterGoogleSignin() {

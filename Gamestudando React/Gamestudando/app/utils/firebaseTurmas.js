@@ -1,5 +1,6 @@
 import {
   addDoc,
+  arrayUnion,
   collection,
   deleteDoc,
   doc,
@@ -14,7 +15,9 @@ import {
 
 import { auth, db } from "./firebase";
 
-export async function criarTurmaProfessor({ nome }) {
+const TIPOS_TURMA = ["regular", "maker", "mista"];
+
+export async function criarTurmaProfessor({ nome, tipo = "regular" }) {
   // Cria uma turma para o professor logado e gera o codigo de entrada.
   const usuario = auth.currentUser;
 
@@ -28,12 +31,17 @@ export async function criarTurmaProfessor({ nome }) {
     throw new Error("NOME_TURMA_CURTO");
   }
 
+  if (!TIPOS_TURMA.includes(tipo)) {
+    throw new Error("TIPO_TURMA_INVALIDO");
+  }
+
   const codigo = await gerarCodigoUnico();
 
   const docRef = await addDoc(collection(db, "turmas"), {
     nome: nomeLimpo,
     codigo,
     professorId: usuario.uid,
+    tipo,
     ativa: true,
     criadoEm: serverTimestamp(),
     atualizadoEm: serverTimestamp(),
@@ -44,6 +52,7 @@ export async function criarTurmaProfessor({ nome }) {
     nome: nomeLimpo,
     codigo,
     professorId: usuario.uid,
+    tipo,
     alunos: [],
   };
 }
@@ -149,29 +158,50 @@ export async function removerAlunoDaTurma(turmaId, alunoId) {
   await deleteDoc(doc(db, "usuarios", alunoId, "turmas", turmaId));
 }
 
-export async function adicionarAlunoNaTurmaPorCodigo(turmaId, codigoAluno) {
+export async function adicionarAlunoNaTurmaPorCodigo(turmaId, codigoAluno, { nivelAtual, moedasAtuais } = {}) {
   // Permite ao professor adicionar o aluno lendo ou digitando o codigo dele.
   const turma = await obterTurmaProfessor(turmaId);
-  const codigo = normalizarCodigoTurma(codigoAluno);
+  const codigo = extrairCodigoAluno(codigoAluno);
 
   if (!codigo) {
     throw new Error("CODIGO_ALUNO_VAZIO");
   }
 
-  const codigoSnap = await getDoc(doc(db, "codigosAlunosResponsavel", codigo));
+  // Alunos regulares usam seu código de vínculo; alunos Maker mostram o QR Maker.
+  let codigoSnap = await getDoc(doc(db, "codigosAlunosResponsavel", codigo));
+  if (!codigoSnap.exists() || codigoSnap.data()?.ativo === false) {
+    codigoSnap = await getDoc(doc(db, "codigosMaker", codigo));
+  }
 
   if (!codigoSnap.exists() || codigoSnap.data()?.ativo === false) {
     throw new Error("ALUNO_NAO_ENCONTRADO");
   }
 
-  const { alunoId } = codigoSnap.data();
-  const alunoSnap = await getDoc(doc(db, "usuarios", alunoId));
-
-  if (!alunoSnap.exists()) {
-    throw new Error("ALUNO_NAO_ENCONTRADO");
+  const dadosDoCodigo = codigoSnap.data();
+  const { alunoId } = dadosDoCodigo;
+  // O professor não pode ler o perfil privado de um aluno antes de vinculá-lo.
+  // O índice do QR carrega apenas o mínimo necessário para criar o vínculo.
+  const aluno = {
+    tipo: dadosDoCodigo.tipo || "aluno",
+    nome: dadosDoCodigo.nome || "Aluno",
+    email: dadosDoCodigo.email || null,
+    materias: dadosDoCodigo.materias || {},
+    estatisticas: dadosDoCodigo.estatisticas || {},
+  };
+  const tipoDaTurma = turma.tipo || "mista";
+  if (tipoDaTurma === "maker" && aluno.tipo !== "aluno_maker") throw new Error("TURMA_APENAS_MAKER");
+  if (tipoDaTurma === "regular" && aluno.tipo === "aluno_maker") throw new Error("TURMA_APENAS_REGULAR");
+  let saldoInicialMaker = null;
+  if (aluno.tipo === "aluno_maker") {
+    // O professor ainda não tem acesso à lista privada de turmas de um aluno novo.
+    // A vinculação usa apenas o QR público e evita essa leitura que o Firestore bloqueia.
+    if (nivelAtual !== undefined || moedasAtuais !== undefined) {
+      const nivel = Number(nivelAtual);
+      const moedas = Number(moedasAtuais);
+      if (!Number.isFinite(nivel) || nivel < 1 || !Number.isFinite(moedas) || moedas < 0) throw new Error("SALDO_MAKER_INVALIDO");
+      saldoInicialMaker = { nivel, moedas };
+    }
   }
-
-  const aluno = alunoSnap.data();
   const professorSnap = await getDoc(doc(db, "usuarios", turma.professorId));
   const professor = professorSnap.exists() ? professorSnap.data() : {};
   const resumoAluno = montarResumoAluno(alunoId, { displayName: aluno.nome }, aluno);
@@ -188,9 +218,29 @@ export async function adicionarAlunoNaTurmaPorCodigo(turmaId, codigoAluno) {
     codigo: turma.codigo,
     professorId: turma.professorId,
     professorNome: professor.nome || "Professor",
+    tipo: turma.tipo || "mista",
     entrouEm: serverTimestamp(),
     ativa: true,
   }, { merge: true });
+
+  // O mesmo perfil Maker pode participar de várias turmas. Registramos cada
+  // turma e professor autorizado sem duplicar níveis ou Maker Coins.
+  if (aluno.tipo === "aluno_maker") {
+    try {
+      await setDoc(doc(db, "makerPerfis", alunoId), {
+        alunoId,
+        ...(saldoInicialMaker || {}),
+        ultimaTurmaId: turma.id,
+        turmaIds: arrayUnion(turma.id),
+        professorIds: arrayUnion(turma.professorId),
+        atualizadoEm: serverTimestamp(),
+      }, { merge: true });
+    } catch (error) {
+      // O vínculo já foi criado nas duas pontas. Não bloquear a entrada do
+      // aluno enquanto uma regra recém-publicada ainda está propagando.
+      console.log("Vínculo criado; perfil Maker aguardando sincronização:", error);
+    }
+  }
 
   return resumoAluno;
 }
@@ -240,9 +290,24 @@ export async function entrarEmTurmaPorCodigo(codigo) {
     codigo: turma.codigo,
     professorId: turma.professorId,
     professorNome: professor.nome || "Professor",
+    tipo: turma.tipo || "mista",
     entrouEm: serverTimestamp(),
     ativa: true,
   }, { merge: true });
+
+  if (aluno.tipo === "aluno_maker") {
+    try {
+      await setDoc(doc(db, "makerPerfis", usuario.uid), {
+        alunoId: usuario.uid,
+        ultimaTurmaId: turma.id,
+        turmaIds: arrayUnion(turma.id),
+        professorIds: arrayUnion(turma.professorId),
+        atualizadoEm: serverTimestamp(),
+      }, { merge: true });
+    } catch (error) {
+      console.log("Turma vinculada; perfil Maker aguardando sincronização:", error);
+    }
+  }
 
   return {
     ...turma,
@@ -310,7 +375,9 @@ async function gerarCodigoUnico() {
     const codigo = gerarCodigoTurma();
     const consulta = query(
       collection(db, "turmas"),
-      where("codigo", "==", codigo)
+      where("codigo", "==", codigo),
+      // A regra de leitura permite consultas públicas somente para turmas ativas.
+      where("ativa", "==", true)
     );
     const snap = await getDocs(consulta);
 
@@ -340,18 +407,53 @@ function normalizarCodigoTurma(codigo) {
     .replace(/[^A-Z0-9]/g, "");
 }
 
+export async function sincronizarResumoAlunoNasTurmas(alunoId, perfil) {
+  // O professor lê o resumo salvo na turma, não o perfil privado do aluno.
+  // Por isso o próprio aluno atualiza apenas seus dados de progresso nas turmas
+  // em que já está vinculado.
+  const usuario = auth.currentUser;
+  if (!usuario || usuario.uid !== alunoId) return;
+
+  const vinculosSnap = await getDocs(collection(db, "usuarios", alunoId, "turmas"));
+  const resumo = montarResumoAluno(alunoId, { displayName: perfil?.nome, email: perfil?.email }, perfil || {});
+
+  await Promise.all(vinculosSnap.docs
+    .map((vinculo) => ({ id: vinculo.id, ...vinculo.data() }))
+    .filter((vinculo) => vinculo.ativa !== false)
+    .map((vinculo) => setDoc(doc(db, "turmas", vinculo.id, "alunos", alunoId), {
+      nome: resumo.nome,
+      email: resumo.email,
+      tipo: resumo.tipo,
+      atividadesConcluidas: resumo.atividadesConcluidas,
+      materias: resumo.materias,
+      estatisticas: resumo.estatisticas,
+      atualizadoEm: serverTimestamp(),
+    }, { merge: true })));
+}
+
+function extrairCodigoAluno(valor) {
+  // Aceita códigos digitados e os QR Codes dos alunos regulares e Maker.
+  const texto = String(valor || "").trim();
+  const matchMaker = texto.match(/maker\/aluno\/([A-Z0-9]+)/i);
+  const matchAluno = texto.match(/(?:responsavel\/)?aluno\/([A-Z0-9]+)/i);
+  return normalizarCodigoTurma(matchMaker?.[1] || matchAluno?.[1] || texto);
+}
+
 function montarResumoAluno(uid, usuario, aluno) {
   // Guarda na turma somente os dados necessarios para relatorio.
   const matematica = aluno.matematica || aluno.materias?.matematica || {};
   const portugues = aluno.portugues || aluno.materias?.portugues || {};
   const rimas = aluno.rimas || aluno.materias?.rimas || {};
+  const maker = aluno.maker || aluno.materias?.maker || {};
   const atividadesConcluidas =
     (matematica.atividadesConcluidas || 0) +
     (portugues.atividadesConcluidas || 0) +
-    (rimas.atividadesConcluidas || 0);
+    (rimas.atividadesConcluidas || 0) +
+    (maker.atividadesConcluidas || 0);
 
   return {
     alunoId: uid,
+    tipo: aluno.tipo || "aluno",
     nome: aluno.nome || usuario.displayName || "Aluno",
     email: aluno.email || usuario.email || null,
     atividadesConcluidas,
@@ -359,6 +461,7 @@ function montarResumoAluno(uid, usuario, aluno) {
       matematica,
       portugues,
       rimas,
+      maker,
     },
     estatisticas: aluno.estatisticas || {},
   };

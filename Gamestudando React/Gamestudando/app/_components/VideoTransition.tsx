@@ -8,7 +8,7 @@ type VideoTransitionContextValue = {
 };
 
 const VideoTransitionContext = createContext<VideoTransitionContextValue | null>(null);
-const SPLASH_DURATION_MS = 3800;
+const SPLASH_DURATION_MS = 1000; // Duração padrão do splash em milissegundos (1 segundo)
 
 export function VideoTransitionProvider({ children }: { children: React.ReactNode }) {
   const [visible, setVisible] = useState(false);

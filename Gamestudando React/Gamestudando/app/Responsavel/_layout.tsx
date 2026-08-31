@@ -34,6 +34,7 @@ export default function ResponsavelLayout() {
           ),
         }}
       />
+      <Tabs.Screen name="LeitorQrAluno" options={{ href: null, tabBarStyle: { display: "none" } }} />
 
       <Tabs.Screen
         name="PerfilResponsavel"

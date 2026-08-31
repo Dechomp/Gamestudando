@@ -30,6 +30,7 @@ const CriarAtividade = ({ embutida = false }) => {
   const [palavraB, setPalavraB] = useState('');
   const [palavraMissao, setPalavraMissao] = useState('');
   const [cosmoPalavra, setCosmoPalavra] = useState('');
+  const [temaCosmoletrando, setTemaCosmoletrando] = useState('normal');
   const [salvando, setSalvando] = useState(false);
 
   const criandoRima = materia === 'rimas';
@@ -127,7 +128,8 @@ const CriarAtividade = ({ embutida = false }) => {
 
     await criarQuestaoCosmoletrando({
       palavra: cosmoPalavra,
-      nivel
+      nivel,
+      tema: temaCosmoletrando
     });
   };
 
@@ -141,6 +143,7 @@ const CriarAtividade = ({ embutida = false }) => {
     setPalavraB('');
     setPalavraMissao('');
     setCosmoPalavra('');
+    setTemaCosmoletrando('normal');
   };
 
   const conteudo = (
@@ -155,8 +158,9 @@ const CriarAtividade = ({ embutida = false }) => {
         >
           <Picker.Item label="Matematica" value="matematica" />
           <Picker.Item label="Portugues" value="portugues" />
+          <Picker.Item label="Maker — robótica, Arduino e sensores" value="maker" />
           <Picker.Item label="Rimas" value="rimas" />
-          <Picker.Item label="Cosmo Letrando" value="cosmoletrando" />
+          <Picker.Item label="Cosmoletrando" value="cosmoletrando" />
         </Picker>
       </View>
 
@@ -218,10 +222,17 @@ const CriarAtividade = ({ embutida = false }) => {
         </>
       ) : (
         <>
+          <Text style={styles.label}>Banco de palavras</Text>
+          <View style={styles.pickerContainer}>
+            <Picker selectedValue={temaCosmoletrando} onValueChange={setTemaCosmoletrando}>
+              <Picker.Item label="Palavras normais" value="normal" />
+              <Picker.Item label="Palavras Maker — robótica e Arduino" value="maker" />
+            </Picker>
+          </View>
           <Text style={styles.label}>Palavra</Text>
           <TextInput
             style={styles.input}
-            placeholder="Digite a palavra"
+            placeholder={temaCosmoletrando === 'maker' ? 'Ex.: SENSOR, ARDUINO ou LED' : 'Digite a palavra'}
             value={cosmoPalavra}
             onChangeText={setCosmoPalavra}
             autoCapitalize="characters"

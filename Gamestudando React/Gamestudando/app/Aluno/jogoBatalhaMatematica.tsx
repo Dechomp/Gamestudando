@@ -13,6 +13,7 @@ import {
 
 import { useVideoTransition } from "../_components/VideoTransition";
 import { perguntasMatematica } from "../perguntasMatematicaQuiz4";
+import { perguntasMaker } from "../perguntasMaker";
 import { perguntasPortugues } from "../perguntasPortuguesQuiz4";
 import { batalhaAssets } from "../utils/batalhaAssets";
 import { lerTextoSeAtivo, pararLeitura } from "../utils/leituraPerguntas";
@@ -38,11 +39,12 @@ type EnemyType =
   | "morcego"
   | "monstrinho";
 type GameStatus = "intro" | "playing" | "between" | "finished";
-type BattleSubject = "matematica" | "portugues";
-type HeroType = "knight" | "mage";
+type BattleSubject = "matematica" | "portugues" | "maker";
+type HeroType = "knight" | "mage" | "maker";
 type BattleElement = "agua" | "fogo" | "terra" | "ar";
 
 const TOTAL_MONSTERS = 5;
+const TOTAL_ATTACK_FRAMES = 5;
 const STARTING_LIVES = 3;
 const BASE_ENEMY_SPEED = 42;
 const SPEED_STEP = 9;
@@ -77,7 +79,7 @@ const INTRO_STEPS = [
   },
   {
     title: "Personagem",
-    text: "Em matematica voce joga de cavaleiro. Em portugues voce joga de mago."
+    text: "Em matematica voce joga de cavaleiro, em portugues de mago e em Maker usa as ferramentas do laboratório."
   },
   {
     title: "Objetivo",
@@ -175,15 +177,19 @@ export default function JogoBatalhaMatematica() {
   const materiaParam = Array.isArray(params.materia) ? params.materia[0] : params.materia;
   const heroiParam = Array.isArray(params.heroi) ? params.heroi[0] : params.heroi;
   const origemParam = Array.isArray(params.origem) ? params.origem[0] : params.origem;
-  const subject: BattleSubject = materiaParam === "portugues" ? "portugues" : "matematica";
+  const subject: BattleSubject = materiaParam === "maker" ? "maker" : materiaParam === "portugues" ? "portugues" : "matematica";
   const heroType: HeroType =
-    origemParam === "jogos" && heroiParam === "mage"
+    origemParam === "jogos" && heroiParam === "maker"
+      ? "maker"
+      : origemParam === "jogos" && heroiParam === "mage"
       ? "mage"
       : origemParam === "jogos" && heroiParam === "knight"
         ? "knight"
         : subject === "portugues"
           ? "mage"
-          : "knight";
+          : subject === "maker"
+            ? "maker"
+            : "knight";
   const groundY = isLandscape ? stageHeight * 0.68 : stageHeight * 0.62;
   const warriorX = isLandscape ? stageWidth * 0.13 : stageWidth * 0.14;
   const contactX = warriorX + (isLandscape ? 54 : 44);
@@ -218,7 +224,7 @@ export default function JogoBatalhaMatematica() {
   const lastFrameRef = useRef<number | null>(null);
 
   const currentQuestion = questions[currentIndex];
-  const gameTitle = subject === "portugues" ? "Batalha das Palavras" : "Batalha dos Numeros";
+  const gameTitle = subject === "maker" ? "Batalha Maker" : subject === "portugues" ? "Batalha das Palavras" : "Batalha dos Numeros";
 
   useEffect(() => {
     enemyXRef.current = enemyX;
@@ -268,8 +274,11 @@ export default function JogoBatalhaMatematica() {
     try {
       const profile = await carregarPerfil();
       const level = profile?.[subject]?.nivel || 3;
-      const fallbackQuestions =
-        subject === "portugues" ? perguntasPortugues : perguntasMatematica;
+      const fallbackQuestions = subject === "maker"
+        ? perguntasMaker
+        : subject === "portugues"
+          ? perguntasPortugues
+          : perguntasMatematica;
       const loadedQuestions = await carregarQuestoesMultiplaEscolha(
         subject,
         fallbackQuestions
@@ -326,7 +335,7 @@ export default function JogoBatalhaMatematica() {
       const phaseId = Array.isArray(params.faseId) ? params.faseId[0] : params.faseId || "1";
 
       const result = {
-        taskId: `matematica-fase-${phaseId}`,
+        taskId: `${subject}-fase-${phaseId}`,
         completed,
         correctAnswers,
         wrongAnswers,
@@ -438,12 +447,12 @@ export default function JogoBatalhaMatematica() {
       setMessage("Acertou! Ataque especial!");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-      [1, 2, 3].forEach((frame) => {
-        setTimeout(() => setAttackFrame(frame), frame * 180);
+      Array.from({ length: TOTAL_ATTACK_FRAMES - 1 }, (_, index) => index + 1).forEach((frame) => {
+        setTimeout(() => setAttackFrame(frame), frame * 150);
       });
-      setTimeout(() => setAttackPulse(0), 760);
-      setTimeout(() => setAttackElement(null), 840);
-      setTimeout(goToNextEnemy, 900);
+      setTimeout(() => setAttackPulse(0), 790);
+      setTimeout(() => setAttackElement(null), 870);
+      setTimeout(goToNextEnemy, 930);
       return;
     }
 
@@ -550,8 +559,8 @@ export default function JogoBatalhaMatematica() {
             heroType={heroType}
             fromX={warriorX + (isLandscape ? 82 : 72)}
             toX={Math.max(72, Math.min(enemyX - 54, stageWidth - 148))}
-            y={groundY - (isLandscape ? 74 : 54)}
-            progress={attackFrame / 3}
+            y={heroType === "maker" ? groundY - 85 : groundY - (isLandscape ? 74 : 54)}
+            progress={attackFrame / (TOTAL_ATTACK_FRAMES - 1)}
           />
         )}
       </View>
@@ -797,7 +806,7 @@ function ElementalAttackView({
   const frames = batalhaAssets.ataques[heroType][element];
   const source = frames[Math.max(0, Math.min(frame, frames.length - 1))];
   const left = fromX + (toX - fromX) * Math.max(0, Math.min(progress, 1));
-  const size = getAttackSize(heroType, element);
+  const layout = getAttackLayout(heroType, element);
 
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
@@ -807,10 +816,11 @@ function ElementalAttackView({
         style={[
           screenStyles.attackSprite,
           {
-            height: size,
+            height: layout.height,
             left,
             top: y,
-            width: size,
+            width: layout.width,
+            transform: layout.espelhar ? [{ scaleX: -1 }] : undefined,
           },
         ]}
       />
@@ -818,16 +828,19 @@ function ElementalAttackView({
   );
 }
 
-function getAttackSize(heroType: HeroType, element: BattleElement) {
+function getAttackLayout(heroType: HeroType, element: BattleElement) {
   // Ajusta cada sprite de ataque para nao ficar gigante ou pequeno demais.
+  // A engrenagem Maker foi desenhada para apontar na outra direção. Espelhar
+  // a imagem deixa o golpe sair da personagem em direção ao inimigo.
+  if (heroType === "maker") return { width: 220, height: 108, espelhar: true };
   if (heroType === "mage") {
-    if (element === "agua") return 142;
-    if (element === "ar") return 136;
-    return 126;
+    if (element === "agua") return { width: 142, height: 142, espelhar: false };
+    if (element === "ar") return { width: 136, height: 136, espelhar: false };
+    return { width: 126, height: 126, espelhar: false };
   }
 
-  if (element === "agua") return 146;
-  return 138;
+  if (element === "agua") return { width: 146, height: 146, espelhar: false };
+  return { width: 138, height: 138, espelhar: false };
 }
 
 const screenStyles = StyleSheet.create({

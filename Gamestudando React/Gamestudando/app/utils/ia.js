@@ -1,4 +1,4 @@
-export function escolherProximaAtividade(perfil) {
+export function escolherProximaAtividade(perfil, materiasPermitidas = null) {
   // Calcula a proxima materia com base nos erros, acertos e ultima pontuacao.
 
   if (!perfil) return { materia: "portugues" };
@@ -13,14 +13,23 @@ export function escolherProximaAtividade(perfil) {
   const pesoCosmoletrando = pesoPort * 0.65;
 
   // Sorteio ponderado: materias com mais dificuldade aparecem mais, mas nao sempre.
-  const soma = pesoMat + pesoPort + pesoRimas + pesoCosmoletrando;
+  const pesosPorMateria = {
+    matematica: pesoMat,
+    portugues: pesoPort,
+    rimas: pesoRimas,
+    cosmoletrando: pesoCosmoletrando,
+  };
+  const materias = (materiasPermitidas || Object.keys(pesosPorMateria))
+    .filter((materia) => pesosPorMateria[materia] != null);
+  const soma = materias.reduce((total, materia) => total + pesosPorMateria[materia], 0);
 
   const rand = Math.random() * soma;
-
-  if (rand < pesoMat) return { materia: "matematica" };
-  if (rand < pesoMat + pesoPort) return { materia: "portugues" };
-  if (rand < pesoMat + pesoPort + pesoRimas) return { materia: "rimas" };
-  return { materia: "cosmoletrando" };
+  let acumulado = 0;
+  for (const materia of materias) {
+    acumulado += pesosPorMateria[materia];
+    if (rand < acumulado) return { materia };
+  }
+  return { materia: materias[0] || "portugues" };
 }
 
 function calcularPeso(dados) {

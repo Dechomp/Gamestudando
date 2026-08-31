@@ -15,8 +15,9 @@ type GameCardProps = {
 export default function Jogos() {
   const router = useRouter();
   const [mostrarEscolhaBatalha, setMostrarEscolhaBatalha] = useState(false);
+  const [mostrarEscolhaCosmoletrando, setMostrarEscolhaCosmoletrando] = useState(false);
 
-  function abrirBatalha(materia: "matematica" | "portugues", heroi: "knight" | "mage") {
+  function abrirBatalha(materia: "matematica" | "portugues" | "maker", heroi: "knight" | "mage" | "maker") {
     router.push({
       pathname: "/Aluno/jogoBatalhaMatematica",
       params: {
@@ -25,6 +26,14 @@ export default function Jogos() {
         heroi,
         origem: "jogos",
       },
+    });
+  }
+
+  function abrirCosmoletrando(tema: "normal" | "maker") {
+    // A escolha chega ao jogo como parâmetro e mantém os dois bancos separados.
+    router.push({
+      pathname: "/Aluno/cosmoletrando",
+      params: { missionWord: tema === "maker" ? "SENSOR" : "GATO", tema },
     });
   }
 
@@ -64,6 +73,17 @@ export default function Jogos() {
               </Pressable>
 
               <Pressable
+                style={({ pressed }) => [screenStyles.choiceButton, screenStyles.choiceButtonMaker, pressed && screenStyles.cardPressed]}
+                onPress={() => abrirBatalha("maker", "maker")}
+              >
+                <Ionicons name="construct" size={28} color="#ffffff" />
+                <View style={screenStyles.choiceTextBox}>
+                  <Text style={screenStyles.choiceName}>Maker</Text>
+                  <Text style={screenStyles.choiceSubject}>Robótica e Arduino</Text>
+                </View>
+              </Pressable>
+
+              <Pressable
                 style={({ pressed }) => [
                   screenStyles.choiceButton,
                   screenStyles.choiceButtonMage,
@@ -83,17 +103,40 @@ export default function Jogos() {
 
         <GameCard
           title="Cosmoletrando"
-          subject="Portugues"
-          description="Destrua meteoros, colete as letras em ordem e volte para a Terra."
+          subject="Português e Maker"
+          description="Destrua meteoros, colete letras e escolha entre palavras normais ou Maker."
           icon="rocket"
           available
-          onPress={() =>
-            router.push({
-              pathname: "/Aluno/cosmoletrando",
-              params: { missionWord: "GATO" },
-            })
-          }
+          onPress={() => setMostrarEscolhaCosmoletrando((value) => !value)}
         />
+
+        {mostrarEscolhaCosmoletrando && (
+          <View style={screenStyles.choicePanel}>
+            <Text style={screenStyles.choiceTitle}>Escolha o banco de palavras</Text>
+            <View style={screenStyles.choiceGrid}>
+              <Pressable
+                style={({ pressed }) => [screenStyles.choiceButton, pressed && screenStyles.cardPressed]}
+                onPress={() => abrirCosmoletrando("normal")}
+              >
+                <Ionicons name="text" size={28} color="#ffffff" />
+                <View style={screenStyles.choiceTextBox}>
+                  <Text style={screenStyles.choiceName}>Palavras normais</Text>
+                  <Text style={screenStyles.choiceSubject}>Português, leitura e palavras do dia a dia</Text>
+                </View>
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [screenStyles.choiceButton, screenStyles.choiceButtonMaker, pressed && screenStyles.cardPressed]}
+                onPress={() => abrirCosmoletrando("maker")}
+              >
+                <Ionicons name="hardware-chip" size={28} color="#ffffff" />
+                <View style={screenStyles.choiceTextBox}>
+                  <Text style={screenStyles.choiceName}>Palavras Maker</Text>
+                  <Text style={screenStyles.choiceSubject}>Robótica, Arduino, sensores e projetos</Text>
+                </View>
+              </Pressable>
+            </View>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -195,7 +238,7 @@ const screenStyles = StyleSheet.create({
     textAlign: "center",
   },
   choiceGrid: {
-    flexDirection: "row",
+    flexDirection: "column",
     gap: 10,
   },
   choiceButton: {
@@ -210,6 +253,12 @@ const screenStyles = StyleSheet.create({
   },
   choiceButtonMage: {
     backgroundColor: "#7c3aed",
+  },
+  choiceButtonMaker: {
+    backgroundColor: "#0f766e",
+  },
+  choiceButtonDisabled: {
+    opacity: 0.58,
   },
   choiceTextBox: {
     flex: 1,

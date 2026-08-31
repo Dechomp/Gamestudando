@@ -16,7 +16,8 @@ import {
 } from "../utils/authUsuario";
 
 const TIPOS = [
-  { valor: "aluno", texto: "Estudante" },
+  { valor: "aluno", texto: "Aluno regular" },
+  { valor: "aluno_maker", texto: "Aluno Maker" },
   { valor: "professor", texto: "Professor" },
   { valor: "responsavel", texto: "Responsavel" },
 ];

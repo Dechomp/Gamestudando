@@ -123,9 +123,10 @@ export async function criarQuestaoRimaProfessor({
 
 export async function criarQuestaoCosmoletrando({
   palavra,
-  nivel
+  nivel,
+  tema = "normal"
 }) {
-  // Cria uma palavra que pode aparecer no jogo da nave.
+  // Cria uma palavra para o modo Normal ou para o modo Maker do jogo.
   const usuario = auth.currentUser;
 
   if (!usuario) {
@@ -133,6 +134,7 @@ export async function criarQuestaoCosmoletrando({
   }
 
   const palavraNormalizada = palavra.trim().toUpperCase();
+  const temaCosmoletrando = tema === "maker" ? "maker" : "normal";
 
   const dadosQuestao = {
     materia: "cosmoletrando",
@@ -141,8 +143,11 @@ export async function criarQuestaoCosmoletrando({
     instrucao: "Forme a palavra usando as letras.",
     palavra: palavraNormalizada,
     palavraMissao: palavraNormalizada,
+    // Este campo separa o banco de palavras Maker das palavras de Português.
+    temaCosmoletrando,
     cosmoletrando: {
       palavra: palavraNormalizada,
+      tema: temaCosmoletrando,
     },
     nivel: Number(nivel),
   };

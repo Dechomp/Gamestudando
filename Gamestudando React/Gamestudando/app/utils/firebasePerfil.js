@@ -59,6 +59,7 @@ export function montarPerfilAlunoFirebase(uid, perfil) {
   // Converte o perfil local para o formato usado no banco.
   const matematica = montarMateria(perfil?.matematica);
   const portugues = montarMateria(perfil?.portugues);
+  const maker = montarMateria(perfil?.maker);
   const rimas = montarMateria(perfil?.rimas);
 
   return {
@@ -66,6 +67,7 @@ export function montarPerfilAlunoFirebase(uid, perfil) {
     tipo: perfil?.tipo || "aluno",
     nome: perfil?.nome || "Aluno",
     email: perfil?.email || null,
+    usuario: perfil?.usuario || null,
     cpf: perfil?.cpf || null,
     telefone: perfil?.telefone || null,
     dataNascimento: perfil?.dataNascimento || null,
@@ -79,6 +81,8 @@ export function montarPerfilAlunoFirebase(uid, perfil) {
     progresso: {
       faseLiberada: perfil?.progresso?.faseLiberada || 1,
       maiorFaseConcluida: perfil?.progresso?.maiorFaseConcluida || 0,
+      faseLiberadaMaker: perfil?.progresso?.faseLiberadaMaker || 1,
+      maiorFaseMakerConcluida: perfil?.progresso?.maiorFaseMakerConcluida || 0,
       avaliacaoInicialConcluida:
         perfil?.progresso?.avaliacaoInicialConcluida === true,
       avaliacaoInicialConcluidaEm:
@@ -89,6 +93,7 @@ export function montarPerfilAlunoFirebase(uid, perfil) {
       matematica,
       portugues,
       rimas,
+      maker,
     },
     estatisticas: {
       tempoTotalEstudoMs: perfil?.estatisticas?.tempoTotalEstudoMs || 0,

@@ -451,6 +451,157 @@ export const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
+  mapaTrilhas: {
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "center",
+    marginBottom: 10,
+  },
+
+  mapaTrilhaBotao: {
+    backgroundColor: colors.cinzaClaro,
+    borderColor: colors.cinza,
+    borderRadius: 18,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+
+  mapaTrilhaBotaoAtivo: {
+    backgroundColor: colors.secundaria,
+    borderColor: colors.secundaria,
+  },
+
+  mapaTrilhaTexto: {
+    color: colors.preto,
+    fontSize: 13,
+    fontWeight: "bold",
+  },
+
+  mapaTrilhaTextoAtivo: {
+    color: colors.branco,
+  },
+
+  roletaArea: {
+    alignItems: "center",
+    height: 270,
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  roletaDisco: {
+    alignItems: "center",
+    backgroundColor: "#164e63",
+    borderColor: colors.secundaria,
+    borderRadius: 120,
+    borderWidth: 7,
+    elevation: 5,
+    height: 240,
+    justifyContent: "center",
+    overflow: "hidden",
+    width: 240,
+  },
+  roletaAnelInterno: {
+    borderColor: "#0e7490",
+    borderRadius: 98,
+    borderWidth: 20,
+    height: 196,
+    opacity: 0.7,
+    position: "absolute",
+    width: 196,
+  },
+  roletaOpcao: {
+    alignItems: "center",
+    backgroundColor: "#f8fafc",
+    borderColor: "#cbd5e1",
+    borderRadius: 10,
+    borderWidth: 1,
+    justifyContent: "center",
+    minHeight: 30,
+    paddingHorizontal: 4,
+    paddingVertical: 3,
+    position: "absolute",
+  },
+  roletaOpcaoSorteada: {
+    backgroundColor: "#fef3c7",
+    borderColor: colors.laranja,
+    borderWidth: 3,
+  },
+  roletaOpcaoTexto: {
+    color: "#164e63",
+    fontSize: 10,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  roletaOpcaoTextoSorteada: { color: "#92400e" },
+  roletaCentro: {
+    alignItems: "center",
+    backgroundColor: colors.secundaria,
+    borderColor: colors.branco,
+    borderRadius: 32,
+    borderWidth: 4,
+    height: 64,
+    justifyContent: "center",
+    width: 64,
+  },
+  roletaCentroTexto: { color: colors.branco, fontSize: 28, fontWeight: "bold" },
+  roletaPonteiro: {
+    color: colors.errada,
+    fontSize: 34,
+    fontWeight: "bold",
+    marginBottom: -10,
+    zIndex: 2,
+  },
+  roletaResultado: {
+    color: colors.primaria,
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+
+  roletaTipoGrade: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginTop: 12,
+    width: "100%",
+  },
+
+  roletaTipoBotao: {
+    backgroundColor: colors.cinzaMuitoClaro,
+    borderColor: colors.cinzaClaro,
+    borderRadius: 12,
+    borderWidth: 1,
+    minHeight: 118,
+    padding: 12,
+    width: "48%",
+  },
+
+  roletaTipoBotaoAtivo: {
+    backgroundColor: colors.secundaria,
+    borderColor: colors.secundaria,
+  },
+
+  roletaTipoTitulo: {
+    color: colors.textoPrimario,
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+
+  roletaTipoDescricao: {
+    color: colors.textoSecundario,
+    fontSize: 12,
+    lineHeight: 17,
+  },
+
+  roletaSalvaItem: {
+    borderBottomColor: colors.cinzaClaro,
+    borderBottomWidth: 1,
+    marginBottom: 14,
+    paddingBottom: 14,
+    width: "100%",
+  },
+
   mapaMundoTitulo: {
     fontSize: 24,
     textAlign: "center",
@@ -803,6 +954,104 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.fundoCampo,
   },
 
+  campoJustificativaFalta: {
+    alignSelf: "stretch",
+    marginHorizontal: -6,
+  },
+
+  botaoJustificativaFalta: {
+    alignSelf: "stretch",
+    marginHorizontal: -6,
+  },
+
+  makerListaRegras: {
+    gap: 10,
+    marginTop: 12,
+    width: "100%",
+  },
+
+  makerRegraItem: {
+    alignItems: "flex-start",
+    backgroundColor: colors.cinzaMuitoClaro,
+    borderRadius: 10,
+    flexDirection: "row",
+    gap: 10,
+    padding: 12,
+  },
+
+  makerRegraNumero: {
+    backgroundColor: colors.secundaria,
+    borderRadius: 14,
+    color: colors.branco,
+    fontWeight: "bold",
+    minWidth: 28,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    textAlign: "center",
+  },
+
+  makerRegraTexto: {
+    color: colors.textoPrimario,
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+
+  makerResumoGrade: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    width: "100%",
+  },
+
+  makerResumoBloco: {
+    alignItems: "center",
+    backgroundColor: colors.cinzaMuitoClaro,
+    borderRadius: 10,
+    minHeight: 92,
+    justifyContent: "center",
+    padding: 12,
+    width: "48%",
+  },
+
+  makerResumoBlocoLargo: {
+    width: "100%",
+  },
+
+  makerResumoRotulo: {
+    color: colors.textoSecundario,
+    fontSize: 13,
+    textAlign: "center",
+  },
+
+  makerResumoValor: {
+    color: colors.secundaria,
+    fontSize: 27,
+    fontWeight: "bold",
+    marginTop: 5,
+  },
+
+  makerInformacaoBloco: {
+    alignSelf: "stretch",
+    backgroundColor: colors.cinzaMuitoClaro,
+    borderRadius: 10,
+    marginBottom: 10,
+    padding: 13,
+  },
+
+  makerInformacaoTitulo: {
+    color: colors.textoPrimario,
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+
+  makerInformacaoTexto: {
+    color: colors.textoSecundario,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+
   tarefaScroll: {
     flex: 1,
     backgroundColor: colors.branco,
@@ -822,6 +1071,21 @@ export const styles = StyleSheet.create({
 
   botaoAcaoFlex: {
     flex: 1,
+  },
+
+  linhaAcoesPedido: {
+    alignItems: "stretch",
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 8,
+    width: "100%",
+  },
+
+  botaoPedido: {
+    flex: 1,
+    justifyContent: "center",
+    marginBottom: 0,
+    minHeight: 48,
   },
 
   seletorCriacaoContainer: {
@@ -1600,6 +1864,269 @@ export const styles = StyleSheet.create({
 
   missaoOverlayBotaoSecundario: {
     backgroundColor: colors.secundaria,
+  },
+
+  navegacaoMesFaltas: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 12,
+    marginBottom: 8,
+  },
+
+  turmaMakerAcoes: {
+    gap: 10,
+    marginTop: 14,
+  },
+
+  turmaMakerAcao: {
+    borderRadius: 12,
+    minHeight: 78,
+    padding: 14,
+  },
+
+  turmaMakerAcaoPresenca: {
+    backgroundColor: colors.certa,
+  },
+
+  turmaMakerAcaoGestao: {
+    backgroundColor: colors.secundaria,
+  },
+
+  turmaMakerAcaoDinamicas: {
+    backgroundColor: colors.laranja,
+  },
+
+  turmaMakerAcaoTitulo: {
+    color: colors.branco,
+    fontSize: 17,
+    fontWeight: "bold",
+  },
+
+  turmaMakerAcaoDescricao: {
+    color: colors.branco,
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 4,
+  },
+
+  leitorQrTela: {
+    backgroundColor: colors.preto,
+    flex: 1,
+    justifyContent: "center",
+    padding: 20,
+  },
+
+  leitorQrCamera: {
+    flex: 1,
+    marginHorizontal: -20,
+  },
+
+  leitorQrRodape: {
+    backgroundColor: colors.branco,
+    marginHorizontal: -20,
+    padding: 20,
+  },
+
+  leitorQrTitulo: {
+    color: colors.textoPrimario,
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+
+  leitorQrTexto: {
+    color: colors.textoPrimario,
+    fontSize: 16,
+    marginVertical: 12,
+    textAlign: "center",
+  },
+
+  aguardandoMakerConteudo: {
+    alignItems: "center",
+    flexGrow: 1,
+    minHeight: "100%",
+    padding: 20,
+    paddingTop: 56,
+    // Espaço extra garante que os botões finais sejam alcançáveis em telas menores.
+    paddingBottom: 160,
+  },
+
+  aguardandoMakerTexto: {
+    color: colors.textoSecundario,
+    fontSize: 15,
+    lineHeight: 21,
+    marginTop: 8,
+    textAlign: "center",
+  },
+
+  aguardandoMakerQrBox: {
+    alignItems: "center",
+    backgroundColor: colors.branco,
+    borderColor: colors.cinzaClaro,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginTop: 22,
+    padding: 18,
+  },
+
+  aguardandoMakerAcoes: {
+    gap: 14,
+    marginTop: 26,
+    width: "100%",
+  },
+
+  aguardandoMakerBotao: {
+    marginTop: 0,
+    minHeight: 50,
+  },
+
+  gestaoMakerAbas: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 20,
+    width: "100%",
+  },
+
+  gestaoMakerAba: {
+    alignItems: "center",
+    backgroundColor: colors.cinzaMuitoClaro,
+    borderRadius: 10,
+    width: "48%",
+    minHeight: 48,
+    paddingHorizontal: 6,
+    paddingVertical: 12,
+  },
+
+  gestaoMakerAbaAtiva: {
+    backgroundColor: colors.secundaria,
+  },
+
+  gestaoMakerAbaTexto: {
+    color: colors.textoPrimario,
+    fontWeight: "bold",
+  },
+
+  gestaoMakerAbaTextoAtivo: {
+    color: colors.branco,
+  },
+
+  gestaoMakerItem: {
+    borderBottomColor: colors.cinzaClaro,
+    borderBottomWidth: 1,
+    marginBottom: 18,
+    paddingBottom: 16,
+  },
+
+  gestaoMakerGrupo: {
+    borderTopColor: colors.cinzaClaro,
+    borderTopWidth: 1,
+    gap: 8,
+    marginTop: 22,
+    paddingTop: 18,
+  },
+
+  gestaoMakerBotaoAjuda: {
+    color: colors.branco,
+    fontSize: 10,
+    marginTop: 3,
+    textAlign: "center",
+  },
+
+  gestaoMakerAcoesVerticais: {
+    gap: 10,
+    marginTop: 10,
+  },
+
+  indicacaoSelecionada: {
+    backgroundColor: colors.cinzaMuitoClaro,
+    borderRadius: 8,
+    color: colors.textoPrimario,
+    marginBottom: 14,
+    padding: 12,
+  },
+
+  registroMakerConteudo: {
+    alignSelf: "stretch",
+  },
+
+  registroMakerDivisor: {
+    borderTopColor: colors.cinzaClaro,
+    borderTopWidth: 1,
+    marginTop: 20,
+    paddingTop: 18,
+  },
+
+  ocorrenciaHistoricoItem: {
+    backgroundColor: colors.cinzaMuitoClaro,
+    borderRadius: 8,
+    marginBottom: 10,
+    padding: 12,
+  },
+
+  faseEscolarGrupo: {
+    alignItems: "center",
+  },
+
+  faseMateriasLinha: {
+    flexDirection: "row",
+    gap: 6,
+    marginTop: 8,
+  },
+
+  faseMateriaBotao: {
+    backgroundColor: colors.secundaria,
+    borderRadius: 10,
+    minWidth: 84,
+    paddingHorizontal: 8,
+    paddingVertical: 7,
+  },
+
+  faseMateriaBotaoBloqueado: {
+    backgroundColor: colors.cinza,
+  },
+
+  faseMateriaTexto: {
+    color: colors.branco,
+    fontSize: 12,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+
+  setaMesFaltas: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.secundaria,
+  },
+
+  setaMesFaltasBloqueada: {
+    backgroundColor: colors.cinzaClaro,
+  },
+
+  setaMesFaltasTexto: {
+    color: colors.branco,
+    fontSize: 30,
+    lineHeight: 34,
+    fontWeight: "bold",
+  },
+
+  setaMesFaltasTextoBloqueada: {
+    color: colors.cinza,
+  },
+
+  nomeMesFaltas: {
+    flex: 1,
+    marginHorizontal: 28,
+    color: colors.textoPrimario,
+    fontSize: 16,
+    fontWeight: "bold",
+    textTransform: "capitalize",
+    textAlign: "center",
   },
 
   missaoOverlayBotaoTexto: {

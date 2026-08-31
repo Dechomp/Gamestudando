@@ -75,6 +75,7 @@ const FUEL_AUTO_ACCELERATION_COST = 2.1;
 const FUEL_SHOT_COST = 0.65;
 const FUEL_PER_LETTER = 25;
 const MIN_WORD_FUEL = 75;
+const PALAVRA_MAKER_INICIAL = "SENSOR";
 const TUTORIAL_STEPS = [
   {
     title: "Cosmoletrando",
@@ -103,7 +104,9 @@ function normalizeWord(value: string | string[] | undefined) {
   const raw = Array.isArray(value) ? value[0] : value;
   const word = raw?.trim() || DEFAULT_WORD;
   return word
-    .replace(/[^a-zA-Z????????????????????????]/g, "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z]/g, "")
     .toUpperCase() || DEFAULT_WORD;
 }
 
@@ -439,13 +442,19 @@ function getUpgradePickupLabel(upgrade?: AsteroidObject["upgrade"]) {
 export default function MissaoEspacial() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  // O parâmetro vem da tela Jogos e decide qual banco de palavras será usado.
+  const temaCosmoletrando = Array.isArray(params.tema) ? params.tema[0] : params.tema;
+  const modoMaker = temaCosmoletrando === "maker";
   const faseId = useMemo(() => {
     const rawFaseId = Array.isArray(params.faseId) ? params.faseId[0] : params.faseId;
     const parsed = parseInt(String(rawFaseId || ""), 10);
     return Number.isNaN(parsed) ? null : parsed;
   }, [params.faseId]);
   const { width, height } = useWindowDimensions();
-  const fallbackMissionWord = useMemo(() => normalizeWord(params.missionWord), [params.missionWord]);
+  const fallbackMissionWord = useMemo(
+    () => modoMaker ? PALAVRA_MAKER_INICIAL : normalizeWord(params.missionWord),
+    [modoMaker, params.missionWord]
+  );
   const [missionWordBanco, setMissionWordBanco] = useState("");
   const missionWord = missionWordBanco || fallbackMissionWord;
 
@@ -512,7 +521,7 @@ export default function MissaoEspacial() {
     let ativo = true;
 
     async function carregarPalavra() {
-      const palavra = await carregarPalavraCosmoletrando(fallbackMissionWord);
+      const palavra = await carregarPalavraCosmoletrando(fallbackMissionWord, "", modoMaker ? "maker" : "normal");
       if (!ativo) return;
 
       const normalizada = normalizeWord(palavra);
@@ -524,23 +533,7 @@ export default function MissaoEspacial() {
     return () => {
       ativo = false;
     };
-  }, [fallbackMissionWord]);
-
-  const restartWithNewWord = useCallback(async () => {
-    // Jogar novamente busca outra palavra e recria a missao.
-    const palavra = await carregarPalavraCosmoletrando(
-      fallbackMissionWord,
-      missionWordRef.current
-    );
-    const normalizada = normalizeWord(palavra);
-
-    if (normalizada && normalizada !== missionWordRef.current) {
-      setMissionWordBanco(normalizada);
-      return;
-    }
-
-    resetMission();
-  }, [fallbackMissionWord, resetMission]);
+  }, [fallbackMissionWord, modoMaker]);
 
   const camera = {
     x: gameRef.current.ship.x,
@@ -620,6 +613,23 @@ export default function MissaoEspacial() {
     setMessage("");
     forceRender((value) => value + 1);
   }, [missionWord]);
+
+  const restartWithNewWord = useCallback(async () => {
+    // Jogar novamente busca outra palavra do mesmo modo antes de recriar a fase.
+    const palavra = await carregarPalavraCosmoletrando(
+      fallbackMissionWord,
+      missionWordRef.current,
+      modoMaker ? "maker" : "normal"
+    );
+    const normalizada = normalizeWord(palavra);
+
+    if (normalizada && normalizada !== missionWordRef.current) {
+      setMissionWordBanco(normalizada);
+      return;
+    }
+
+    resetMission();
+  }, [fallbackMissionWord, modoMaker, resetMission]);
 
   useEffect(() => {
     missionWordRef.current = missionWord;
@@ -1074,10 +1084,11 @@ export default function MissaoEspacial() {
     if (completionSavedRef.current || !faseId) return;
 
     completionSavedRef.current = true;
-    atualizarPerfil("cosmoletrando", missionWordRef.current.length, 0, faseId).catch((error) => {
+    // No modo Maker a missão alimenta o progresso Maker; no normal, Português.
+    atualizarPerfil(modoMaker ? "maker" : "cosmoletrando", missionWordRef.current.length, 0, faseId).catch((error) => {
       console.log("Erro ao salvar progresso do Cosmoletrando:", error);
     });
-  }, [faseId]);
+  }, [faseId, modoMaker]);
 
   function handleEarthCollision() {
     // A Terra finaliza a missao apenas depois que a palavra foi completada.
@@ -1291,6 +1302,10 @@ export default function MissaoEspacial() {
   const fuelPercent = clamp(game.ship.fuel / game.maxFuel, 0, 1);
   const displayedLives = phase === "intro" ? 3 : Math.round(clamp(game.ship.lives, 0, 3));
   const tutorial = TUTORIAL_STEPS[tutorialStep];
+  const tituloDoJogo = modoMaker ? "Cosmoletrando Maker" : "Cosmoletrando";
+  const textoInicial = modoMaker
+    ? "Busque palavras de robótica, sensores e Arduino no espaço."
+    : tutorial.text;
   const backgroundOffsetX = -wrapScreenPosition(camera.x * 0.34, width || 1);
   const backgroundOffsetY = -wrapScreenPosition(camera.y * 0.34, height || 1);
 
@@ -1629,8 +1644,8 @@ export default function MissaoEspacial() {
             <Text style={styles.missaoOverlayProgresso}>
               {tutorialStep + 1}/{TUTORIAL_STEPS.length}
             </Text>
-            <Text style={styles.missaoOverlayTitulo}>{tutorial.title}</Text>
-            <Text style={styles.missaoOverlayTexto}>{tutorial.text}</Text>
+            <Text style={styles.missaoOverlayTitulo}>{tutorialStep === 0 ? tituloDoJogo : tutorial.title}</Text>
+            <Text style={styles.missaoOverlayTexto}>{tutorialStep === 0 ? textoInicial : tutorial.text}</Text>
             <View style={styles.missaoModoControleBox}>
               <Text style={styles.missaoOverlayTexto}>Controle</Text>
               <View style={styles.missaoModoControleLinha}>

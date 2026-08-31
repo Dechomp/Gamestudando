@@ -23,13 +23,14 @@ export default function Cadastro() {
   const { showVideo, hideVideo } = useVideoTransition();
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
+  const [usuario, setUsuario] = useState("");
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [tipoConta, setTipoConta] = useState("aluno");
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const scrollRef = useRef(null);
   const [carregando, setCarregando] = useState(false);
-  const textoNome = tipoConta === "aluno"
+  const textoNome = tipoConta === "aluno" || tipoConta === "aluno_maker"
     ? "Nome do estudante"
     : tipoConta === "professor"
       ? "Nome do professor"
@@ -39,6 +40,7 @@ export default function Cadastro() {
     useCallback(() => {
       setNome("");
       setEmail("");
+      setUsuario("");
       setSenha("");
       setConfirmarSenha("");
       setTipoConta("aluno");
@@ -53,8 +55,8 @@ export default function Cadastro() {
   }
 
   async function cadastrar() {
-    if (!nome.trim() || !email.trim() || !senha || !confirmarSenha) {
-      Alert.alert("Cadastro", "Preencha nome, email e senha.");
+    if (!nome.trim() || !(tipoConta === "aluno_maker" ? usuario.trim() : email.trim()) || !senha || !confirmarSenha) {
+      Alert.alert("Cadastro", tipoConta === "aluno_maker" ? "Preencha nome de usuário e senha." : "Preencha nome, email e senha.");
       return;
     }
 
@@ -80,13 +82,16 @@ export default function Cadastro() {
         nome,
         email,
         senha,
-        tipo: tipoConta
+        tipo: tipoConta,
+        usuario,
       });
 
       hideVideo();
       Alert.alert(
         "Conta criada",
-        "Enviamos um email de verificacao. Voce ja pode comecar a usar o app."
+        tipoConta === "aluno_maker"
+          ? "Conta Maker criada. Mostre seu QR ao professor para ele incluir você na turma."
+          : "Enviamos um email de verificacao. Voce ja pode comecar a usar o app."
       );
 
       router.replace(obterRotaInicialPorPerfil(perfil));
@@ -120,7 +125,8 @@ export default function Cadastro() {
 
           <View style={styles.tipoContaContainer}>
             {[
-              { valor: "aluno", texto: "Estudante" },
+              { valor: "aluno", texto: "Aluno regular" },
+              { valor: "aluno_maker", texto: "Aluno Maker" },
               { valor: "professor", texto: "Professor" },
               { valor: "responsavel", texto: "Responsavel" }
             ].map(opcao => (
@@ -154,15 +160,7 @@ export default function Cadastro() {
             placeholder={textoNome}
           />
 
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            value={email}
-            onChangeText={setEmail}
-            style={styles.input}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            placeholder="email@exemplo.com"
-          />
+          {tipoConta === "aluno_maker" ? <><Text style={styles.label}>Nome de usuário</Text><TextInput value={usuario} onChangeText={setUsuario} style={styles.input} autoCapitalize="none" placeholder="Ex.: ana.maker" /></> : <><Text style={styles.label}>Email</Text><TextInput value={email} onChangeText={setEmail} style={styles.input} autoCapitalize="none" keyboardType="email-address" placeholder="email@exemplo.com" /></>}
 
           <Text style={styles.label}>Senha</Text>
           <View style={styles.senhaContainer}>

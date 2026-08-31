@@ -107,9 +107,12 @@ export default function PerfilAluno() {
     erros: perfil.portugues.erros + perfil.rimas.erros
   };
 
+  const maker = perfil.maker || { nivel: 1, acertos: 0, erros: 0, atividadesConcluidas: 0 };
+
   const areas = [
     { nome: "Matemática", dados: matematica },
     { nome: "Português", dados: portugues },
+    ...(perfil.tipo === "aluno_maker" ? [{ nome: "Maker", dados: maker, mostrarNivel: true }] : []),
   ];
 
   const gerarDadosPizza = (acertos, erros) => [
@@ -164,7 +167,7 @@ export default function PerfilAluno() {
           </View>
         )}
         <Text style={styles.legendaTexto}>
-          Professor ou responsavel pode ler este codigo para vincular voce.
+          Professor ou responsavel pode ler este codigo para vincular você.
         </Text>
       </View>
 
@@ -244,6 +247,7 @@ export default function PerfilAluno() {
             <Text style={styles.areaTitulo}>
               {area.nome}
             </Text>
+            {area.mostrarNivel && <Text style={styles.legendaTexto}>Nível Maker: {area.dados.nivel || 1} · Atividades concluídas: {area.dados.atividadesConcluidas || 0}</Text>}
 
             <View style={styles.graficoContainer}>
               <PieChart
